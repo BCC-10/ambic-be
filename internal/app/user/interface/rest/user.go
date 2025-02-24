@@ -18,7 +18,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 		UserUsecase: userUsecase,
 	}
 
-	routerGroup = routerGroup.Group("/auth")
+	routerGroup = routerGroup.Group("/users")
 	routerGroup.Post("/register", UserHandler.Register)
 }
 
