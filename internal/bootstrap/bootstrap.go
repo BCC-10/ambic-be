@@ -1,9 +1,11 @@
 package bootstrap
 
 import (
+	userHandler "ambic/internal/app/user/interface/rest"
+	userRepo "ambic/internal/app/user/repository"
+	userUsecase "ambic/internal/app/user/usecase"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/fiber"
-	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/mysql"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -31,10 +33,14 @@ func Start() error {
 
 	val := validator.New()
 
-	jwt := jwt.NewJwt(config)
+	//jwt := jwt.NewJwt(config)
 
 	app := fiber.New()
-	app.Group("/api/v1")
+	v1 := app.Group("/api/v1")
+
+	userRepository := userRepo.NewUserMySQL(db)
+	userUsercase := userUsecase.NewUserUsecase(userRepository)
+	userHandler.NewUserHandler(v1, userUsercase, val)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
