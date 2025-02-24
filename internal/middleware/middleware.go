@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"ambic/internal/infra/jwt"
+	"github.com/gofiber/fiber/v2"
 )
 
 type MiddlewareIf interface {
+	Authentication(ctx *fiber.Ctx) error
 }
 
 type Middleware struct {

@@ -3,6 +3,7 @@ package rest
 import (
 	"ambic/internal/app/user/usecase"
 	"ambic/internal/domain/dto"
+	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -10,12 +11,14 @@ import (
 type UserHandler struct {
 	Validator   *validator.Validate
 	UserUsecase usecase.UserUsecaseItf
+	Middleware  middleware.MiddlewareIf
 }
 
-func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate) {
+func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
+		Middleware:  middleware,
 	}
 
 	routerGroup = routerGroup.Group("/users")

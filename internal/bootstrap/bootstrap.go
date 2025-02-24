@@ -8,6 +8,7 @@ import (
 	"ambic/internal/infra/fiber"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/mysql"
+	"ambic/internal/middleware"
 	"fmt"
 	"github.com/go-playground/validator/v10"
 )
@@ -36,12 +37,14 @@ func Start() error {
 
 	jwt := jwt.NewJwt(config)
 
+	middleware := middleware.NewMiddleware(jwt)
+
 	app := fiber.New()
 	v1 := app.Group("/api/v1")
 
 	userRepository := userRepo.NewUserMySQL(db)
 	userUsercase := userUsecase.NewUserUsecase(userRepository, jwt)
-	userHandler.NewUserHandler(v1, userUsercase, val)
+	userHandler.NewUserHandler(v1, userUsercase, val, middleware)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
