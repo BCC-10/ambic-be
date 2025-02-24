@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"ambic/internal/domain/env"
-	"github.com/gofiber/fiber/v2"
+	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"time"
@@ -60,7 +60,7 @@ func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, error) {
 	}
 
 	if !token.Valid {
-		return uuid.Nil, fiber.NewError(fiber.StatusUnauthorized, "invalid token")
+		return uuid.Nil, errors.New("invalid token")
 	}
 
 	userId := claim.Id

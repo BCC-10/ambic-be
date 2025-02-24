@@ -5,7 +5,7 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/infra/jwt"
-	"github.com/gofiber/fiber/v2"
+	"errors"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -49,12 +49,12 @@ func (u *UserUsecase) Login(login dto.Login) (string, error) {
 
 	err := u.UserRepository.Get(user, dto.UserParam{Email: login.Email})
 	if err != nil {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "email or password is incorrect")
+		return "", errors.New("email or password is incorrect")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
 	if err != nil {
-		return "", err
+		return "", errors.New("email or password is incorrect")
 	}
 
 	token, err := u.jwt.GenerateToken(user.ID)
