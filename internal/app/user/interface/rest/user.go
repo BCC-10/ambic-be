@@ -20,6 +20,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Post("/register", UserHandler.Register)
+	routerGroup.Post("/login", UserHandler.Login)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
@@ -44,6 +45,31 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "User created successfully",
+		"message": "User registered successfully",
+	})
+}
+
+func (h UserHandler) Login(ctx *fiber.Ctx) error {
+	user := new(dto.Login)
+	if err := ctx.BodyParser(user); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Bad Request",
+		})
+	}
+
+	if err := h.Validator.Struct(user); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if err := h.UserUsecase.Login(*user); err != nil {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Login successful",
 	})
 }

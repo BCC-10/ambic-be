@@ -4,12 +4,14 @@ import (
 	"ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
+	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecaseItf interface {
 	Register(dto.Register) error
+	Login(login dto.Login) error
 }
 
 type UserUsecase struct {
@@ -37,4 +39,20 @@ func (u *UserUsecase) Register(register dto.Register) error {
 	}
 
 	return u.UserRepository.Create(&user)
+}
+
+func (u *UserUsecase) Login(login dto.Login) error {
+	user := new(entity.User)
+
+	err := u.UserRepository.Get(user, dto.UserParam{Email: login.Email})
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnauthorized, "email or password is incorrect")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
