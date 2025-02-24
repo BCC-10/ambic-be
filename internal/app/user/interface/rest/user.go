@@ -63,7 +63,8 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.UserUsecase.Login(*user); err != nil {
+	token, err := h.UserUsecase.Login(*user)
+	if err != nil {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": err.Error(),
 		})
@@ -71,5 +72,6 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Login successful",
+		"token":   token,
 	})
 }
