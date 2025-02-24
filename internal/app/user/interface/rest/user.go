@@ -49,6 +49,7 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "User registered successfully",
+		"payload": user,
 	})
 }
 
