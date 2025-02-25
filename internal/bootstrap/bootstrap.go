@@ -15,6 +15,7 @@ import (
 	"ambic/internal/middleware"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 )
 
 func Start() error {
@@ -50,6 +51,7 @@ func Start() error {
 	e := email.NewEmail(config)
 
 	app := fiber.New()
+	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
 
 	l := limiter.NewLimiter(r)
