@@ -3,6 +3,7 @@ package rest
 import (
 	"ambic/internal/app/user/usecase"
 	"ambic/internal/domain/dto"
+	"ambic/internal/infra/limiter"
 	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -12,20 +13,22 @@ type UserHandler struct {
 	Validator   *validator.Validate
 	UserUsecase usecase.UserUsecaseItf
 	Middleware  middleware.MiddlewareIf
+	Limiter     limiter.LimiterIf
 }
 
-func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf) {
+func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf, limiter limiter.LimiterIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
 		Middleware:  middleware,
+		Limiter:     limiter,
 	}
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Post("/register", UserHandler.Register)
 	routerGroup.Post("/login", UserHandler.Login)
-	routerGroup.Post("/request-otp", UserHandler.RequestOTP)
-	routerGroup.Post("verify-otp", UserHandler.VerifyOTP)
+	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
+	routerGroup.Post("/verify-otp", UserHandler.VerifyOTP)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {

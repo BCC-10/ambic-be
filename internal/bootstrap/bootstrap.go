@@ -9,6 +9,7 @@ import (
 	"ambic/internal/infra/email"
 	"ambic/internal/infra/fiber"
 	"ambic/internal/infra/jwt"
+	"ambic/internal/infra/limiter"
 	"ambic/internal/infra/mysql"
 	"ambic/internal/infra/redis"
 	"ambic/internal/middleware"
@@ -51,9 +52,11 @@ func Start() error {
 	app := fiber.New()
 	v1 := app.Group("/api/v1")
 
+	l := limiter.NewLimiter(r)
+
 	userRepository := userRepo.NewUserMySQL(db)
 	userUsercase := userUsecase.NewUserUsecase(config, userRepository, j, c, e, r)
-	userHandler.NewUserHandler(v1, userUsercase, v, m)
+	userHandler.NewUserHandler(v1, userUsercase, v, m, l)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }

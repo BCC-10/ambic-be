@@ -9,7 +9,11 @@ import (
 type RedisIf interface {
 	Get(key string) ([]byte, error)
 	Set(key string, val []byte, exp time.Duration) error
+	Delete(key string) error
+	Reset() error
+	Close() error
 }
+
 type Redis struct {
 	store *redis.Storage
 }
@@ -38,4 +42,16 @@ func (r *Redis) Get(key string) ([]byte, error) {
 
 func (r *Redis) Set(key string, val []byte, exp time.Duration) error {
 	return r.store.Set(key, val, exp)
+}
+
+func (r *Redis) Delete(key string) error {
+	return r.store.Delete(key)
+}
+
+func (r *Redis) Reset() error {
+	return r.store.Reset()
+}
+
+func (r *Redis) Close() error {
+	return r.store.Close()
 }
