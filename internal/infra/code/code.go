@@ -1,24 +1,29 @@
 package code
 
 import (
+	"ambic/internal/domain/env"
 	"crypto/rand"
 	"fmt"
 	"math/big"
 )
 
 type CodeIf interface {
-	GenerateOTP(length int) (string, error)
+	GenerateOTP() (string, error)
 }
 
-type Code struct{}
-
-func NewCode() CodeIf {
-	return &Code{}
+type Code struct {
+	Length int
 }
 
-func (c *Code) GenerateOTP(length int) (string, error) {
+func NewCode(env *env.Env) CodeIf {
+	return &Code{
+		Length: env.OTPLength,
+	}
+}
+
+func (c *Code) GenerateOTP() (string, error) {
 	otp := ""
-	for i := 0; i < length; i++ {
+	for i := 0; i < c.Length; i++ {
 		num, err := rand.Int(rand.Reader, big.NewInt(10))
 		if err != nil {
 			return "", err

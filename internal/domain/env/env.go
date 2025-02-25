@@ -3,10 +3,14 @@ package env
 import (
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
+	"time"
 )
 
 type Env struct {
 	AppPort int `env:"APP_PORT"`
+
+	OTPLength      int           `env:"OTP_LENGTH"`
+	OTPExpiresTime time.Duration `env:"OTP_EXPIRES_TIME"`
 
 	DBHost     string `env:"DB_HOST"`
 	DBPort     int    `env:"DB_PORT"`
@@ -14,8 +18,8 @@ type Env struct {
 	DBUsername string `env:"DB_USERNAME"`
 	DBPassword string `env:"DB_PASSWORD"`
 
-	JWTSecret  string `env:"JWT_SECRET"`
-	JWTExpires int    `env:"JWT_EXPIRES"`
+	JWTSecret  string        `env:"JWT_SECRET"`
+	JWTExpires time.Duration `env:"JWT_EXPIRES"`
 
 	RedisHost     string `env:"REDIS_HOST"`
 	RedisPort     int    `env:"REDIS_PORT"`

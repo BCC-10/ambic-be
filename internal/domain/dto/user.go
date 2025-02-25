@@ -13,6 +13,11 @@ type RequestOTP struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
+type VerifyOTP struct {
+	Email string `json:"email" validate:"required,email"`
+	OTP   string `json:"otp" validate:"required"`
+}
+
 type Login struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`

@@ -14,7 +14,7 @@ type JWTIf interface {
 }
 type JWT struct {
 	secretKey   string
-	expiredTime int
+	expiredTime time.Duration
 }
 
 func NewJwt(env *env.Env) JWTIf {
@@ -37,7 +37,7 @@ func (j *JWT) GenerateToken(userId uuid.UUID, isActive bool) (string, error) {
 	claim := Claims{
 		Id:               userId,
 		IsActive:         isActive,
-		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(j.expiredTime)))},
+		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.expiredTime))},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)

@@ -9,6 +9,7 @@ import (
 type UserMySQLItf interface {
 	Get(user *entity.User, param dto.UserParam) error
 	Create(user *entity.User) error
+	Activate(user *entity.User) error
 }
 
 type UserMySQL struct {
@@ -25,4 +26,8 @@ func (r UserMySQL) Get(user *entity.User, param dto.UserParam) error {
 
 func (r UserMySQL) Create(user *entity.User) error {
 	return r.db.Debug().Create(user).Error
+}
+
+func (r UserMySQL) Activate(user *entity.User) error {
+	return r.db.Debug().Model(&user).Where("email = ?", user.Email).Update("is_active", true).Error
 }

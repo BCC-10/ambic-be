@@ -10,6 +10,7 @@ import (
 	"ambic/internal/infra/fiber"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/mysql"
+	"ambic/internal/infra/redis"
 	"ambic/internal/middleware"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -39,11 +40,11 @@ func Start() error {
 
 	j := jwt.NewJwt(config)
 
-	//r := redis.New(config)
-
 	m := middleware.NewMiddleware(j)
 
-	c := code.NewCode()
+	r := redis.NewRedis(config)
+
+	c := code.NewCode(config)
 
 	e := email.NewEmail(config)
 
@@ -51,7 +52,7 @@ func Start() error {
 	v1 := app.Group("/api/v1")
 
 	userRepository := userRepo.NewUserMySQL(db)
-	userUsercase := userUsecase.NewUserUsecase(userRepository, j, c, e)
+	userUsercase := userUsecase.NewUserUsecase(config, userRepository, j, c, e, r)
 	userHandler.NewUserHandler(v1, userUsercase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
