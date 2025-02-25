@@ -9,8 +9,8 @@ import (
 )
 
 type JWTIf interface {
-	GenerateToken(userId uuid.UUID) (string, error)
-	ValidateToken(token string) (uuid.UUID, error)
+	GenerateToken(userId uuid.UUID, isActive bool) (string, error)
+	ValidateToken(token string) (uuid.UUID, bool, error)
 }
 type JWT struct {
 	secretKey   string
@@ -28,13 +28,15 @@ func NewJwt(env *env.Env) JWTIf {
 }
 
 type Claims struct {
-	Id uuid.UUID
+	Id       uuid.UUID
+	IsActive bool
 	jwt.RegisteredClaims
 }
 
-func (j *JWT) GenerateToken(userId uuid.UUID) (string, error) {
+func (j *JWT) GenerateToken(userId uuid.UUID, isActive bool) (string, error) {
 	claim := Claims{
 		Id:               userId,
+		IsActive:         isActive,
 		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(j.expiredTime)))},
 	}
 
@@ -48,7 +50,7 @@ func (j *JWT) GenerateToken(userId uuid.UUID) (string, error) {
 	return tokenString, err
 }
 
-func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, error) {
+func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, bool, error) {
 	claim := new(Claims)
 
 	token, err := jwt.ParseWithClaims(tokenString, claim, func(token *jwt.Token) (interface{}, error) {
@@ -56,14 +58,15 @@ func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, false, err
 	}
 
 	if !token.Valid {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil, false, errors.New("invalid token")
 	}
 
 	userId := claim.Id
+	isActive := claim.IsActive
 
-	return userId, nil
+	return userId, isActive, nil
 }

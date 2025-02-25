@@ -39,6 +39,7 @@ func (u *UserUsecase) Register(register dto.Register) error {
 		Username: register.Username,
 		Email:    register.Email,
 		Password: string(hashedPassword),
+		IsActive: false,
 	}
 
 	return u.UserRepository.Create(&user)
@@ -57,7 +58,11 @@ func (u *UserUsecase) Login(login dto.Login) (string, error) {
 		return "", errors.New("email or password is incorrect")
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID)
+	if !user.IsActive {
+		return "", errors.New("user is not active, check your email to activate your account")
+	}
+
+	token, err := u.jwt.GenerateToken(user.ID, user.IsActive)
 	if err != nil {
 		return "", err
 	}

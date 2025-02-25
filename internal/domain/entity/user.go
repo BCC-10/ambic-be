@@ -11,6 +11,7 @@ type User struct {
 	Username  string    `gorm:"type:varchar(255);unique;not null"`
 	Email     string    `gorm:"type:varchar(255);unique;not null"`
 	Password  string    `gorm:"type:varchar(255);not null"`
+	IsActive  bool      `gorm:"type:boolean;default:false"`
 	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
