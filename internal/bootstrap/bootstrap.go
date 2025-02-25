@@ -33,9 +33,10 @@ func Start() error {
 		return err
 	}
 
-	val := validator.New()
+	v := validator.New()
 
 	j := jwt.NewJwt(config)
+	//r := redis.New(config)
 
 	m := middleware.NewMiddleware(j)
 
@@ -44,7 +45,7 @@ func Start() error {
 
 	userRepository := userRepo.NewUserMySQL(db)
 	userUsercase := userUsecase.NewUserUsecase(userRepository, j)
-	userHandler.NewUserHandler(v1, userUsercase, val, m)
+	userHandler.NewUserHandler(v1, userUsercase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
