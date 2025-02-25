@@ -4,6 +4,8 @@ import (
 	"ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
+	"ambic/internal/infra/code"
+	"ambic/internal/infra/email"
 	"ambic/internal/infra/jwt"
 	"errors"
 	"github.com/google/uuid"
@@ -13,17 +15,22 @@ import (
 type UserUsecaseItf interface {
 	Register(dto.Register) error
 	Login(login dto.Login) (string, error)
+	RequestOTP(requestOTP dto.RequestOTP) error
 }
 
 type UserUsecase struct {
 	UserRepository repository.UserMySQLItf
 	jwt            jwt.JWTIf
+	code           code.CodeIf
+	email          email.EmailIf
 }
 
-func NewUserUsecase(userRepository repository.UserMySQLItf, jwt jwt.JWTIf) UserUsecaseItf {
+func NewUserUsecase(userRepository repository.UserMySQLItf, jwt jwt.JWTIf, code code.CodeIf, email email.EmailIf) UserUsecaseItf {
 	return &UserUsecase{
 		UserRepository: userRepository,
 		jwt:            jwt,
+		code:           code,
+		email:          email,
 	}
 }
 
@@ -68,4 +75,13 @@ func (u *UserUsecase) Login(login dto.Login) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (u *UserUsecase) RequestOTP(requestOTP dto.RequestOTP) error {
+	otp, err := u.code.GenerateOTP(6)
+	if err != nil {
+		return err
+	}
+
+	return u.email.SendOTP(requestOTP.Email, otp)
 }

@@ -9,6 +9,10 @@ type Register struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+type RequestOTP struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
 type Login struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`

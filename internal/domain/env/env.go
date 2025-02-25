@@ -21,6 +21,11 @@ type Env struct {
 	RedisPort     int    `env:"REDIS_PORT"`
 	RedisUsername string `env:"REDIS_USERNAME"`
 	RedisPassword string `env:"REDIS_PASSWORD"`
+
+	SMTPHost string `env:"SMTP_HOST"`
+	SMTPPort string `env:"SMTP_PORT"`
+	SMTPUser string `env:"SMTP_USER"`
+	SMTPPass string `env:"SMTP_PASS"`
 }
 
 func New() (*Env, error) {

@@ -5,6 +5,8 @@ import (
 	userRepo "ambic/internal/app/user/repository"
 	userUsecase "ambic/internal/app/user/usecase"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/code"
+	"ambic/internal/infra/email"
 	"ambic/internal/infra/fiber"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/mysql"
@@ -36,15 +38,20 @@ func Start() error {
 	v := validator.New()
 
 	j := jwt.NewJwt(config)
+
 	//r := redis.New(config)
 
 	m := middleware.NewMiddleware(j)
+
+	c := code.NewCode()
+
+	e := email.NewEmail(config)
 
 	app := fiber.New()
 	v1 := app.Group("/api/v1")
 
 	userRepository := userRepo.NewUserMySQL(db)
-	userUsercase := userUsecase.NewUserUsecase(userRepository, j)
+	userUsercase := userUsecase.NewUserUsecase(userRepository, j, c, e)
 	userHandler.NewUserHandler(v1, userUsercase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))

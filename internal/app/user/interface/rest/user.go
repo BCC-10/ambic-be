@@ -40,8 +40,13 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err := h.UserUsecase.Register(*user)
-	if err != nil {
+	if err := h.UserUsecase.Register(*user); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if err := h.UserUsecase.RequestOTP(dto.RequestOTP{Email: user.Email}); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
