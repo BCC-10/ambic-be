@@ -86,7 +86,7 @@ func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.UserUsecase.VerifyOTP(*verifyOTP); err != nil {
-		res.Error(ctx, err)
+		return res.Error(ctx, err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
