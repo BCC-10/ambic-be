@@ -11,8 +11,9 @@ type Err struct {
 }
 
 type Res struct {
-	StatusCode int    `json:"status_code"`
-	Message    string `json:"message"`
+	StatusCode int         `json:"status_code"`
+	Message    string      `json:"message"`
+	Payload    interface{} `json:"payload"`
 }
 
 func (e *Err) Error() string {
