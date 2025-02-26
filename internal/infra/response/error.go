@@ -5,17 +5,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type Err struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
-type Res struct {
-	StatusCode int         `json:"status_code"`
-	Message    string      `json:"message"`
-	Payload    interface{} `json:"payload"`
-}
-
 func (e *Err) Error() string {
 	return e.Message
 }
