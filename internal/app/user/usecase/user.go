@@ -9,16 +9,16 @@ import (
 	"ambic/internal/infra/email"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/redis"
-	"errors"
+	res "ambic/internal/infra/response"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserUsecaseItf interface {
-	Register(dto.Register) error
-	Login(login dto.Login) (string, error)
-	RequestOTP(requestOTP dto.RequestOTP) error
-	VerifyOTP(verifyOTP dto.VerifyOTP) error
+	Register(dto.Register) *res.Err
+	Login(login dto.Login) (string, *res.Err)
+	RequestOTP(requestOTP dto.RequestOTP) *res.Err
+	VerifyOTP(verifyOTP dto.VerifyOTP) *res.Err
 }
 
 type UserUsecase struct {
@@ -41,10 +41,10 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, jwt jw
 	}
 }
 
-func (u *UserUsecase) Register(register dto.Register) error {
+func (u *UserUsecase) Register(register dto.Register) *res.Err {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), 10)
 	if err != nil {
-		return err
+		return res.ErrInternalServer()
 	}
 
 	user := entity.User{
@@ -56,77 +56,81 @@ func (u *UserUsecase) Register(register dto.Register) error {
 		IsActive: false,
 	}
 
-	return u.UserRepository.Create(&user)
-}
-
-func (u *UserUsecase) Login(login dto.Login) (string, error) {
-	user := new(entity.User)
-
-	err := u.UserRepository.Get(user, dto.UserParam{Email: login.Email})
-	if err != nil {
-		return "", errors.New("email or password is incorrect")
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
-	if err != nil {
-		return "", errors.New("email or password is incorrect")
-	}
-
-	if !user.IsActive {
-		return "", errors.New("user is not active, check your email to activate your account")
-	}
-
-	token, err := u.jwt.GenerateToken(user.ID, user.IsActive)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
-}
-
-func (u *UserUsecase) RequestOTP(data dto.RequestOTP) error {
-	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
-	if err != nil {
-		return errors.New("email is not registered")
-	}
-
-	otp, err := u.code.GenerateOTP()
-	if err != nil {
-		return errors.New("failed to generate OTP")
-	}
-
-	err = u.redis.Set(data.Email, []byte(otp), u.env.OTPExpiresTime)
-	if err != nil {
-		return errors.New("failed to save OTP")
-	}
-
-	err = u.email.SendOTP(data.Email, otp)
-	if err != nil {
-		return errors.New("failed to send OTP")
+	if err := u.UserRepository.Create(&user); err != nil {
+		return res.ErrInternalServer()
 	}
 
 	return nil
 }
 
-func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) error {
+func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
+	user := new(entity.User)
+
+	err := u.UserRepository.Get(user, dto.UserParam{Email: login.Email})
+	if err != nil {
+		return "", res.ErrUnauthorized("email or password is incorrect")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+	if err != nil {
+		return "", res.ErrUnauthorized("email or password is incorrect")
+	}
+
+	if !user.IsActive {
+		return "", res.ErrUnauthorized("user is not verified")
+	}
+
+	token, err := u.jwt.GenerateToken(user.ID, user.IsActive)
+	if err != nil {
+		return "", res.ErrInternalServer()
+	}
+
+	return token, nil
+}
+
+func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
+	user := new(entity.User)
+	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	if err != nil {
+		return res.ErrNotFound("Email")
+	}
+
+	otp, err := u.code.GenerateOTP()
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	err = u.redis.Set(data.Email, []byte(otp), u.env.OTPExpiresTime)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	err = u.email.SendOTP(data.Email, otp)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) *res.Err {
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
-		return errors.New("OTP is expired or invalid")
+		return res.ErrBadRequest("OTP expired or invalid")
 	}
 
 	if string(savedOTP) != data.OTP {
-		return errors.New("OTP is expired or invalid")
+		return res.ErrBadRequest("OTP expired or invalid")
 	}
 
 	err = u.redis.Set(data.Email, nil, 0)
 	if err != nil {
-		return errors.New("failed to delete OTP")
+		return res.ErrInternalServer()
 	}
 
 	err = u.UserRepository.Activate(&entity.User{Email: data.Email})
 	if err != nil {
-		return errors.New("failed to activate user")
+		return res.ErrInternalServer()
 	}
 
 	return nil

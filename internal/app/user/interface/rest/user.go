@@ -4,6 +4,7 @@ import (
 	"ambic/internal/app/user/usecase"
 	"ambic/internal/domain/dto"
 	"ambic/internal/infra/limiter"
+	res "ambic/internal/infra/response"
 	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -34,27 +35,19 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
 	user := new(dto.Register)
 	if err := ctx.BodyParser(user); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Bad Request",
-		})
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.BadRequest(ctx, err.Error())
 	}
 
 	if err := h.UserUsecase.Register(*user); err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.Error(ctx, err)
 	}
 
 	if err := h.UserUsecase.RequestOTP(dto.RequestOTP{Email: user.Email}); err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.Error(ctx, err)
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
@@ -66,21 +59,15 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 	requestOTP := new(dto.RequestOTP)
 	if err := ctx.BodyParser(requestOTP); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Bad Request",
-		})
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(requestOTP); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.BadRequest(ctx, err.Error())
 	}
 
 	if err := h.UserUsecase.RequestOTP(*requestOTP); err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.Error(ctx, err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -91,21 +78,15 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 	verifyOTP := new(dto.VerifyOTP)
 	if err := ctx.BodyParser(verifyOTP); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Bad Request",
-		})
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(verifyOTP); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.ErrBadRequest(err.Error())
 	}
 
 	if err := h.UserUsecase.VerifyOTP(*verifyOTP); err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		res.Error(ctx, err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -116,22 +97,16 @@ func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 func (h UserHandler) Login(ctx *fiber.Ctx) error {
 	user := new(dto.Login)
 	if err := ctx.BodyParser(user); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": "Bad Request",
-		})
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.BadRequest(ctx, err.Error())
 	}
 
 	token, err := h.UserUsecase.Login(*user)
 	if err != nil {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": err.Error(),
-		})
+		return res.Error(ctx, err)
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
