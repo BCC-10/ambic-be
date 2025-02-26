@@ -25,6 +25,9 @@ func (l *Limiter) Set(max int, duration string) fiber.Handler {
 	d, _ := time.ParseDuration(duration)
 
 	return limiter.New(limiter.Config{
+		Next: func(ctx *fiber.Ctx) bool {
+			return ctx.IP() == "127.0.0.1"
+		},
 		Max:        max,
 		Expiration: d,
 		Storage:    l.redis,
