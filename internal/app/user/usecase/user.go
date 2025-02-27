@@ -163,6 +163,10 @@ func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
 		return res.ErrNotFound("User")
 	}
 
+	if !user.IsVerified {
+		return res.ErrBadRequest(res.UserNotVerified)
+	}
+
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
 		return res.ErrBadRequest(res.InvalidOTP)
