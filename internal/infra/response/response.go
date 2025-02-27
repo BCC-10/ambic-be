@@ -12,14 +12,16 @@ type Res struct {
 }
 
 const (
-	EmailExist          = "email already exist"
-	UsernameExist       = "username already exist"
-	RegisterSuccess     = "user register successfully"
-	OTPSent             = "OTP sent"
-	UserVerified        = "OTP verified"
-	InvalidOTP          = "invalid or expired OTP"
-	VerifySuccess       = "user verified successfully"
-	LoginSuccess        = "user login successfully"
+	UsernameExist   = "username already exist"
+	EmailExist      = "email already exist"
+	RegisterSuccess = "user register successfully"
+
+	OTPSent         = "OTP sent"
+	InvalidOTP      = "invalid or expired OTP"
+	UserVerified    = "OTP verified"
+	VerifySuccess   = "user verified successfully"
+	UserNotVerified = "user is not verified"
+
 	IncorrectIdentifier = "email or password is incorrect"
-	UserNotVerified     = "user is not verified"
+	LoginSuccess        = "user login successfully"
 )
