@@ -10,3 +10,14 @@ type Res struct {
 	Message    string      `json:"message"`
 	Payload    interface{} `json:"payload"`
 }
+
+const (
+	EmailExist      = "email already exist"
+	UsernameExist   = "username already exist"
+	RegisterSuccess = "user register successfully"
+	OTPSent         = "OTP sent"
+	UserVerified    = "OTP verified"
+	InvalidOTP      = "invalid or expired OTP"
+	VerifySuccess   = "user verified successfully"
+	LoginSuccess    = "user login successfully"
+)

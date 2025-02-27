@@ -50,7 +50,7 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "Register successfully", nil)
+	return res.SuccessResponse(ctx, res.RegisterSuccess, nil)
 }
 
 func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
@@ -67,7 +67,7 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "OTP sent successfully", nil)
+	return res.SuccessResponse(ctx, res.OTPSent, nil)
 }
 
 func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
@@ -84,7 +84,7 @@ func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "OTP verified successfully", nil)
+	return res.SuccessResponse(ctx, res.VerifySuccess, nil)
 }
 
 func (h UserHandler) Login(ctx *fiber.Ctx) error {
@@ -102,7 +102,7 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "Login successfully", fiber.Map{
+	return res.SuccessResponse(ctx, res.LoginSuccess, fiber.Map{
 		"token": token,
 	})
 }

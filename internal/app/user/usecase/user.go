@@ -58,11 +58,11 @@ func (u *UserUsecase) Register(register dto.Register) *res.Err {
 
 	var dbUser entity.User
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
-		return res.ErrBadRequest("email already exists")
+		return res.ErrBadRequest(res.EmailExist)
 	}
 
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
-		return res.ErrBadRequest("username already exists")
+		return res.ErrBadRequest(res.UsernameExist)
 	}
 
 	if err := u.UserRepository.Create(&user); err != nil {
@@ -105,7 +105,7 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	}
 
 	if user.IsActive {
-		return res.ErrUnprocessableEntity("User already verified")
+		return res.ErrUnprocessableEntity(res.UserVerified)
 	}
 
 	otp, err := u.code.GenerateOTP()
@@ -129,11 +129,11 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) *res.Err {
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
-		return res.ErrBadRequest("OTP expired or invalid")
+		return res.ErrBadRequest(res.InvalidOTP)
 	}
 
 	if string(savedOTP) != data.OTP {
-		return res.ErrBadRequest("OTP expired or invalid")
+		return res.ErrBadRequest(res.InvalidOTP)
 	}
 
 	err = u.redis.Delete(data.Email)
