@@ -49,7 +49,6 @@ func Start() error {
 	c := code.NewCode(config)
 
 	e := email.NewEmail(config)
-	return e.SendResetPasswordLink("atha.3417@gmail.com", "bjerghierufheiurghryu832yr8723r32")
 
 	app := fiber.New()
 	app.Get("/metrics", monitor.New())
