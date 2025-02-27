@@ -7,10 +7,14 @@ import (
 )
 
 type Env struct {
-	AppPort int `env:"APP_PORT"`
+	AppPort int    `env:"APP_PORT"`
+	AppURL  string `env:"APP_URL"`
 
 	OTPLength      int           `env:"OTP_LENGTH"`
 	OTPExpiresTime time.Duration `env:"OTP_EXPIRES_TIME"`
+
+	TokenLength      int           `env:"TOKEN_LENGTH"`
+	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
 
 	DBHost     string `env:"DB_HOST"`
 	DBPort     int    `env:"DB_PORT"`

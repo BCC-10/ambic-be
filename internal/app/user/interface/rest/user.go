@@ -30,7 +30,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	routerGroup.Post("/login", UserHandler.Login)
 	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
 	routerGroup.Post("/verify", UserHandler.VerifyUser)
-	routerGroup.Patch("/reset-password", UserHandler.ResetPassword)
+	routerGroup.Post("/forgot-password", UserHandler.ForgotPassword)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
@@ -108,19 +108,19 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 	})
 }
 
-func (h UserHandler) ResetPassword(ctx *fiber.Ctx) error {
-	resetPassword := new(dto.ResetPassword)
-	if err := ctx.BodyParser(resetPassword); err != nil {
+func (h UserHandler) ForgotPassword(ctx *fiber.Ctx) error {
+	forgotPassword := new(dto.ForgotPassword)
+	if err := ctx.BodyParser(forgotPassword); err != nil {
 		return res.BadRequest(ctx)
 	}
 
-	if err := h.Validator.Struct(resetPassword); err != nil {
-		return res.ErrBadRequest(err.Error())
+	if err := h.Validator.Struct(forgotPassword); err != nil {
+		return res.BadRequest(ctx, err.Error())
 	}
 
-	if err := h.UserUsecase.ResetPassword(*resetPassword); err != nil {
+	if err := h.UserUsecase.ForgotPassword(*forgotPassword); err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.ResetPasswordSuccess, nil)
+	return res.SuccessResponse(ctx, res.ForgotPasswordSuccess, nil)
 }

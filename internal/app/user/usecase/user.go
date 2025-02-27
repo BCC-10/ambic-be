@@ -19,7 +19,7 @@ type UserUsecaseItf interface {
 	Login(login dto.Login) (string, *res.Err)
 	RequestOTP(requestOTP dto.RequestOTP) *res.Err
 	VerifyUser(verifyUser dto.VerifyOTP) *res.Err
-	ResetPassword(resetPassword dto.ResetPassword) *res.Err
+	ForgotPassword(resetPassword dto.ForgotPassword) *res.Err
 }
 
 type UserUsecase struct {
@@ -131,7 +131,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 	}
 
 	if user.IsVerified {
-		return res.ErrBadRequest(res.UserVerified)
+		return res.ErrForbidden(res.UserVerified)
 	}
 
 	savedOTP, err := u.redis.Get(data.Email)
@@ -156,39 +156,27 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 	return nil
 }
 
-func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
+func (u *UserUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
 	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
-	if err != nil {
+	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
 		return res.ErrNotFound("User")
 	}
 
 	if !user.IsVerified {
-		return res.ErrBadRequest(res.UserNotVerified)
+		return res.ErrForbidden(res.UserNotVerified)
 	}
 
-	savedOTP, err := u.redis.Get(data.Email)
-	if err != nil {
-		return res.ErrBadRequest(res.InvalidOTP)
-	}
-
-	if string(savedOTP) != data.OTP {
-		return res.ErrBadRequest(res.InvalidOTP)
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	token, err := u.code.GenerateToken()
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	user.Password = string(hashedPassword)
-
-	err = u.UserRepository.Update(user)
+	err = u.redis.Set(user.Email, []byte(token), u.env.TokenExpiresTime)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(data.Email)
+	err = u.email.SendResetPassword(user.Email, token)
 	if err != nil {
 		return res.ErrInternalServer()
 	}

@@ -24,7 +24,8 @@ const (
 	IncorrectIdentifier = "email or password is incorrect"
 	LoginSuccess        = "user login successfully"
 
-	ResetPasswordSuccess = "password reset successfully"
+	ForgotPasswordSuccess = "reset password link sent"
+	ResetPasswordSuccess  = "password reset successfully"
 )
 
 // middleware

@@ -29,10 +29,8 @@ type Login struct {
 	Password   string `json:"password" validate:"required,min=6"`
 }
 
-type ResetPassword struct {
-	Email    string `json:"email" validate:"required,email"`
-	OTP      string `json:"otp" validate:"required"`
-	Password string `json:"password" validate:"required,min=6"`
+type ForgotPassword struct {
+	Email string `json:"email" validate:"required,email"`
 }
 
 type UserParam struct {
