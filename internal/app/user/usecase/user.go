@@ -178,7 +178,7 @@ func (u *UserUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
 		return res.ErrInternalServer()
 	}
 
-	err = u.email.SendResetPassword(user.Email, token)
+	err = u.email.SendResetPasswordLink(user.Email, token)
 	if err != nil {
 		return res.ErrInternalServer()
 	}

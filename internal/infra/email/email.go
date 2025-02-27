@@ -2,21 +2,23 @@ package email
 
 import (
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/file"
 	"fmt"
-	"net/smtp"
+	gomail "gopkg.in/mail.v2"
 )
 
 type EmailIf interface {
 	SendOTP(to string, code string) error
-	SendResetPassword(to string, token string) error
+	SendResetPasswordLink(to string, token string) error
 }
 
 type Email struct {
-	host   string
-	port   string
-	user   string
-	pass   string
-	appURL string
+	host     string
+	port     int
+	user     string
+	pass     string
+	appURL   string
+	template string
 }
 
 type Config struct {
@@ -28,32 +30,49 @@ func NewEmail(env *env.Env) EmailIf {
 	user := env.SMTPUser
 	pass := env.SMTPPass
 	appURL := env.AppURL
+	template := "internal/infra/email/template"
 
 	return &Email{
-		host, port, user, pass, appURL,
+		host, port, user, pass, appURL, template,
 	}
 }
 
-func (e *Email) connect() smtp.Auth {
-	return smtp.PlainAuth("", e.user, e.pass, e.host)
+func (e *Email) connect() *gomail.Dialer {
+	return gomail.NewDialer(e.host, e.port, e.user, e.pass)
 }
 
-func (e *Email) sendEmail(to string, message []byte) error {
-	return smtp.SendMail(e.host+":"+e.port, e.connect(), e.user, []string{to}, message)
+func (e *Email) sendEmail(dialer *gomail.Dialer, message *gomail.Message) error {
+	return dialer.DialAndSend(message)
 }
 
 func (e *Email) SendOTP(to string, otp string) error {
-	subject := "Subject: Email Verification Code \n"
-	body := fmt.Sprintf("Your verification code is %s", otp)
-	message := []byte(subject + "\n" + body)
+	message := gomail.NewMessage()
+	body, err := file.ReadHTML(e.template, "otp")
+	if err != nil {
+		return err
+	}
 
-	return e.sendEmail(to, message)
+	message.SetHeader("From", e.user)
+	message.SetHeader("To", to)
+	message.SetHeader("Subject", "Email Verification Code")
+
+	message.SetBody("text/html", fmt.Sprintf(body, otp))
+
+	return e.sendEmail(e.connect(), message)
 }
 
-func (e *Email) SendResetPassword(to string, token string) error {
-	subject := "Subject: Reset NewPassword \n"
-	body := fmt.Sprintf("Click this link to reset your password: %s/reset-password?token=%s", e.appURL, token)
-	message := []byte(subject + "\n" + body)
+func (e *Email) SendResetPasswordLink(to string, token string) error {
+	message := gomail.NewMessage()
+	body, err := file.ReadHTML(e.template, "reset_password")
+	if err != nil {
+		return err
+	}
 
-	return e.sendEmail(to, message)
+	message.SetHeader("From", e.user)
+	message.SetHeader("To", to)
+	message.SetHeader("Subject", "Email Verification Code")
+
+	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, token))
+
+	return e.sendEmail(e.connect(), message)
 }

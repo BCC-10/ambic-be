@@ -31,7 +31,7 @@ type Env struct {
 	RedisPassword string `env:"REDIS_PASSWORD"`
 
 	SMTPHost string `env:"SMTP_HOST"`
-	SMTPPort string `env:"SMTP_PORT"`
+	SMTPPort int    `env:"SMTP_PORT"`
 	SMTPUser string `env:"SMTP_USER"`
 	SMTPPass string `env:"SMTP_PASS"`
 }
