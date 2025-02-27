@@ -28,6 +28,8 @@ const (
 	ForgotPasswordSuccess = "reset password link sent"
 	MissingToken          = "missing token"
 	ResetPasswordSuccess  = "password reset successfully"
+
+	UpdateSuccess = "user updated successfully"
 )
 
 // middleware

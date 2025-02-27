@@ -39,6 +39,11 @@ type ResetPassword struct {
 	Token    string `json:"token" validate:"required"`
 }
 
+type UpdateUser struct {
+	Name     string `json:"name"`
+	Password string `json:"password" validate:"omitempty,min=6"`
+}
+
 type UserParam struct {
 	Id       uuid.UUID
 	Email    string

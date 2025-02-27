@@ -8,19 +8,18 @@ import (
 	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type UserHandler struct {
 	Validator   *validator.Validate
 	UserUsecase usecase.UserUsecaseItf
-	Middleware  middleware.MiddlewareIf
 }
 
 func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf, limiter limiter.LimiterIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
-		Middleware:  middleware,
 	}
 
 	routerGroup = routerGroup.Group("/users")
@@ -30,6 +29,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	routerGroup.Post("/verify", UserHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", UserHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", UserHandler.ResetPassword)
+	routerGroup.Patch("/:id/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
@@ -139,4 +139,22 @@ func (h UserHandler) ResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.ResetPasswordSuccess, nil)
+}
+
+func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
+	user := new(dto.UpdateUser)
+	if err := ctx.BodyParser(user); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(user); err != nil {
+		return res.BadRequest(ctx, err.Error())
+	}
+
+	userId := ctx.Locals("userId").(uuid.UUID)
+	if err := h.UserUsecase.UpdateUser(userId, *user); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.UpdateSuccess, nil)
 }

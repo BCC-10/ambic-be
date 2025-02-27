@@ -21,6 +21,7 @@ type UserUsecaseItf interface {
 	VerifyUser(verifyUser dto.VerifyOTP) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPassword) *res.Err
 	ResetPassword(data dto.ResetPassword) *res.Err
+	UpdateUser(id uuid.UUID, data dto.UpdateUser) *res.Err
 }
 
 type UserUsecase struct {
@@ -216,6 +217,29 @@ func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
 	}
 
 	err = u.redis.Delete(data.Email)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUser) *res.Err {
+	user := &entity.User{
+		ID:   id,
+		Name: data.Name,
+	}
+
+	if data.Password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		user.Password = string(hashedPassword)
+	}
+
+	err := u.UserRepository.Update(user)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
