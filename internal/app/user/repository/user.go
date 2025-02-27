@@ -39,5 +39,5 @@ func (r UserMySQL) Update(user *entity.User) error {
 }
 
 func (r UserMySQL) Verify(user *entity.User) error {
-	return r.db.Debug().Model(&user).Where("email = ?", user.Email).Update("is_active", true).Error
+	return r.db.Debug().Model(&user).Where("email = ?", user.Email).Update("is_verified", true).Error
 }

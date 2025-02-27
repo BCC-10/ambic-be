@@ -86,10 +86,6 @@ func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
-	if !user.IsVerified {
-		return "", res.ErrUnauthorized(res.UserNotVerified)
-	}
-
 	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
