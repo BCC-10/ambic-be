@@ -11,6 +11,7 @@ type Res struct {
 	Payload    interface{} `json:"payload"`
 }
 
+// Auth Domain
 const (
 	UsernameExist   = "username already exist"
 	EmailExist      = "email already exist"
