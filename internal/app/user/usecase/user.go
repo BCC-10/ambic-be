@@ -138,7 +138,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 		return res.ErrInternalServer()
 	}
 
-	err = u.UserRepository.Update(&entity.User{Email: data.Email, IsVerified: true})
+	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
 	if err != nil {
 		return res.ErrInternalServer()
 	}
