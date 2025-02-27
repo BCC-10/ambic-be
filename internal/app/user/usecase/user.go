@@ -133,12 +133,12 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 		return res.ErrBadRequest(res.InvalidOTP)
 	}
 
-	err = u.redis.Delete(data.Email)
+	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
+	err = u.redis.Delete(data.Email)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
