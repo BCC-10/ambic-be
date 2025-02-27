@@ -38,7 +38,7 @@ func ErrInternalServer() *Err {
 
 func ErrUnauthorized(message ...string) *Err {
 	var msg string
-	if len(msg) == 1 {
+	if len(message) == 1 {
 		msg = message[0]
 	} else {
 		msg = fiber.ErrUnauthorized.Message
