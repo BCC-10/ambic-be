@@ -43,7 +43,7 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, jwt jw
 }
 
 func (u *UserUsecase) Register(register dto.Register) *res.Err {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
@@ -176,7 +176,7 @@ func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
 		return res.ErrBadRequest(res.InvalidOTP)
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), 10)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
