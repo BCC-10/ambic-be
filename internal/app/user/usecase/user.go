@@ -77,16 +77,16 @@ func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
 
 	err := u.UserRepository.Check(user, login)
 	if err != nil {
-		return "", res.ErrUnauthorized("email or password is incorrect")
+		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
 	if err != nil {
-		return "", res.ErrUnauthorized("email or password is incorrect")
+		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
 	if !user.IsActive {
-		return "", res.ErrUnauthorized("user is not verified")
+		return "", res.ErrUnauthorized(res.UserNotVerified)
 	}
 
 	token, err := u.jwt.GenerateToken(user.ID, user.IsActive)
