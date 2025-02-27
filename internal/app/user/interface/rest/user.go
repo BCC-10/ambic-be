@@ -75,7 +75,7 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 func (h UserHandler) VerifyUser(ctx *fiber.Ctx) error {
 	data := new(dto.VerifyOTP)
 	if err := ctx.BodyParser(data); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
