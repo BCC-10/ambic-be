@@ -29,7 +29,8 @@ const (
 	MissingToken          = "missing token"
 	ResetPasswordSuccess  = "password reset successfully"
 
-	UpdateSuccess = "user updated successfully"
+	UpdateSuccess        = "user updated successfully"
+	IncorrectOldPassword = "incorrect old password"
 )
 
 // middleware

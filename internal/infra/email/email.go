@@ -51,7 +51,7 @@ func (e *Email) SendOTP(to string, otp string) error {
 }
 
 func (e *Email) SendResetPassword(to string, token string) error {
-	subject := "Subject: Reset Password \n"
+	subject := "Subject: Reset NewPassword \n"
 	body := fmt.Sprintf("Click this link to reset your password: %s/reset-password?token=%s", e.appURL, token)
 	message := []byte(subject + "\n" + body)
 

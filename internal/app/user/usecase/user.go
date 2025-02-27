@@ -225,13 +225,22 @@ func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
 }
 
 func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUser) *res.Err {
+	userDB := new(entity.User)
+	if err := u.UserRepository.Get(userDB, dto.UserParam{Id: id}); err != nil {
+		return res.ErrNotFound(res.UserNotExists)
+	}
+
 	user := &entity.User{
 		ID:   id,
 		Name: data.Name,
 	}
 
-	if data.Password != "" {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	if data.NewPassword != "" {
+		err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword))
+		if err != nil {
+			return res.ErrForbidden(res.IncorrectOldPassword)
+		}
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			return res.ErrInternalServer()
 		}
