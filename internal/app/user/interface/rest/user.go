@@ -29,7 +29,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	routerGroup.Post("/register", UserHandler.Register)
 	routerGroup.Post("/login", UserHandler.Login)
 	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
-	routerGroup.Post("/verify-otp", UserHandler.VerifyOTP)
+	routerGroup.Post("/verify", UserHandler.VerifyOTP)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
