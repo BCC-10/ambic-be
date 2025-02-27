@@ -17,13 +17,20 @@ const (
 	EmailExist      = "email already exist"
 	RegisterSuccess = "user register successfully"
 
-	OTPSent         = "OTP sent"
-	InvalidOTP      = "invalid or expired OTP"
-	VerifySuccess   = "user verified successfully"
-	UserNotVerified = "user is not verified"
+	OTPSent       = "OTP sent"
+	InvalidOTP    = "invalid or expired OTP"
+	VerifySuccess = "user verified successfully"
 
 	IncorrectIdentifier = "email or password is incorrect"
 	LoginSuccess        = "user login successfully"
 
 	ResetPasswordSuccess = "password reset successfully"
+)
+
+// middleware
+const (
+	UserNotVerified = "user is not verified"
+	UserVerified    = "user already verified"
+	MissingToken    = "missing token"
+	InvalidToken    = "invalid token"
 )

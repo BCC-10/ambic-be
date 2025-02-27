@@ -9,7 +9,7 @@ func (m *Middleware) EnsureVerified(ctx *fiber.Ctx) error {
 	isVerified := ctx.Locals("isVerified")
 
 	if isVerified == false {
-		return res.Forbidden(ctx)
+		return res.Forbidden(ctx, res.UserNotVerified)
 	}
 
 	return ctx.Next()

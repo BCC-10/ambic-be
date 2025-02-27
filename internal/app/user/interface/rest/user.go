@@ -27,7 +27,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Post("/register", UserHandler.Register)
-	routerGroup.Post("/login", UserHandler.Login)
+	routerGroup.Post("/login", middleware.EnsureVerified, UserHandler.Login)
 	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
 	routerGroup.Post("/verify", middleware.EnsureNotVerified, UserHandler.VerifyUser)
 	routerGroup.Patch("/reset-password", middleware.EnsureVerified, UserHandler.ResetPassword)
