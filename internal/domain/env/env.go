@@ -39,7 +39,7 @@ type Env struct {
 func New() (*Env, error) {
 	err := godotenv.Load()
 	if err != nil {
-		panic("Failed to load env")
+		panic(err)
 	}
 
 	_env := new(Env)
