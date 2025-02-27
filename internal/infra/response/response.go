@@ -16,6 +16,7 @@ const (
 	UsernameExist   = "username already exist"
 	EmailExist      = "email already exist"
 	RegisterSuccess = "user register successfully"
+	UserNotExists   = "user not exists"
 
 	OTPSent       = "OTP sent"
 	InvalidOTP    = "invalid or expired OTP"
@@ -25,6 +26,7 @@ const (
 	LoginSuccess        = "user login successfully"
 
 	ForgotPasswordSuccess = "reset password link sent"
+	MissingToken          = "missing token"
 	ResetPasswordSuccess  = "password reset successfully"
 )
 
@@ -32,6 +34,5 @@ const (
 const (
 	UserNotVerified = "user is not verified"
 	UserVerified    = "user already verified"
-	MissingToken    = "missing token"
-	InvalidToken    = "invalid token"
+	InvalidToken    = "invalid or expired token"
 )

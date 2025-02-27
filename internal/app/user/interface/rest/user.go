@@ -31,6 +31,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
 	routerGroup.Post("/verify", UserHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", UserHandler.ForgotPassword)
+	routerGroup.Patch("/reset-password", UserHandler.ResetPassword)
 }
 
 func (h UserHandler) Register(ctx *fiber.Ctx) error {
@@ -72,16 +73,16 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 }
 
 func (h UserHandler) VerifyUser(ctx *fiber.Ctx) error {
-	verifyOTP := new(dto.VerifyOTP)
-	if err := ctx.BodyParser(verifyOTP); err != nil {
+	data := new(dto.VerifyOTP)
+	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx, err.Error())
 	}
 
-	if err := h.Validator.Struct(verifyOTP); err != nil {
+	if err := h.Validator.Struct(data); err != nil {
 		return res.BadRequest(ctx, err.Error())
 	}
 
-	if err := h.UserUsecase.VerifyUser(*verifyOTP); err != nil {
+	if err := h.UserUsecase.VerifyUser(*data); err != nil {
 		return res.Error(ctx, err)
 	}
 
@@ -109,18 +110,35 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 }
 
 func (h UserHandler) ForgotPassword(ctx *fiber.Ctx) error {
-	forgotPassword := new(dto.ForgotPassword)
-	if err := ctx.BodyParser(forgotPassword); err != nil {
+	data := new(dto.ForgotPassword)
+	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
 
-	if err := h.Validator.Struct(forgotPassword); err != nil {
+	if err := h.Validator.Struct(data); err != nil {
 		return res.BadRequest(ctx, err.Error())
 	}
 
-	if err := h.UserUsecase.ForgotPassword(*forgotPassword); err != nil {
+	if err := h.UserUsecase.ForgotPassword(*data); err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.ForgotPasswordSuccess, nil)
+}
+
+func (h UserHandler) ResetPassword(ctx *fiber.Ctx) error {
+	data := new(dto.ResetPassword)
+	if err := ctx.BodyParser(data); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(data); err != nil {
+		return res.BadRequest(ctx, err.Error())
+	}
+
+	if err := h.UserUsecase.ResetPassword(*data); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.ResetPasswordSuccess, nil)
 }

@@ -9,16 +9,15 @@ func (e *Err) Error() string {
 	return e.Message
 }
 
-func ErrNotFound(str ...string) *Err {
-	var message string
-	if len(str) == 1 {
-		message = str[0] + " " + fiber.ErrNotFound.Message
-	} else if len(str) == 2 {
-		message = str[0] + " " + str[1]
+func ErrNotFound(message ...string) *Err {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
 	} else {
-		message += fiber.ErrNotFound.Message
+		msg = fiber.ErrNotFound.Message
 	}
-	return &Err{Code: fiber.StatusNotFound, Message: message}
+
+	return &Err{Code: fiber.ErrNotFound.Code, Message: msg}
 }
 
 func ErrBadRequest(message ...string) *Err {

@@ -20,6 +20,7 @@ type UserUsecaseItf interface {
 	RequestOTP(requestOTP dto.RequestOTP) *res.Err
 	VerifyUser(verifyUser dto.VerifyOTP) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPassword) *res.Err
+	ResetPassword(data dto.ResetPassword) *res.Err
 }
 
 type UserUsecase struct {
@@ -42,17 +43,17 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, jwt jw
 	}
 }
 
-func (u *UserUsecase) Register(register dto.Register) *res.Err {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
+func (u *UserUsecase) Register(data dto.Register) *res.Err {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
 	user := entity.User{
 		ID:         uuid.New(),
-		Name:       register.Name,
-		Username:   register.Username,
-		Email:      register.Email,
+		Name:       data.Name,
+		Username:   data.Username,
+		Email:      data.Email,
 		Password:   string(hashedPassword),
 		IsVerified: false,
 	}
@@ -73,15 +74,15 @@ func (u *UserUsecase) Register(register dto.Register) *res.Err {
 	return nil
 }
 
-func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
+func (u *UserUsecase) Login(data dto.Login) (string, *res.Err) {
 	user := new(entity.User)
 
-	err := u.UserRepository.Check(user, login)
+	err := u.UserRepository.Check(user, data)
 	if err != nil {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
 	if err != nil {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
@@ -102,7 +103,7 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
-		return res.ErrNotFound("Email")
+		return res.ErrNotFound(res.UserNotExists)
 	}
 
 	otp, err := u.code.GenerateOTP()
@@ -127,7 +128,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
-		return res.ErrNotFound("User")
+		return res.ErrNotFound(res.UserNotExists)
 	}
 
 	if user.IsVerified {
@@ -136,7 +137,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
-		return res.ErrBadRequest(res.InvalidOTP)
+		return res.ErrInternalServer()
 	}
 
 	if string(savedOTP) != data.OTP {
@@ -159,7 +160,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 func (u *UserUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
 	user := new(entity.User)
 	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
-		return res.ErrNotFound("User")
+		return res.ErrNotFound(res.UserNotExists)
 	}
 
 	if !user.IsVerified {
@@ -177,6 +178,44 @@ func (u *UserUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
 	}
 
 	err = u.email.SendResetPassword(user.Email, token)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
+	user := new(entity.User)
+	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
+		return res.ErrNotFound(res.UserNotExists)
+	}
+
+	if !user.IsVerified {
+		return res.ErrForbidden(res.UserNotVerified)
+	}
+
+	savedToken, err := u.redis.Get(data.Email)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	if string(savedToken) != data.Token {
+		return res.ErrBadRequest(res.InvalidToken)
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	user.Password = string(hashedPassword)
+	err = u.UserRepository.Update(user)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	err = u.redis.Delete(data.Email)
 	if err != nil {
 		return res.ErrInternalServer()
 	}

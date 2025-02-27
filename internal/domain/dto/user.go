@@ -33,6 +33,12 @@ type ForgotPassword struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
+type ResetPassword struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+	Token    string `json:"token" validate:"required"`
+}
+
 type UserParam struct {
 	Id       uuid.UUID
 	Email    string
