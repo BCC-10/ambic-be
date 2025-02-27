@@ -32,6 +32,7 @@ const (
 
 // middleware
 const (
+	LimitExceeded   = "too many requests"
 	UserNotVerified = "user is not verified"
 	UserVerified    = "user already verified"
 	InvalidToken    = "invalid or expired token"

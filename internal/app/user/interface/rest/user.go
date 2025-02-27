@@ -14,7 +14,6 @@ type UserHandler struct {
 	Validator   *validator.Validate
 	UserUsecase usecase.UserUsecaseItf
 	Middleware  middleware.MiddlewareIf
-	Limiter     limiter.LimiterIf
 }
 
 func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf, limiter limiter.LimiterIf) {
@@ -22,13 +21,12 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 		Validator:   validator,
 		UserUsecase: userUsecase,
 		Middleware:  middleware,
-		Limiter:     limiter,
 	}
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Post("/register", UserHandler.Register)
 	routerGroup.Post("/login", UserHandler.Login)
-	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
+	routerGroup.Post("/request-otp", limiter.Set(3, "15m"), UserHandler.RequestOTP)
 	routerGroup.Post("/verify", UserHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", UserHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", UserHandler.ResetPassword)

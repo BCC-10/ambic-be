@@ -46,17 +46,6 @@ func ErrUnauthorized(message ...string) *Err {
 	return &Err{Code: fiber.ErrUnauthorized.Code, Message: msg}
 }
 
-func ErrUnprocessableEntity(message ...string) *Err {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrUnprocessableEntity.Message
-	}
-
-	return &Err{Code: fiber.ErrUnprocessableEntity.Code, Message: msg}
-}
-
 func ErrForbidden(message ...string) *Err {
 	var msg string
 	if len(message) == 1 {
@@ -113,6 +102,20 @@ func Forbidden(ctx *fiber.Ctx, message ...string) error {
 
 	return ctx.Status(fiber.ErrForbidden.Code).JSON(Res{
 		StatusCode: fiber.ErrForbidden.Code,
+		Message:    msg,
+	})
+}
+
+func TooManyRequests(ctx *fiber.Ctx, message ...string) error {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrTooManyRequests.Message
+	}
+
+	return ctx.Status(fiber.ErrTooManyRequests.Code).JSON(Res{
+		StatusCode: fiber.ErrTooManyRequests.Code,
 		Message:    msg,
 	})
 }
