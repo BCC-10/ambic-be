@@ -9,7 +9,7 @@ import (
 )
 
 type JWTIf interface {
-	GenerateToken(userId uuid.UUID, isActive bool) (string, error)
+	GenerateToken(userId uuid.UUID, isVerified bool) (string, error)
 	ValidateToken(token string) (uuid.UUID, bool, error)
 }
 type JWT struct {
@@ -28,15 +28,15 @@ func NewJwt(env *env.Env) JWTIf {
 }
 
 type Claims struct {
-	Id       uuid.UUID
-	IsActive bool
+	Id         uuid.UUID
+	IsVerified bool
 	jwt.RegisteredClaims
 }
 
-func (j *JWT) GenerateToken(userId uuid.UUID, isActive bool) (string, error) {
+func (j *JWT) GenerateToken(userId uuid.UUID, isVerified bool) (string, error) {
 	claim := Claims{
 		Id:               userId,
-		IsActive:         isActive,
+		IsVerified:       isVerified,
 		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.expiredTime))},
 	}
 
@@ -66,7 +66,7 @@ func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, bool, error) {
 	}
 
 	userId := claim.Id
-	isActive := claim.IsActive
+	isVerified := claim.IsVerified
 
-	return userId, isActive, nil
+	return userId, isVerified, nil
 }

@@ -5,10 +5,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func (m *Middleware) Authorization(ctx *fiber.Ctx) error {
-	isActive := ctx.Locals("isActive")
+func (m *Middleware) EnsureVerified(ctx *fiber.Ctx) error {
+	isVerified := ctx.Locals("isVerified")
 
-	if isActive == false {
+	if isVerified == false {
 		return res.Forbidden(ctx)
 	}
 

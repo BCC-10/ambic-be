@@ -79,6 +79,34 @@ func InternalSeverError(ctx *fiber.Ctx) error {
 	})
 }
 
+func Unauthorized(ctx *fiber.Ctx, message ...string) error {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrUnauthorized.Message
+	}
+
+	return ctx.Status(fiber.ErrUnauthorized.Code).JSON(Res{
+		StatusCode: fiber.ErrUnauthorized.Code,
+		Message:    msg,
+	})
+}
+
+func Forbidden(ctx *fiber.Ctx, message ...string) error {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrForbidden.Message
+	}
+
+	return ctx.Status(fiber.ErrForbidden.Code).JSON(Res{
+		StatusCode: fiber.ErrForbidden.Code,
+		Message:    msg,
+	})
+}
+
 func Error(ctx *fiber.Ctx, err *Err) error {
 	var customErr *Err
 	if errors.As(err, &customErr) {

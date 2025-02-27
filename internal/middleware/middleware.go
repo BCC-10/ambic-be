@@ -7,7 +7,8 @@ import (
 
 type MiddlewareIf interface {
 	Authentication(ctx *fiber.Ctx) error
-	Authorization(ctx *fiber.Ctx) error
+	EnsureVerified(ctx *fiber.Ctx) error
+	EnsureNotVerified(ctx *fiber.Ctx) error
 }
 
 type Middleware struct {

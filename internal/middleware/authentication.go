@@ -16,13 +16,13 @@ func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	bearerToken := authToken[0]
 	token := strings.Split(bearerToken, " ")
 
-	userId, isActive, err := m.jwt.ValidateToken(token[1])
+	userId, isVerified, err := m.jwt.ValidateToken(token[1])
 	if err != nil {
 		return res.Unauthorized(ctx, "invalid token")
 	}
 
 	ctx.Locals("userId", userId)
-	ctx.Locals("isActive", isActive)
+	ctx.Locals("isVerified", isVerified)
 
 	return ctx.Next()
 }

@@ -19,10 +19,11 @@ const (
 
 	OTPSent         = "OTP sent"
 	InvalidOTP      = "invalid or expired OTP"
-	UserVerified    = "OTP verified"
 	VerifySuccess   = "user verified successfully"
 	UserNotVerified = "user is not verified"
 
 	IncorrectIdentifier = "email or password is incorrect"
 	LoginSuccess        = "user login successfully"
+
+	ResetPasswordSuccess = "password reset successfully"
 )

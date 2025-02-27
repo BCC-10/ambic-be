@@ -19,6 +19,7 @@ type UserUsecaseItf interface {
 	Login(login dto.Login) (string, *res.Err)
 	RequestOTP(requestOTP dto.RequestOTP) *res.Err
 	VerifyOTP(verifyOTP dto.VerifyOTP) *res.Err
+	ResetPassword(resetPassword dto.ResetPassword) *res.Err
 }
 
 type UserUsecase struct {
@@ -48,12 +49,12 @@ func (u *UserUsecase) Register(register dto.Register) *res.Err {
 	}
 
 	user := entity.User{
-		ID:       uuid.New(),
-		Name:     register.Name,
-		Username: register.Username,
-		Email:    register.Email,
-		Password: string(hashedPassword),
-		IsActive: false,
+		ID:         uuid.New(),
+		Name:       register.Name,
+		Username:   register.Username,
+		Email:      register.Email,
+		Password:   string(hashedPassword),
+		IsVerified: false,
 	}
 
 	var dbUser entity.User
@@ -85,11 +86,11 @@ func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
-	if !user.IsActive {
+	if !user.IsVerified {
 		return "", res.ErrUnauthorized(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsActive)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
@@ -102,10 +103,6 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
 		return res.ErrNotFound("Email")
-	}
-
-	if user.IsActive {
-		return res.ErrUnprocessableEntity(res.UserVerified)
 	}
 
 	otp, err := u.code.GenerateOTP()
@@ -142,6 +139,42 @@ func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) *res.Err {
 	}
 
 	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
+	user := new(entity.User)
+	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	if err != nil {
+		return res.ErrNotFound("Email")
+	}
+
+	savedOTP, err := u.redis.Get(data.Email)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidOTP)
+	}
+
+	if string(savedOTP) != data.OTP {
+		return res.ErrBadRequest(res.InvalidOTP)
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), 10)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	user.Password = string(hashedPassword)
+
+	err = u.UserRepository.Update(user)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	err = u.redis.Delete(data.Email)
 	if err != nil {
 		return res.ErrInternalServer()
 	}

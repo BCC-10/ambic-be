@@ -11,6 +11,7 @@ type UserMySQLItf interface {
 	Get(user *entity.User, param dto.UserParam) error
 	Create(user *entity.User) error
 	Verify(user *entity.User) error
+	Update(user *entity.User) error
 }
 
 type UserMySQL struct {
@@ -31,6 +32,10 @@ func (r UserMySQL) Get(user *entity.User, param dto.UserParam) error {
 
 func (r UserMySQL) Create(user *entity.User) error {
 	return r.db.Debug().Create(user).Error
+}
+
+func (r UserMySQL) Update(user *entity.User) error {
+	return r.db.Debug().Model(&user).Updates(user).Error
 }
 
 func (r UserMySQL) Verify(user *entity.User) error {
