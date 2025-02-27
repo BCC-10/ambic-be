@@ -75,7 +75,7 @@ func (u *UserUsecase) Register(register dto.Register) *res.Err {
 func (u *UserUsecase) Login(login dto.Login) (string, *res.Err) {
 	user := new(entity.User)
 
-	err := u.UserRepository.Get(user, dto.UserParam{Email: login.Email})
+	err := u.UserRepository.Check(user, login)
 	if err != nil {
 		return "", res.ErrUnauthorized("email or password is incorrect")
 	}
@@ -102,6 +102,10 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
 		return res.ErrNotFound("Email")
+	}
+
+	if user.IsActive {
+		return res.ErrUnprocessableEntity("User already verified")
 	}
 
 	otp, err := u.code.GenerateOTP()
@@ -132,12 +136,12 @@ func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) *res.Err {
 		return res.ErrBadRequest("OTP expired or invalid")
 	}
 
-	err = u.redis.Set(data.Email, nil, 0)
+	err = u.redis.Delete(data.Email)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.UserRepository.Activate(&entity.User{Email: data.Email})
+	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
 	if err != nil {
 		return res.ErrInternalServer()
 	}

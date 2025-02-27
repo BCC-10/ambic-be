@@ -50,7 +50,7 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "Register successfully", user)
+	return res.SuccessResponse(ctx, "Register successfully", nil)
 }
 
 func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
