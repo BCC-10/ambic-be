@@ -124,6 +124,16 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 }
 
 func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
+	user := new(entity.User)
+	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	if err != nil {
+		return res.ErrNotFound("User")
+	}
+
+	if user.IsVerified {
+		return res.ErrBadRequest(res.UserVerified)
+	}
+
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
 		return res.ErrBadRequest(res.InvalidOTP)
@@ -133,7 +143,7 @@ func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 		return res.ErrBadRequest(res.InvalidOTP)
 	}
 
-	err = u.UserRepository.Verify(&entity.User{Email: data.Email})
+	err = u.UserRepository.Verify(user)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
@@ -150,7 +160,7 @@ func (u *UserUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
-		return res.ErrNotFound("Email")
+		return res.ErrNotFound("User")
 	}
 
 	savedOTP, err := u.redis.Get(data.Email)
