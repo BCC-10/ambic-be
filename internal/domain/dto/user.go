@@ -9,6 +9,12 @@ type Register struct {
 	Password string `json:"password" validate:"required,min=6"`
 }
 
+type RegisterResponse struct {
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
 type RequestOTP struct {
 	Email string `json:"email" validate:"required,email"`
 }
@@ -27,4 +33,12 @@ type UserParam struct {
 	Id       uuid.UUID
 	Email    string
 	Username string
+}
+
+func (r Register) AsResponse() RegisterResponse {
+	return RegisterResponse{
+		Name:     r.Name,
+		Username: r.Username,
+		Email:    r.Email,
+	}
 }
