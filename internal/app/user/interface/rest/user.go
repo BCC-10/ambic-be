@@ -29,7 +29,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	routerGroup.Post("/register", UserHandler.Register)
 	routerGroup.Post("/login", UserHandler.Login)
 	routerGroup.Post("/request-otp", UserHandler.Limiter.Set(3, "15m"), UserHandler.RequestOTP)
-	routerGroup.Post("/verify", middleware.EnsureNotVerified, UserHandler.VerifyOTP)
+	routerGroup.Post("/verify", middleware.EnsureNotVerified, UserHandler.VerifyUser)
 	routerGroup.Patch("/reset-password", middleware.EnsureVerified, UserHandler.ResetPassword)
 }
 
@@ -71,7 +71,7 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 	return res.SuccessResponse(ctx, res.OTPSent, nil)
 }
 
-func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
+func (h UserHandler) VerifyUser(ctx *fiber.Ctx) error {
 	verifyOTP := new(dto.VerifyOTP)
 	if err := ctx.BodyParser(verifyOTP); err != nil {
 		return res.BadRequest(ctx)
@@ -81,7 +81,7 @@ func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 		return res.ErrBadRequest(err.Error())
 	}
 
-	if err := h.UserUsecase.VerifyOTP(*verifyOTP); err != nil {
+	if err := h.UserUsecase.VerifyUser(*verifyOTP); err != nil {
 		return res.Error(ctx, err)
 	}
 

@@ -18,7 +18,7 @@ type UserUsecaseItf interface {
 	Register(dto.Register) *res.Err
 	Login(login dto.Login) (string, *res.Err)
 	RequestOTP(requestOTP dto.RequestOTP) *res.Err
-	VerifyOTP(verifyOTP dto.VerifyOTP) *res.Err
+	VerifyUser(verifyUser dto.VerifyOTP) *res.Err
 	ResetPassword(resetPassword dto.ResetPassword) *res.Err
 }
 
@@ -119,7 +119,7 @@ func (u *UserUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	return nil
 }
 
-func (u *UserUsecase) VerifyOTP(data dto.VerifyOTP) *res.Err {
+func (u *UserUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 	savedOTP, err := u.redis.Get(data.Email)
 	if err != nil {
 		return res.ErrBadRequest(res.InvalidOTP)
