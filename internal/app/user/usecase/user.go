@@ -56,6 +56,10 @@ func (u *UserUsecase) Register(register dto.Register) *res.Err {
 		IsActive: false,
 	}
 
+	if err := u.UserRepository.Get(&entity.User{}, dto.UserParam{Email: user.Email, Username: user.Username}); err == nil {
+		return res.ErrBadRequest("email or username already exists")
+	}
+
 	if err := u.UserRepository.Create(&user); err != nil {
 		return res.ErrInternalServer()
 	}

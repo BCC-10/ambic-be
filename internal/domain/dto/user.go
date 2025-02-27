@@ -24,6 +24,7 @@ type Login struct {
 }
 
 type UserParam struct {
-	Id    uuid.UUID
-	Email string
+	Id       uuid.UUID
+	Email    string
+	Username string
 }

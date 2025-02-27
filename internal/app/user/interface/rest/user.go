@@ -50,10 +50,7 @@ func (h UserHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message": "User registered successfully",
-		"payload": user,
-	})
+	return res.SuccessResponse(ctx, "Register successfully", user)
 }
 
 func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
@@ -70,9 +67,7 @@ func (h UserHandler) RequestOTP(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "OTP sent successfully",
-	})
+	return res.SuccessResponse(ctx, "OTP sent successfully", nil)
 }
 
 func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
@@ -89,9 +84,7 @@ func (h UserHandler) VerifyOTP(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "OTP verified successfully",
-	})
+	return res.SuccessResponse(ctx, "OTP verified successfully", nil)
 }
 
 func (h UserHandler) Login(ctx *fiber.Ctx) error {
@@ -109,8 +102,7 @@ func (h UserHandler) Login(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Login successful",
-		"token":   token,
+	return res.SuccessResponse(ctx, "Login successfully", fiber.Map{
+		"token": token,
 	})
 }
