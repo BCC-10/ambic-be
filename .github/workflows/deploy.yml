@@ -27,6 +27,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa root@$SSH_HOST << 'EOF'
           set -e
+          git config --global --add safe.directory /var/www/ambic
           cd /var/www/ambic
           git pull origin main
           go mod tidy
