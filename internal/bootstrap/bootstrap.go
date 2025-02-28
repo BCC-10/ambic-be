@@ -1,9 +1,11 @@
 package bootstrap
 
 import (
-	userHandler "ambic/internal/app/user/interface/rest"
-	userRepo "ambic/internal/app/user/repository"
-	userUsecase "ambic/internal/app/user/usecase"
+	AuthHandler "ambic/internal/app/auth/interface/rest"
+	AuthUsecase "ambic/internal/app/auth/usecase"
+	UserHandler "ambic/internal/app/user/interface/rest"
+	UserRepo "ambic/internal/app/user/repository"
+	UserUsecase "ambic/internal/app/user/usecase"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/code"
 	"ambic/internal/infra/email"
@@ -56,9 +58,12 @@ func Start() error {
 
 	l := limiter.NewLimiter(r)
 
-	userRepository := userRepo.NewUserMySQL(db)
-	userUsercase := userUsecase.NewUserUsecase(config, userRepository, j, c, e, r)
-	userHandler.NewUserHandler(v1, userUsercase, v, m, l)
+	userRepository := UserRepo.NewUserMySQL(db)
+	userUsecase := UserUsecase.NewUserUsecase(config, userRepository)
+	UserHandler.NewUserHandler(v1, userUsecase, v, m)
+
+	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r)
+	AuthHandler.NewAuthHandler(v1, authUsecase, v, m, l)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
