@@ -13,6 +13,7 @@ import (
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/limiter"
 	"ambic/internal/infra/mysql"
+	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
 	"ambic/internal/middleware"
 	"fmt"
@@ -52,6 +53,8 @@ func Start() error {
 
 	e := email.NewEmail(config)
 
+	o := oauth.NewOAuth(config)
+
 	app := fiber.New()
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
@@ -62,7 +65,7 @@ func Start() error {
 	userUsecase := UserUsecase.NewUserUsecase(config, userRepository)
 	UserHandler.NewUserHandler(v1, userUsecase, v, m)
 
-	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r)
+	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, m, l)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))

@@ -16,6 +16,8 @@ type Env struct {
 	TokenLength      int           `env:"TOKEN_LENGTH"`
 	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
 
+	StateExpiresTime time.Duration `env:"STATE_EXPIRES_TIME"`
+
 	DBHost     string `env:"DB_HOST"`
 	DBPort     int    `env:"DB_PORT"`
 	DBName     string `env:"DB_NAME"`
@@ -34,6 +36,10 @@ type Env struct {
 	SMTPPort int    `env:"SMTP_PORT"`
 	SMTPUser string `env:"SMTP_USER"`
 	SMTPPass string `env:"SMTP_PASS"`
+
+	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
+	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
+	GoogleRedirectURL  string `env:"GOOGLE_REDIRECT_URL"`
 }
 
 func New() (*Env, error) {

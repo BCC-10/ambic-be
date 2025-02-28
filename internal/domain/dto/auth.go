@@ -3,10 +3,11 @@ package dto
 import "github.com/google/uuid"
 
 type RegisterRequest struct {
-	Name     string `json:"name" validate:"required"`
-	Username string `json:"username" validate:"required"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
+	Name       string `json:"name" validate:"required"`
+	Username   string `json:"username" validate:"required"`
+	Email      string `json:"email" validate:"required,email"`
+	Password   string `json:"password" validate:"required,min=6"`
+	IsVerified bool   `json:"is_verified"`
 }
 
 type RegisterResponse struct {
@@ -37,6 +38,13 @@ type ResetPasswordRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 	Token    string `json:"token" validate:"required"`
+}
+
+type GoogleUserProfileResponse struct {
+	Email      string
+	Username   string
+	Name       string
+	IsVerified bool
 }
 
 type UserParam struct {

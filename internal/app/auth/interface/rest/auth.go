@@ -28,6 +28,8 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup.Post("/verify", AuthHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
+	routerGroup.Post("/google", AuthHandler.GoogleLogin)
+	routerGroup.Get("/google/callback", AuthHandler.GoogleCallback)
 }
 
 func (h AuthHandler) Register(ctx *fiber.Ctx) error {
@@ -137,4 +139,36 @@ func (h AuthHandler) ResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.ResetPasswordSuccess, nil)
+}
+
+func (h AuthHandler) GoogleLogin(ctx *fiber.Ctx) error {
+	url, err := h.AuthUsecase.GoogleLogin()
+	if err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.OAuthLoginSuccess, url)
+}
+
+func (h AuthHandler) GoogleCallback(ctx *fiber.Ctx) error {
+	googleErr := ctx.Query("error")
+	if googleErr != "" {
+		return res.Forbidden(ctx, res.OAuthAccessDenied)
+	}
+
+	code := ctx.Query("code")
+	state := ctx.Query("state")
+
+	if code == "" || state == "" {
+		return res.BadRequest(ctx)
+	}
+
+	token, err := h.AuthUsecase.GoogleCallback(code, state)
+	if err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.LoginSuccess, fiber.Map{
+		"token": token,
+	})
 }
