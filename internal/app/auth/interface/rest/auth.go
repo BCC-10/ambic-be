@@ -31,7 +31,7 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 }
 
 func (h AuthHandler) Register(ctx *fiber.Ctx) error {
-	user := new(dto.Register)
+	user := new(dto.RegisterRequest)
 	if err := ctx.BodyParser(user); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -44,7 +44,7 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	if err := h.AuthUsecase.RequestOTP(dto.RequestOTP{Email: user.Email}); err != nil {
+	if err := h.AuthUsecase.RequestOTP(dto.OTPRequest{Email: user.Email}); err != nil {
 		return res.Error(ctx, err)
 	}
 
@@ -52,7 +52,7 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) RequestOTP(ctx *fiber.Ctx) error {
-	requestOTP := new(dto.RequestOTP)
+	requestOTP := new(dto.OTPRequest)
 	if err := ctx.BodyParser(requestOTP); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -69,7 +69,7 @@ func (h AuthHandler) RequestOTP(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) VerifyUser(ctx *fiber.Ctx) error {
-	data := new(dto.VerifyOTP)
+	data := new(dto.VerifyOTPRequest)
 	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -86,7 +86,7 @@ func (h AuthHandler) VerifyUser(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) Login(ctx *fiber.Ctx) error {
-	user := new(dto.Login)
+	user := new(dto.LoginRequest)
 	if err := ctx.BodyParser(user); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -106,7 +106,7 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) ForgotPassword(ctx *fiber.Ctx) error {
-	data := new(dto.ForgotPassword)
+	data := new(dto.ForgotPasswordRequest)
 	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -123,7 +123,7 @@ func (h AuthHandler) ForgotPassword(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) ResetPassword(ctx *fiber.Ctx) error {
-	data := new(dto.ResetPassword)
+	data := new(dto.ResetPasswordRequest)
 	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}

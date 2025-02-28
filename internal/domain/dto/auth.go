@@ -2,7 +2,7 @@ package dto
 
 import "github.com/google/uuid"
 
-type Register struct {
+type RegisterRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
@@ -15,25 +15,25 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 }
 
-type RequestOTP struct {
+type OTPRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-type VerifyOTP struct {
+type VerifyOTPRequest struct {
 	Email string `json:"email" validate:"required,email"`
 	OTP   string `json:"otp" validate:"required"`
 }
 
-type Login struct {
+type LoginRequest struct {
 	Identifier string `json:"identifier" validate:"required"`
 	Password   string `json:"password" validate:"required,min=6"`
 }
 
-type ForgotPassword struct {
+type ForgotPasswordRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-type ResetPassword struct {
+type ResetPasswordRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 	Token    string `json:"token" validate:"required"`
@@ -45,7 +45,7 @@ type UserParam struct {
 	Username string
 }
 
-func (r Register) AsResponse() RegisterResponse {
+func (r RegisterRequest) AsResponse() RegisterResponse {
 	return RegisterResponse{
 		Name:     r.Name,
 		Username: r.Username,

@@ -7,7 +7,7 @@ import (
 )
 
 type UserMySQLItf interface {
-	Check(user *entity.User, param dto.Login) error
+	Check(user *entity.User, param dto.LoginRequest) error
 	Get(user *entity.User, param dto.UserParam) error
 	Create(user *entity.User) error
 	Verify(user *entity.User) error
@@ -22,7 +22,7 @@ func NewUserMySQL(db *gorm.DB) UserMySQLItf {
 	return &UserMySQL{db}
 }
 
-func (r UserMySQL) Check(user *entity.User, param dto.Login) error {
+func (r UserMySQL) Check(user *entity.User, param dto.LoginRequest) error {
 	return r.db.Debug().Where("email = ? OR username = ?", param.Identifier, param.Identifier).First(&user).Error
 }
 

@@ -26,7 +26,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
-	user := new(dto.UpdateUser)
+	user := new(dto.UpdateUserRequest)
 	if err := ctx.BodyParser(user); err != nil {
 		return res.BadRequest(ctx)
 	}

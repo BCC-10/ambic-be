@@ -15,12 +15,12 @@ import (
 )
 
 type AuthUsecaseItf interface {
-	Register(dto.Register) *res.Err
-	Login(login dto.Login) (string, *res.Err)
-	RequestOTP(requestOTP dto.RequestOTP) *res.Err
-	VerifyUser(verifyUser dto.VerifyOTP) *res.Err
-	ForgotPassword(resetPassword dto.ForgotPassword) *res.Err
-	ResetPassword(data dto.ResetPassword) *res.Err
+	Register(dto.RegisterRequest) *res.Err
+	Login(login dto.LoginRequest) (string, *res.Err)
+	RequestOTP(requestOTP dto.OTPRequest) *res.Err
+	VerifyUser(verifyUser dto.VerifyOTPRequest) *res.Err
+	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
+	ResetPassword(data dto.ResetPasswordRequest) *res.Err
 }
 
 type AuthUsecase struct {
@@ -43,7 +43,7 @@ func NewAuthUsecase(env *env.Env, userRepository repository.UserMySQLItf, jwt jw
 	}
 }
 
-func (u *AuthUsecase) Register(data dto.Register) *res.Err {
+func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
@@ -74,7 +74,7 @@ func (u *AuthUsecase) Register(data dto.Register) *res.Err {
 	return nil
 }
 
-func (u *AuthUsecase) Login(data dto.Login) (string, *res.Err) {
+func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	user := new(entity.User)
 
 	err := u.UserRepository.Check(user, data)
@@ -99,7 +99,7 @@ func (u *AuthUsecase) Login(data dto.Login) (string, *res.Err) {
 	return token, nil
 }
 
-func (u *AuthUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
+func (u *AuthUsecase) RequestOTP(data dto.OTPRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
@@ -124,7 +124,7 @@ func (u *AuthUsecase) RequestOTP(data dto.RequestOTP) *res.Err {
 	return nil
 }
 
-func (u *AuthUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
+func (u *AuthUsecase) VerifyUser(data dto.VerifyOTPRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
@@ -157,7 +157,7 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyOTP) *res.Err {
 	return nil
 }
 
-func (u *AuthUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
+func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 	user := new(entity.User)
 	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
 		return res.ErrNotFound(res.UserNotExists)
@@ -185,7 +185,7 @@ func (u *AuthUsecase) ForgotPassword(data dto.ForgotPassword) *res.Err {
 	return nil
 }
 
-func (u *AuthUsecase) ResetPassword(data dto.ResetPassword) *res.Err {
+func (u *AuthUsecase) ResetPassword(data dto.ResetPasswordRequest) *res.Err {
 	user := new(entity.User)
 	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
 		return res.ErrNotFound(res.UserNotExists)
