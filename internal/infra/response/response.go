@@ -13,30 +13,30 @@ type Res struct {
 
 // Auth Domain
 const (
-	UsernameExist   = "Username already exist"
-	EmailExist      = "Email already exist"
-	RegisterSuccess = "User register successfully"
-	UserNotExists   = "User not exists"
+	UsernameExist   = "Username already exists"
+	EmailExist      = "Email already exists"
+	RegisterSuccess = "User registered successfully"
+	UserNotExists   = "User does not exist"
 
-	OTPSent       = "OTP sent"
-	InvalidOTP    = "Invalid or expired OTP"
+	OTPSent       = "OTP has been sent"
+	InvalidOTP    = "OTP is invalid or has expired"
 	VerifySuccess = "User verified successfully"
 
 	IncorrectIdentifier = "Email or password is incorrect"
-	LoginSuccess        = "User login successfully"
+	LoginSuccess        = "User logged in successfully"
 
-	ForgotPasswordSuccess = "Reset password link sent"
-	MissingToken          = "Missing token"
-	ResetPasswordSuccess  = "Password reset successfully"
+	ForgotPasswordSuccess = "Password reset link has been sent"
+	MissingToken          = "Authentication token is missing"
+	ResetPasswordSuccess  = "Password has been reset successfully"
 
-	UpdateSuccess        = "User updated successfully"
-	IncorrectOldPassword = "Incorrect old password"
+	UpdateSuccess        = "User profile updated successfully"
+	IncorrectOldPassword = "Old password is incorrect"
 )
 
 // middleware
 const (
-	LimitExceeded   = "Too many requests"
+	LimitExceeded   = "Too many requests. Please try again later."
 	UserNotVerified = "User is not verified"
-	UserVerified    = "User already verified"
-	InvalidToken    = "Invalid or expired token"
+	UserVerified    = "User is already verified"
+	InvalidToken    = "Token is invalid or has expired"
 )
