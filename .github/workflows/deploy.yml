@@ -17,14 +17,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "103.196.155.124" >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS
         run: |
-          ssh ${{ secrets.VPS_HOST }} << 'EOF'
-            cd ${{ secrets.VPS_DIR }}
+          ssh 103.196.155.124 << 'EOF'
+            cd /var/www/ambic/cmd/api
             git pull origin main
             go mod tidy
-            go build -o ambic
+            go build -o /var/www/ambic/ambic
             sudo systemctl restart ambic
           EOF
