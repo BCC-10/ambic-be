@@ -16,7 +16,7 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 }
 
-type OTPRequest struct {
+type RequestOTPRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
@@ -28,6 +28,10 @@ type VerifyOTPRequest struct {
 type LoginRequest struct {
 	Identifier string `json:"identifier" validate:"required"`
 	Password   string `json:"password" validate:"required,min=6"`
+}
+
+type LoginResponse struct {
+	Identifier string `json:"identifier"`
 }
 
 type ForgotPasswordRequest struct {
@@ -53,10 +57,19 @@ type UserParam struct {
 	Username string
 }
 
+type Empty struct {
+}
+
 func (r RegisterRequest) AsResponse() RegisterResponse {
 	return RegisterResponse{
 		Name:     r.Name,
 		Username: r.Username,
 		Email:    r.Email,
+	}
+}
+
+func (r LoginRequest) AsResponse() LoginResponse {
+	return LoginResponse{
+		Identifier: r.Identifier,
 	}
 }

@@ -39,14 +39,14 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, user.AsResponse(), err)
 	}
 
 	if err := h.AuthUsecase.Register(*user); err != nil {
 		return res.Error(ctx, err)
 	}
 
-	if err := h.AuthUsecase.RequestOTP(dto.OTPRequest{Email: user.Email}); err != nil {
+	if err := h.AuthUsecase.RequestOTP(dto.RequestOTPRequest{Email: user.Email}); err != nil {
 		return res.Error(ctx, err)
 	}
 
@@ -54,13 +54,13 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) RequestOTP(ctx *fiber.Ctx) error {
-	requestOTP := new(dto.OTPRequest)
+	requestOTP := new(dto.RequestOTPRequest)
 	if err := ctx.BodyParser(requestOTP); err != nil {
 		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(requestOTP); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, dto.Empty{}, err)
 	}
 
 	if err := h.AuthUsecase.RequestOTP(*requestOTP); err != nil {
@@ -77,7 +77,7 @@ func (h AuthHandler) VerifyUser(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, dto.Empty{}, err)
 	}
 
 	if err := h.AuthUsecase.VerifyUser(*data); err != nil {
@@ -94,7 +94,7 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, user.AsResponse(), err)
 	}
 
 	token, err := h.AuthUsecase.Login(*user)
@@ -114,7 +114,7 @@ func (h AuthHandler) ForgotPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, dto.Empty{}, err)
 	}
 
 	if err := h.AuthUsecase.ForgotPassword(*data); err != nil {
@@ -131,7 +131,7 @@ func (h AuthHandler) ResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, err)
+		return res.ValidationError(ctx, dto.Empty{}, err)
 	}
 
 	if err := h.AuthUsecase.ResetPassword(*data); err != nil {

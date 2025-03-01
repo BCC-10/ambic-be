@@ -74,13 +74,11 @@ func BadRequest(ctx *fiber.Ctx, message ...string) error {
 	})
 }
 
-func ValidationError(ctx *fiber.Ctx, err error) error {
+func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 	_errors := make(map[string]string)
-	old := make(map[string]string)
 	for _, err := range err.(validator.ValidationErrors) {
 		field := strings.ToLower(err.Field())
 		_errors[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
-		old[field] = err.Value().(string)
 	}
 
 	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
@@ -88,7 +86,7 @@ func ValidationError(ctx *fiber.Ctx, err error) error {
 		Message:    fiber.ErrBadRequest.Message,
 		Payload: map[string]interface{}{
 			"errors": _errors,
-			"old":    old,
+			"old":    val,
 		},
 	})
 }
