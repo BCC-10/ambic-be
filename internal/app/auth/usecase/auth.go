@@ -111,6 +111,10 @@ func (u *AuthUsecase) RequestVerification(data dto.RequestTokenRequest) *res.Err
 		return res.ErrNotFound(res.UserNotExists)
 	}
 
+	if user.IsVerified {
+		return res.ErrForbidden(res.UserVerified)
+	}
+
 	token, err := u.code.GenerateToken()
 	if err != nil {
 		return res.ErrInternalServer()
