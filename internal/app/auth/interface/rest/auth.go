@@ -24,7 +24,7 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup = routerGroup.Group("/auth")
 	routerGroup.Post("/register", AuthHandler.Register)
 	routerGroup.Post("/login", AuthHandler.Login)
-	routerGroup.Post("/request-otp", limiter.Set(3, "15m"), AuthHandler.RequestOTP)
+	routerGroup.Post("/request-verification", limiter.Set(3, "15m"), AuthHandler.RequestVerification)
 	routerGroup.Post("/verify", AuthHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
@@ -46,38 +46,38 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	if err := h.AuthUsecase.RequestOTP(dto.RequestOTPRequest{Email: user.Email}); err != nil {
+	if err := h.AuthUsecase.RequestVerification(dto.RequestTokenRequest{Email: user.Email}); err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.RegisterSuccess, user.AsResponse())
 }
 
-func (h AuthHandler) RequestOTP(ctx *fiber.Ctx) error {
-	requestOTP := new(dto.RequestOTPRequest)
-	if err := ctx.BodyParser(requestOTP); err != nil {
+func (h AuthHandler) RequestVerification(ctx *fiber.Ctx) error {
+	requestToken := new(dto.RequestTokenRequest)
+	if err := ctx.BodyParser(requestToken); err != nil {
 		return res.BadRequest(ctx)
 	}
 
-	if err := h.Validator.Struct(requestOTP); err != nil {
-		return res.ValidationError(ctx, dto.Empty{}, err)
+	if err := h.Validator.Struct(requestToken); err != nil {
+		return res.ValidationError(ctx, nil, err)
 	}
 
-	if err := h.AuthUsecase.RequestOTP(*requestOTP); err != nil {
+	if err := h.AuthUsecase.RequestVerification(*requestToken); err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.OTPSent, nil)
+	return res.SuccessResponse(ctx, res.VerificationLinkSent, nil)
 }
 
 func (h AuthHandler) VerifyUser(ctx *fiber.Ctx) error {
-	data := new(dto.VerifyOTPRequest)
+	data := new(dto.VerifyUserRequest)
 	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, dto.Empty{}, err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	if err := h.AuthUsecase.VerifyUser(*data); err != nil {
@@ -114,7 +114,7 @@ func (h AuthHandler) ForgotPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, dto.Empty{}, err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	if err := h.AuthUsecase.ForgotPassword(*data); err != nil {
@@ -131,7 +131,7 @@ func (h AuthHandler) ResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, dto.Empty{}, err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	if err := h.AuthUsecase.ResetPassword(*data); err != nil {

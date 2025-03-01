@@ -16,13 +16,13 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 }
 
-type RequestOTPRequest struct {
+type RequestTokenRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-type VerifyOTPRequest struct {
+type VerifyUserRequest struct {
 	Email string `json:"email" validate:"required,email"`
-	OTP   string `json:"otp" validate:"required"`
+	Token string `json:"token" validate:"required"`
 }
 
 type LoginRequest struct {

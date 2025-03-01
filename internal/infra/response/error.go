@@ -81,13 +81,18 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 		_errors[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
 	}
 
+	payload := map[string]interface{}{
+		"errors": _errors,
+	}
+
+	if val != nil {
+		payload["old"] = val
+	}
+
 	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
 		StatusCode: fiber.ErrBadRequest.Code,
 		Message:    fiber.ErrBadRequest.Message,
-		Payload: map[string]interface{}{
-			"errors": _errors,
-			"old":    val,
-		},
+		Payload:    payload,
 	})
 }
 

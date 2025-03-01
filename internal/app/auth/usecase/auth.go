@@ -18,8 +18,8 @@ import (
 type AuthUsecaseItf interface {
 	Register(dto.RegisterRequest) *res.Err
 	Login(login dto.LoginRequest) (string, *res.Err)
-	RequestOTP(requestOTP dto.RequestOTPRequest) *res.Err
-	VerifyUser(verifyUser dto.VerifyOTPRequest) *res.Err
+	RequestVerification(requestToken dto.RequestTokenRequest) *res.Err
+	VerifyUser(verifyUser dto.VerifyUserRequest) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
 	ResetPassword(data dto.ResetPasswordRequest) *res.Err
 	GoogleLogin() (string, *res.Err)
@@ -104,24 +104,24 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	return token, nil
 }
 
-func (u *AuthUsecase) RequestOTP(data dto.RequestOTPRequest) *res.Err {
+func (u *AuthUsecase) RequestVerification(data dto.RequestTokenRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
 		return res.ErrNotFound(res.UserNotExists)
 	}
 
-	otp, err := u.code.GenerateOTP()
+	token, err := u.code.GenerateToken()
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Set(data.Email, []byte(otp), u.env.OTPExpiresTime)
+	err = u.redis.Set(data.Email, []byte(token), u.env.TokenExpiresTime)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.email.SendOTP(data.Email, otp)
+	err = u.email.SendEmailVerification(data.Email, token)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
@@ -129,7 +129,7 @@ func (u *AuthUsecase) RequestOTP(data dto.RequestOTPRequest) *res.Err {
 	return nil
 }
 
-func (u *AuthUsecase) VerifyUser(data dto.VerifyOTPRequest) *res.Err {
+func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
@@ -140,13 +140,13 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyOTPRequest) *res.Err {
 		return res.ErrForbidden(res.UserVerified)
 	}
 
-	savedOTP, err := u.redis.Get(data.Email)
+	savedToken, err := u.redis.Get(data.Email)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	if string(savedOTP) != data.OTP {
-		return res.ErrBadRequest(res.InvalidOTP)
+	if string(savedToken) != data.Token {
+		return res.ErrBadRequest(res.InvalidToken)
 	}
 
 	err = u.UserRepository.Verify(user)
