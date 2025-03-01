@@ -9,12 +9,17 @@ import (
 func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	authToken := ctx.GetReqHeaders()["Authorization"]
 
-	if len(authToken) < 2 {
+	if len(authToken) < 1 {
 		return res.BadRequest(ctx, res.MissingToken)
 	}
 
 	bearerToken := authToken[0]
+
 	token := strings.Split(bearerToken, " ")
+
+	if len(token) < 2 {
+		return res.BadRequest(ctx, res.InvalidTokenFormat)
+	}
 
 	userId, isVerified, err := m.jwt.ValidateToken(token[1])
 	if err != nil {
