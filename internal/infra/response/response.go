@@ -1,8 +1,9 @@
 package response
 
 type Err struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Payload interface{} `json:"payload"`
 }
 
 type Res struct {

@@ -2,7 +2,10 @@ package response
 
 import (
 	"errors"
+	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"strings"
 )
 
 func (e *Err) Error() string {
@@ -71,6 +74,25 @@ func BadRequest(ctx *fiber.Ctx, message ...string) error {
 	})
 }
 
+func ValidationError(ctx *fiber.Ctx, err error) error {
+	_errors := make(map[string]string)
+	old := make(map[string]string)
+	for _, err := range err.(validator.ValidationErrors) {
+		field := strings.ToLower(err.Field())
+		_errors[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
+		old[field] = err.Value().(string)
+	}
+
+	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
+		StatusCode: fiber.ErrBadRequest.Code,
+		Message:    fiber.ErrBadRequest.Message,
+		Payload: map[string]interface{}{
+			"errors": _errors,
+			"old":    old,
+		},
+	})
+}
+
 func InternalSeverError(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.ErrInternalServerError.Code).JSON(Res{
 		StatusCode: fiber.ErrInternalServerError.Code,
@@ -126,6 +148,7 @@ func Error(ctx *fiber.Ctx, err *Err) error {
 		return ctx.Status(customErr.Code).JSON(Res{
 			StatusCode: customErr.Code,
 			Message:    customErr.Message,
+			Payload:    customErr.Payload,
 		})
 	}
 

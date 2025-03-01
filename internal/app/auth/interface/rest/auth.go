@@ -39,7 +39,7 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.AuthUsecase.Register(*user); err != nil {
@@ -60,7 +60,7 @@ func (h AuthHandler) RequestOTP(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(requestOTP); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.AuthUsecase.RequestOTP(*requestOTP); err != nil {
@@ -77,7 +77,7 @@ func (h AuthHandler) VerifyUser(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.AuthUsecase.VerifyUser(*data); err != nil {
@@ -94,7 +94,7 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	token, err := h.AuthUsecase.Login(*user)
@@ -114,7 +114,7 @@ func (h AuthHandler) ForgotPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.AuthUsecase.ForgotPassword(*data); err != nil {
@@ -131,7 +131,7 @@ func (h AuthHandler) ResetPassword(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.AuthUsecase.ResetPassword(*data); err != nil {
