@@ -18,12 +18,12 @@ import (
 type AuthUsecaseItf interface {
 	Register(dto.RegisterRequest) *res.Err
 	Login(login dto.LoginRequest) (string, *res.Err)
-	RequestOTP(requestOTP dto.RequestOTPRequest) *res.Err
-	VerifyUser(verifyUser dto.VerifyOTPRequest) *res.Err
+	RequestVerification(requestToken dto.RequestTokenRequest) *res.Err
+	VerifyUser(verifyUser dto.VerifyUserRequest) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
 	ResetPassword(data dto.ResetPasswordRequest) *res.Err
 	GoogleLogin() (string, *res.Err)
-	GoogleCallback(code string, state string) (string, *res.Err)
+	GoogleCallback(data dto.GoogleCallbackRequest) (string, *res.Err)
 }
 
 type AuthUsecase struct {
@@ -65,11 +65,11 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 
 	var dbUser entity.User
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
-		return res.ErrBadRequest(res.EmailExist)
+		return res.ErrValidationError(data.AsResponse(), map[string]string{"email": res.EmailExist})
 	}
 
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
-		return res.ErrBadRequest(res.UsernameExist)
+		return res.ErrValidationError(data.AsResponse(), map[string]string{"username": res.UsernameExist})
 	}
 
 	if err := u.UserRepository.Create(&user); err != nil {
@@ -104,32 +104,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	return token, nil
 }
 
-func (u *AuthUsecase) RequestOTP(data dto.RequestOTPRequest) *res.Err {
-	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
-	if err != nil {
-		return res.ErrNotFound(res.UserNotExists)
-	}
-
-	otp, err := u.code.GenerateOTP()
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	err = u.redis.Set(data.Email, []byte(otp), u.env.OTPExpiresTime)
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	err = u.email.SendOTP(data.Email, otp)
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	return nil
-}
-
-func (u *AuthUsecase) VerifyUser(data dto.VerifyOTPRequest) *res.Err {
+func (u *AuthUsecase) RequestVerification(data dto.RequestTokenRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
@@ -140,13 +115,42 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyOTPRequest) *res.Err {
 		return res.ErrForbidden(res.UserVerified)
 	}
 
-	savedOTP, err := u.redis.Get(data.Email)
+	token, err := u.code.GenerateToken()
 	if err != nil {
 		return res.ErrInternalServer()
 	}
 
-	if string(savedOTP) != data.OTP {
-		return res.ErrBadRequest(res.InvalidOTP)
+	err = u.redis.Set(data.Email, []byte(token), u.env.TokenExpiresTime)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	err = u.email.SendEmailVerification(data.Email, token)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
+	user := new(entity.User)
+	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	if err != nil {
+		return res.ErrNotFound(res.UserNotExists)
+	}
+
+	if user.IsVerified {
+		return res.ErrForbidden(res.UserVerified)
+	}
+
+	savedToken, err := u.redis.Get(data.Email)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	if string(savedToken) != data.Token {
+		return res.ErrBadRequest(res.InvalidToken)
 	}
 
 	err = u.UserRepository.Verify(user)
@@ -247,19 +251,23 @@ func (u *AuthUsecase) GoogleLogin() (string, *res.Err) {
 	return url, nil
 }
 
-func (u *AuthUsecase) GoogleCallback(code string, state string) (string, *res.Err) {
-	savedState, err := u.redis.Get(state)
+func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *res.Err) {
+	if data.Error != "" {
+		return "", res.ErrForbidden(data.Error)
+	}
+
+	savedState, err := u.redis.Get(data.State)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
 
-	if string(savedState) != state {
+	if string(savedState) != data.State {
 		return "", res.ErrBadRequest(res.InvalidState)
 	}
 
-	token, err := u.OAuth.ExchangeToken(code)
+	token, err := u.OAuth.ExchangeToken(data.Code)
 	if err != nil {
-		return "", res.ErrInternalServer()
+		return "", res.ErrBadRequest(err.Error())
 	}
 
 	profile, err := u.OAuth.GetUserProfile(token)
@@ -291,7 +299,7 @@ func (u *AuthUsecase) GoogleCallback(code string, state string) (string, *res.Er
 		return "", res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(state)
+	err = u.redis.Delete(data.State)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}

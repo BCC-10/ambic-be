@@ -19,9 +19,8 @@ const (
 	RegisterSuccess = "User registered successfully"
 	UserNotExists   = "User does not exist"
 
-	OTPSent       = "OTP has been sent"
-	InvalidOTP    = "OTP is invalid or has expired"
-	VerifySuccess = "User verified successfully"
+	VerificationLinkSent = "Verification link has been sent"
+	VerifySuccess        = "User verified successfully"
 
 	IncorrectIdentifier = "Email or password is incorrect"
 	LoginSuccess        = "User logged in successfully"
@@ -43,4 +42,9 @@ const (
 	UserNotVerified = "User is not verified"
 	UserVerified    = "User is already verified"
 	InvalidToken    = "Token is invalid or has expired"
+)
+
+// User Domain
+const (
+	InvalidDateFormat = "Invalid date format"
 )

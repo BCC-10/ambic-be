@@ -16,13 +16,13 @@ type RegisterResponse struct {
 	Email    string `json:"email"`
 }
 
-type RequestOTPRequest struct {
+type RequestTokenRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 
-type VerifyOTPRequest struct {
+type VerifyUserRequest struct {
 	Email string `json:"email" validate:"required,email"`
-	OTP   string `json:"otp" validate:"required"`
+	Token string `json:"token" validate:"required"`
 }
 
 type LoginRequest struct {
@@ -42,6 +42,12 @@ type ResetPasswordRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 	Token    string `json:"token" validate:"required"`
+}
+
+type GoogleCallbackRequest struct {
+	Code  string `json:"code" validate:"required"`
+	State string `json:"state" validate:"required"`
+	Error string `json:"error"`
 }
 
 type GoogleUserProfileResponse struct {

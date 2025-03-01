@@ -34,6 +34,18 @@ func ErrBadRequest(message ...string) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: msg}
 }
 
+func ErrValidationError(val interface{}, err interface{}) *Err {
+	payload := map[string]interface{}{
+		"errors": err,
+	}
+
+	if val != nil {
+		payload["old"] = val
+	}
+
+	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
+}
+
 func ErrInternalServer() *Err {
 	return &Err{Code: fiber.ErrInternalServerError.Code, Message: fiber.ErrInternalServerError.Message}
 }
@@ -81,13 +93,18 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 		_errors[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
 	}
 
+	payload := map[string]interface{}{
+		"errors": _errors,
+	}
+
+	if val != nil {
+		payload["old"] = val
+	}
+
 	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
 		StatusCode: fiber.ErrBadRequest.Code,
 		Message:    fiber.ErrBadRequest.Message,
-		Payload: map[string]interface{}{
-			"errors": _errors,
-			"old":    val,
-		},
+		Payload:    payload,
 	})
 }
 

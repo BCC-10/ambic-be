@@ -8,7 +8,7 @@ import (
 )
 
 type EmailIf interface {
-	SendOTP(to string, code string) error
+	SendEmailVerification(to string, code string) error
 	SendResetPasswordLink(to string, token string) error
 }
 
@@ -45,18 +45,18 @@ func (e *Email) sendEmail(dialer *gomail.Dialer, message *gomail.Message) error 
 	return dialer.DialAndSend(message)
 }
 
-func (e *Email) SendOTP(to string, otp string) error {
+func (e *Email) SendEmailVerification(to string, token string) error {
 	message := gomail.NewMessage()
-	body, err := file.ReadHTML(e.template, "otp")
+	body, err := file.ReadHTML(e.template, "verification")
 	if err != nil {
 		return err
 	}
 
 	message.SetHeader("From", e.user)
 	message.SetHeader("To", to)
-	message.SetHeader("Subject", "Email Verification Code")
+	message.SetHeader("Subject", "Email Verification")
 
-	message.SetBody("text/html", fmt.Sprintf(body, otp))
+	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, token))
 
 	return e.sendEmail(e.connect(), message)
 }

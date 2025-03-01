@@ -22,7 +22,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	}
 
 	routerGroup = routerGroup.Group("/users")
-	routerGroup.Patch("/:id/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
+	routerGroup.Patch("/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
@@ -32,7 +32,7 @@ func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.ValidationError(ctx, user.ToResponse(), err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -40,5 +40,7 @@ func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.UpdateSuccess, nil)
+	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
+		"updated_data": user.ToResponse(),
+	})
 }
