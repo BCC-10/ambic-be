@@ -43,3 +43,8 @@ const (
 	UserVerified    = "User is already verified"
 	InvalidToken    = "Token is invalid or has expired"
 )
+
+// User Domain
+const (
+	InvalidDateFormat = "Invalid date format"
+)
