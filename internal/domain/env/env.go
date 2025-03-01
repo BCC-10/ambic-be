@@ -37,6 +37,9 @@ type Env struct {
 	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
 	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
 	GoogleRedirectURL  string `env:"GOOGLE_REDIRECT_URL"`
+
+	SupabaseURL    string `env:"SUPABASE_URL"`
+	SupabaseSecret string `env:"SUPABASE_SECRET"`
 }
 
 func New() (*Env, error) {

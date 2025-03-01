@@ -32,7 +32,6 @@ const (
 	MissingToken          = "Authentication token is missing"
 	ResetPasswordSuccess  = "Password has been reset successfully"
 
-	UpdateSuccess        = "User profile updated successfully"
 	IncorrectOldPassword = "Old password is incorrect"
 )
 
@@ -46,5 +45,7 @@ const (
 
 // User Domain
 const (
-	InvalidDateFormat = "Invalid date format"
+	InvalidDateFormat         = "Invalid date format"
+	UpdateProfilePhotoSuccess = "Profile photo updated successfully"
+	UpdateSuccess             = "User profile updated successfully"
 )

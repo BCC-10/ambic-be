@@ -15,6 +15,7 @@ import (
 	"ambic/internal/infra/mysql"
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
+	"ambic/internal/infra/supabase"
 	"ambic/internal/middleware"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -55,6 +56,8 @@ func Start() error {
 
 	o := oauth.NewOAuth(config)
 
+	s := supabase.New(config)
+
 	app := fiber.New()
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
@@ -62,7 +65,7 @@ func Start() error {
 	l := limiter.NewLimiter(r)
 
 	userRepository := UserRepo.NewUserMySQL(db)
-	userUsecase := UserUsecase.NewUserUsecase(config, userRepository)
+	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s)
 	UserHandler.NewUserHandler(v1, userUsecase, v, m)
 
 	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
