@@ -29,7 +29,7 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
 	routerGroup.Post("/google", AuthHandler.GoogleLogin)
-	routerGroup.Get("/google/callback", AuthHandler.GoogleCallback)
+	routerGroup.Post("/google/callback", AuthHandler.GoogleCallback)
 }
 
 func (h AuthHandler) Register(ctx *fiber.Ctx) error {
@@ -151,19 +151,16 @@ func (h AuthHandler) GoogleLogin(ctx *fiber.Ctx) error {
 }
 
 func (h AuthHandler) GoogleCallback(ctx *fiber.Ctx) error {
-	googleErr := ctx.Query("error")
-	if googleErr != "" {
-		return res.Forbidden(ctx, res.OAuthAccessDenied)
-	}
-
-	code := ctx.Query("code")
-	state := ctx.Query("state")
-
-	if code == "" || state == "" {
+	data := new(dto.GoogleCallbackRequest)
+	if err := ctx.BodyParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
 
-	token, err := h.AuthUsecase.GoogleCallback(code, state)
+	if err := h.Validator.Struct(data); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	token, err := h.AuthUsecase.GoogleCallback(*data)
 	if err != nil {
 		return res.Error(ctx, err)
 	}

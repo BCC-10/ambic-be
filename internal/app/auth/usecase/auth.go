@@ -23,7 +23,7 @@ type AuthUsecaseItf interface {
 	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
 	ResetPassword(data dto.ResetPasswordRequest) *res.Err
 	GoogleLogin() (string, *res.Err)
-	GoogleCallback(code string, state string) (string, *res.Err)
+	GoogleCallback(data dto.GoogleCallbackRequest) (string, *res.Err)
 }
 
 type AuthUsecase struct {
@@ -112,9 +112,7 @@ func (u *AuthUsecase) RequestVerification(data dto.RequestTokenRequest) *res.Err
 	}
 
 	if user.IsVerified {
-		return res.ErrValidationError(nil, map[string]string{
-			"user": res.UserVerified,
-		})
+		return res.ErrForbidden(res.UserVerified)
 	}
 
 	token, err := u.code.GenerateToken()
@@ -253,19 +251,23 @@ func (u *AuthUsecase) GoogleLogin() (string, *res.Err) {
 	return url, nil
 }
 
-func (u *AuthUsecase) GoogleCallback(code string, state string) (string, *res.Err) {
-	savedState, err := u.redis.Get(state)
+func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *res.Err) {
+	if data.Error != "" {
+		return "", res.ErrForbidden(data.Error)
+	}
+
+	savedState, err := u.redis.Get(data.State)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
 
-	if string(savedState) != state {
+	if string(savedState) != data.State {
 		return "", res.ErrBadRequest(res.InvalidState)
 	}
 
-	token, err := u.OAuth.ExchangeToken(code)
+	token, err := u.OAuth.ExchangeToken(data.Code)
 	if err != nil {
-		return "", res.ErrInternalServer()
+		return "", res.ErrBadRequest(err.Error())
 	}
 
 	profile, err := u.OAuth.GetUserProfile(token)
@@ -297,7 +299,7 @@ func (u *AuthUsecase) GoogleCallback(code string, state string) (string, *res.Er
 		return "", res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(state)
+	err = u.redis.Delete(data.State)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}

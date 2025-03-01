@@ -44,6 +44,12 @@ type ResetPasswordRequest struct {
 	Token    string `json:"token" validate:"required"`
 }
 
+type GoogleCallbackRequest struct {
+	Code  string `json:"code" validate:"required"`
+	State string `json:"state" validate:"required"`
+	Error string `json:"error"`
+}
+
 type GoogleUserProfileResponse struct {
 	Email      string
 	Username   string
