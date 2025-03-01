@@ -65,11 +65,11 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 
 	var dbUser entity.User
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
-		return res.ErrBadRequest(res.EmailExist)
+		return res.ErrValidationError(data.AsResponse(), map[string]string{"email": res.EmailExist})
 	}
 
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
-		return res.ErrBadRequest(res.UsernameExist)
+		return res.ErrValidationError(data.AsResponse(), map[string]string{"username": res.UsernameExist})
 	}
 
 	if err := u.UserRepository.Create(&user); err != nil {

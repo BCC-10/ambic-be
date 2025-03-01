@@ -34,6 +34,18 @@ func ErrBadRequest(message ...string) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: msg}
 }
 
+func ErrValidationError(val interface{}, err interface{}) *Err {
+	payload := map[string]interface{}{
+		"errors": err,
+	}
+
+	if val != nil {
+		payload["old"] = val
+	}
+
+	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
+}
+
 func ErrInternalServer() *Err {
 	return &Err{Code: fiber.ErrInternalServerError.Code, Message: fiber.ErrInternalServerError.Message}
 }
