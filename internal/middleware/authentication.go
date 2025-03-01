@@ -9,7 +9,7 @@ import (
 func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	authToken := ctx.GetReqHeaders()["Authorization"]
 
-	if len(authToken) < 1 {
+	if len(authToken) < 2 {
 		return res.BadRequest(ctx, res.MissingToken)
 	}
 
