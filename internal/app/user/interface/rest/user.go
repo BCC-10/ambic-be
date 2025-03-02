@@ -24,30 +24,9 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Patch("/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
-	routerGroup.Post("/upload", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateProfilePhoto)
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
-	user := new(dto.UpdateUserRequest)
-	if err := ctx.BodyParser(user); err != nil {
-		return res.BadRequest(ctx)
-	}
-
-	if err := h.Validator.Struct(user); err != nil {
-		return res.ValidationError(ctx, user.ToResponse(), err)
-	}
-
-	userId := ctx.Locals("userId").(uuid.UUID)
-	if err := h.UserUsecase.UpdateUser(userId, *user); err != nil {
-		return res.Error(ctx, err)
-	}
-
-	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
-		"updated_data": user.ToResponse(),
-	})
-}
-
-func (h UserHandler) UpdateProfilePhoto(ctx *fiber.Ctx) error {
 	fmt.Println(ctx.Get("Content-Type"))
 	data := dto.UpdateUserRequest{
 		Name:     ctx.FormValue("name"),

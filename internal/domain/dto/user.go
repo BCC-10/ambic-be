@@ -19,14 +19,21 @@ type UpdateUserResponse struct {
 	Address  string `json:"address"`
 	BornDate string `json:"born_date"`
 	Gender   string `json:"gender"`
+	PhotoURL string `json:"photo"`
 }
 
-func (r *UpdateUserRequest) ToResponse() UpdateUserResponse {
-	return UpdateUserResponse{
+func (r *UpdateUserRequest) ToResponse(val ...string) UpdateUserResponse {
+	res := UpdateUserResponse{
 		Name:     r.Name,
 		Phone:    r.Phone,
 		Gender:   r.Gender,
 		Address:  r.Address,
 		BornDate: r.BornDate,
 	}
+
+	if len(val) == 1 {
+		res.PhotoURL = val[0]
+	}
+
+	return res
 }

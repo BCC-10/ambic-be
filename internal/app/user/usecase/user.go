@@ -9,7 +9,6 @@ import (
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"mime/multipart"
 	"path/filepath"
 	"strings"
 	"time"
@@ -17,7 +16,6 @@ import (
 
 type UserUsecaseItf interface {
 	UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err
-	UpdateProfilePhoto(id uuid.UUID, file *multipart.FileHeader) *res.Err
 }
 
 type UserUsecase struct {
@@ -110,40 +108,6 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	err := u.UserRepository.Update(user)
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	return nil
-}
-
-func (u *UserUsecase) UpdateProfilePhoto(id uuid.UUID, file *multipart.FileHeader) *res.Err {
-	userDB := new(entity.User)
-	if err := u.UserRepository.Get(userDB, dto.UserParam{Id: id}); err != nil {
-		return res.ErrNotFound(res.UserNotExists)
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	defer src.Close()
-
-	path := "profiles/" + uuid.NewString() + filepath.Ext(file.Filename)
-	contentType := file.Header.Get("Content-Type")
-
-	publicURL, err := u.Supabase.UploadFile("uploads", path, contentType, src)
-	if err != nil {
-		return res.ErrInternalServer()
-	}
-
-	user := &entity.User{
-		ID:       id,
-		PhotoURL: publicURL,
-	}
-
-	err = u.UserRepository.Update(user)
 	if err != nil {
 		return res.ErrInternalServer()
 	}
