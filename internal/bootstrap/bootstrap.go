@@ -3,6 +3,9 @@ package bootstrap
 import (
 	AuthHandler "ambic/internal/app/auth/interface/rest"
 	AuthUsecase "ambic/internal/app/auth/usecase"
+	PartnerHandler "ambic/internal/app/partner/interface/rest"
+	PartnerRepo "ambic/internal/app/partner/repository"
+	PartnerUsecase "ambic/internal/app/partner/usecase"
 	UserHandler "ambic/internal/app/user/interface/rest"
 	UserRepo "ambic/internal/app/user/repository"
 	UserUsecase "ambic/internal/app/user/usecase"
@@ -70,6 +73,10 @@ func Start() error {
 
 	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, m, l)
+
+	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository)
+	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }

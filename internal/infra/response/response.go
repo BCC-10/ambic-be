@@ -25,7 +25,6 @@ const (
 	IncorrectIdentifier = "Email or password is incorrect"
 	LoginSuccess        = "User logged in successfully"
 	InvalidState        = "State is invalid"
-	OAuthAccessDenied   = "Access denied"
 	OAuthLoginSuccess   = "OAuth login URL generated successfully"
 
 	ForgotPasswordSuccess = "Password reset link has been sent"
@@ -46,7 +45,11 @@ const (
 
 // User Domain
 const (
-	InvalidDateFormat         = "Invalid date format"
-	UpdateProfilePhotoSuccess = "Profile photo updated successfully"
-	UpdateSuccess             = "User profile updated successfully"
+	InvalidDateFormat = "Date format is invalid"
+	UpdateSuccess     = "User profile updated successfully"
+)
+
+// Partner Domain
+const (
+	PartnerRegisterSuccess = "Partner registered successfully"
 )
