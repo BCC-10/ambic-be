@@ -46,8 +46,15 @@ func ErrValidationError(val interface{}, err interface{}) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
-func ErrInternalServer() *Err {
-	return &Err{Code: fiber.ErrInternalServerError.Code, Message: fiber.ErrInternalServerError.Message}
+func ErrInternalServer(message ...string) *Err {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrInternalServerError.Message
+	}
+
+	return &Err{Code: fiber.ErrInternalServerError.Code, Message: msg}
 }
 
 func ErrUnauthorized(message ...string) *Err {

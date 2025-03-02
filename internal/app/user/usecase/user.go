@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"mime/multipart"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -43,6 +44,8 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	if data.Gender != "" {
 		g := entity.Gender(data.Gender)
 		gender = &g
+	} else {
+		gender = nil
 	}
 
 	user := &entity.User{
@@ -73,6 +76,37 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 		}
 
 		user.Password = string(hashedPassword)
+	}
+
+	if data.Photo != nil {
+		src, err := data.Photo.Open()
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		defer src.Close()
+
+		bucket := "uploads"
+		path := "profiles/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
+		contentType := data.Photo.Header.Get("Content-Type")
+
+		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		user.PhotoURL = publicURL
+
+		if userDB.PhotoURL != "" {
+			oldPhotoURL := userDB.PhotoURL
+			index := strings.Index(oldPhotoURL, bucket)
+			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
+
+			err = u.Supabase.DeleteFile("uploads", oldPhotoPath)
+			if err != nil {
+				return res.ErrBadRequest(err.Error())
+			}
+		}
 	}
 
 	err := u.UserRepository.Update(user)

@@ -35,7 +35,7 @@ func (r UserMySQL) Create(user *entity.User) error {
 }
 
 func (r UserMySQL) Update(user *entity.User) error {
-	return r.db.Debug().Model(&user).Updates(user).Error
+	return r.db.Debug().Updates(user).Error
 }
 
 func (r UserMySQL) Verify(user *entity.User) error {

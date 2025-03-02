@@ -37,10 +37,11 @@ const (
 
 // middleware
 const (
-	LimitExceeded   = "Too many requests. Please try again later."
-	UserNotVerified = "User is not verified"
-	UserVerified    = "User is already verified"
-	InvalidToken    = "Token is invalid or has expired"
+	LimitExceeded      = "Too many requests. Please try again later."
+	UserNotVerified    = "User is not verified"
+	UserVerified       = "User is already verified"
+	InvalidToken       = "Token is invalid or has expired"
+	InvalidTokenFormat = "Invalid token format"
 )
 
 // User Domain
