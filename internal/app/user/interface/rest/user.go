@@ -15,14 +15,14 @@ type UserHandler struct {
 	UserUsecase usecase.UserUsecaseItf
 }
 
-func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf) {
+func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
 	}
 
 	routerGroup = routerGroup.Group("/users")
-	routerGroup.Patch("/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
+	routerGroup.Patch("/update", m.Authentication, UserHandler.UpdateUser)
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
