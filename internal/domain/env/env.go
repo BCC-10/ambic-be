@@ -38,6 +38,7 @@ type Env struct {
 	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
 	GoogleRedirectURL  string `env:"GOOGLE_REDIRECT_URL"`
 
+	SupabaseBucket string `env:"SUPABASE_BUCKET"`
 	SupabaseURL    string `env:"SUPABASE_URL"`
 	SupabaseSecret string `env:"SUPABASE_SECRET"`
 }

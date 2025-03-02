@@ -84,7 +84,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 
 		defer src.Close()
 
-		bucket := "uploads"
+		bucket := u.env.SupabaseBucket
 		path := "profiles/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
 		contentType := data.Photo.Header.Get("Content-Type")
 
@@ -100,7 +100,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 			index := strings.Index(oldPhotoURL, bucket)
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
-			err = u.Supabase.DeleteFile("uploads", oldPhotoPath)
+			err = u.Supabase.DeleteFile(bucket, oldPhotoPath)
 			if err != nil {
 				return res.ErrBadRequest(err.Error())
 			}
