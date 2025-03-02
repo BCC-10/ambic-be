@@ -5,7 +5,6 @@ import (
 	"ambic/internal/domain/dto"
 	res "ambic/internal/infra/response"
 	"ambic/internal/middleware"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -27,28 +26,35 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
-	fmt.Println(ctx.Get("Content-Type"))
-	data := dto.UpdateUserRequest{
-		Name:     ctx.FormValue("name"),
-		Phone:    ctx.FormValue("phone"),
-		Address:  ctx.FormValue("address"),
-		BornDate: ctx.FormValue("born_date"),
-		Gender:   ctx.FormValue("gender"),
+	data := new(dto.UpdateUserRequest)
+	if ctx.Get("Content-Type") == "application/json" {
+		if err := ctx.BodyParser(data); err != nil {
+			return res.BadRequest(ctx)
+		}
+	} else {
+		data = &dto.UpdateUserRequest{
+			Name:     ctx.FormValue("name"),
+			Phone:    ctx.FormValue("phone"),
+			Address:  ctx.FormValue("address"),
+			BornDate: ctx.FormValue("born_date"),
+			Gender:   ctx.FormValue("gender"),
+		}
 	}
 
 	err := h.Validator.Struct(data)
 	if err != nil {
-		return err
+		return res.ErrValidationError(ctx, err)
 	}
 
 	file, err := ctx.FormFile("photo")
 	if err == nil {
-		userId := ctx.Locals("userId").(uuid.UUID)
 		data.Photo = file
-		_err := h.UserUsecase.UpdateUser(userId, data)
-		if _err != nil {
-			return res.Error(ctx, _err)
-		}
+	}
+
+	userId := ctx.Locals("userId").(uuid.UUID)
+	_err := h.UserUsecase.UpdateUser(userId, *data)
+	if _err != nil {
+		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
