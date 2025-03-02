@@ -5,6 +5,7 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/maps"
 	res "ambic/internal/infra/response"
 	"github.com/google/uuid"
 )
@@ -16,17 +17,20 @@ type PartnerUsecaseItf interface {
 type PartnerUsecase struct {
 	env               *env.Env
 	PartnerRepository repository.PartnerMySQLItf
+	Maps              maps.MapsIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, maps maps.MapsIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:               env,
 		PartnerRepository: partnerRepository,
+		Maps:              maps,
 	}
 }
 
 func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err {
 	partner := entity.Partner{
+		ID:        uuid.New(),
 		UserID:    id,
 		Name:      data.Name,
 		Type:      data.Type,
