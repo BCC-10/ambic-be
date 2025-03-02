@@ -6,7 +6,8 @@ import (
 )
 
 type Partner struct {
-	ID         uint      `gorm:"primary_key"`
+	ID         uuid.UUID `gorm:"type:varchar(36);primary_key"`
+	Products   []Product
 	UserID     uuid.UUID `gorm:"type:varchar(36);not null"`
 	User       User      `gorm:"foreignKey:UserID;not null"`
 	Name       string    `gorm:"type:varchar(255);not null"`
