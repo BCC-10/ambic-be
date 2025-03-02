@@ -15,6 +15,7 @@ import (
 	"ambic/internal/infra/fiber"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/limiter"
+	"ambic/internal/infra/maps"
 	"ambic/internal/infra/mysql"
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
@@ -61,6 +62,8 @@ func Start() error {
 
 	s := supabase.New(config)
 
+	ma := maps.NewMaps(config)
+
 	app := fiber.New()
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
@@ -75,7 +78,7 @@ func Start() error {
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, m, l)
 
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, ma)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
