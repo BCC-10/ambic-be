@@ -55,7 +55,6 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	user := entity.User{
-		Name:       data.Name,
 		Username:   data.Username,
 		Email:      data.Email,
 		Password:   string(hashedPassword),
