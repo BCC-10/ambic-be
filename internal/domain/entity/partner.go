@@ -19,3 +19,8 @@ type Partner struct {
 	CreatedAt  time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
+
+func (p *Partner) BeforeCreate() (err error) {
+	p.ID = uuid.New()
+	return
+}

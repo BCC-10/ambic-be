@@ -30,7 +30,6 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 
 func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err {
 	partner := entity.Partner{
-		ID:        uuid.New(),
 		UserID:    id,
 		Name:      data.Name,
 		Type:      data.Type,
