@@ -6,7 +6,7 @@ import (
 )
 
 type GetProductsResponse struct {
-	ID           uint      `json:"id"`
+	ID           uuid.UUID `json:"id"`
 	PartnerID    uuid.UUID `json:"partner_id"`
 	Name         string    `json:"name"`
 	Description  string    `json:"description"`

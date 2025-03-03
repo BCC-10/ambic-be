@@ -6,7 +6,7 @@ import (
 )
 
 type Product struct {
-	ID           uint      `gorm:"primaryKey"`
+	ID           uuid.UUID `gorm:"primaryKey"`
 	PartnerID    uuid.UUID `gorm:"type:varchar(36);not null"`
 	Partner      Partner
 	Name         string    `gorm:"type:varchar(255);not null"`
@@ -18,4 +18,9 @@ type Product struct {
 	PhotoURL     string    `gorm:"type:varchar(255)"`
 	CreatedAt    time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt    time.Time `gorm:"type:timestamp;autoUpdateTime"`
+}
+
+func (p *Product) BeforeCreate() (err error) {
+	p.ID = uuid.New()
+	return
 }
