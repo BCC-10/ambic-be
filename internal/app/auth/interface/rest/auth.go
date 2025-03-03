@@ -5,7 +5,6 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/infra/limiter"
 	res "ambic/internal/infra/response"
-	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -15,7 +14,7 @@ type AuthHandler struct {
 	AuthUsecase usecase.AuthUsecaseItf
 }
 
-func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf, limiter limiter.LimiterIf) {
+func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf, validator *validator.Validate, limiter limiter.LimiterIf) {
 	AuthHandler := AuthHandler{
 		Validator:   validator,
 		AuthUsecase: userUsecase,
