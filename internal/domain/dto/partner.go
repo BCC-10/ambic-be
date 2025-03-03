@@ -8,23 +8,3 @@ type RegisterPartnerRequest struct {
 	Longitude float64 `form:"longitude" json:"longitude" validate:"required,longitude"`
 	Latitude  float64 `form:"latitude" json:"latitude" validate:"required,latitude"`
 }
-
-type RegisterPartnerResponse struct {
-	Name      string  `json:"name"`
-	Type      string  `json:"type"`
-	Address   string  `json:"address"`
-	City      string  `json:"city"`
-	Longitude float64 `json:"longitude"`
-	Latitude  float64 `json:"latitude"`
-}
-
-func (r *RegisterPartnerRequest) AsResponse() RegisterPartnerResponse {
-	return RegisterPartnerResponse{
-		Name:      r.Name,
-		Type:      r.Type,
-		Address:   r.Address,
-		City:      r.City,
-		Longitude: r.Longitude,
-		Latitude:  r.Latitude,
-	}
-}
