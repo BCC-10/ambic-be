@@ -31,7 +31,6 @@ func ParseForm(ctx *fiber.Ctx, target interface{}) error {
 			continue
 		}
 
-		// Jika formKey ada di form.Value (teks)
 		if values, ok := form.Value[formKey]; ok && len(values) > 0 {
 			valueStr := values[0]
 
@@ -50,13 +49,10 @@ func ParseForm(ctx *fiber.Ctx, target interface{}) error {
 			}
 		}
 
-		// Jika formKey ada di form.File (file upload)
 		if files, ok := form.File[formKey]; ok && len(files) > 0 {
 			if field.Type() == reflect.TypeOf((*multipart.FileHeader)(nil)) {
-				// Set file pertama ke field Photo (*multipart.FileHeader)
 				field.Set(reflect.ValueOf(files[0]))
 			} else if field.Type() == reflect.TypeOf([]*multipart.FileHeader{}) {
-				// Set semua file ke field Docs ([]*multipart.FileHeader)
 				field.Set(reflect.ValueOf(files))
 			}
 		}
