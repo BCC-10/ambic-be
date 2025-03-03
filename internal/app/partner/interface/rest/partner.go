@@ -22,7 +22,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup = routerGroup.Group("/partners")
-	routerGroup.Post("/register", m.Authentication, PartnerHandler.RegisterPartner)
+	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
