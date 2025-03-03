@@ -31,5 +31,3 @@ tmp/
 
 # Redis dump file
 dump.rdb
-
-internal/infra/maps
