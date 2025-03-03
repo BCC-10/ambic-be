@@ -64,8 +64,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if data.NewPassword != "" {
-		err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword))
-		if err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword)); err != nil {
 			return res.ErrForbidden(res.IncorrectOldPassword)
 		}
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
@@ -100,15 +99,13 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 			index := strings.Index(oldPhotoURL, bucket)
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
-			err = u.Supabase.DeleteFile(bucket, oldPhotoPath)
-			if err != nil {
+			if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
 				return res.ErrBadRequest(err.Error())
 			}
 		}
 	}
 
-	err := u.UserRepository.Update(user)
-	if err != nil {
+	if err := u.UserRepository.Update(user); err != nil {
 		return res.ErrInternalServer()
 	}
 
