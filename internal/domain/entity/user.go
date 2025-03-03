@@ -28,3 +28,8 @@ type User struct {
 	CreatedAt  time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
+
+func (u *User) BeforeCreate() (err error) {
+	u.ID = uuid.New()
+	return
+}
