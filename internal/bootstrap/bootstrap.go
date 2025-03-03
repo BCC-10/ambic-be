@@ -81,7 +81,7 @@ func Start() error {
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
 
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, ma)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, ma)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
 
 	productRepository := ProductRepo.NewProductMySQL(db)

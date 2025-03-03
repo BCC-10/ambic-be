@@ -40,7 +40,7 @@ const (
 	UserNotVerified    = "User is not verified"
 	UserVerified       = "User is already verified"
 	InvalidToken       = "Token is invalid or has expired"
-	InvalidTokenFormat = "Invalid token format"
+	InvalidTokenFormat = "Token format is invalid"
 )
 
 // User Domain
@@ -56,5 +56,6 @@ const (
 
 // Product Domain
 const (
-	ProductCreateSuccess = "Product created successfully"
+	ProductCreateSuccess       = "Product created successfully"
+	ProfileNotFilledCompletely = "Profile is not filled completely"
 )
