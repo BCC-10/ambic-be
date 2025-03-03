@@ -28,10 +28,6 @@ type LoginRequest struct {
 	Password   string `json:"password" validate:"required,min=6"`
 }
 
-type LoginResponse struct {
-	Identifier string `json:"identifier"`
-}
-
 type ForgotPasswordRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
@@ -68,11 +64,5 @@ func (r RegisterRequest) AsResponse() RegisterResponse {
 	return RegisterResponse{
 		Username: r.Username,
 		Email:    r.Email,
-	}
-}
-
-func (r LoginRequest) AsResponse() LoginResponse {
-	return LoginResponse{
-		Identifier: r.Identifier,
 	}
 }
