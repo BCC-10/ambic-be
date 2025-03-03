@@ -9,11 +9,6 @@ type RegisterRequest struct {
 	IsVerified bool   `json:"is_verified"`
 }
 
-type RegisterResponse struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-}
-
 type RequestTokenRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
@@ -55,14 +50,4 @@ type UserParam struct {
 	Id       uuid.UUID
 	Email    string
 	Username string
-}
-
-type Empty struct {
-}
-
-func (r RegisterRequest) AsResponse() RegisterResponse {
-	return RegisterResponse{
-		Username: r.Username,
-		Email:    r.Email,
-	}
 }

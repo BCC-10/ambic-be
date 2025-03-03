@@ -49,7 +49,7 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.RegisterSuccess, user.AsResponse())
+	return res.SuccessResponse(ctx, res.RegisterSuccess, nil)
 }
 
 func (h AuthHandler) RequestVerification(ctx *fiber.Ctx) error {
