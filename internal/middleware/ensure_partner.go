@@ -1,9 +1,15 @@
 package middleware
 
-import "github.com/gofiber/fiber/v2"
+import (
+	res "ambic/internal/infra/response"
+	"github.com/gofiber/fiber/v2"
+)
 
 func (m *Middleware) EnsurePartner(ctx *fiber.Ctx) error {
-	return ctx.JSON(fiber.Map{
-		"isPartner": ctx.Locals("isPartner"),
-	})
+	isPartner := ctx.Locals("isPartner").(bool)
+	if !isPartner {
+		return res.Unauthorized(ctx)
+	}
+
+	return ctx.Next()
 }
