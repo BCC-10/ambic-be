@@ -3,7 +3,6 @@ package dto
 import "github.com/google/uuid"
 
 type RegisterRequest struct {
-	Name       string `json:"name" validate:"required"`
 	Username   string `json:"username" validate:"required"`
 	Email      string `json:"email" validate:"required,email"`
 	Password   string `json:"password" validate:"required,min=6"`
@@ -11,7 +10,6 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 }
@@ -68,7 +66,6 @@ type Empty struct {
 
 func (r RegisterRequest) AsResponse() RegisterResponse {
 	return RegisterResponse{
-		Name:     r.Name,
 		Username: r.Username,
 		Email:    r.Email,
 	}

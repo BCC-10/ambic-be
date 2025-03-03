@@ -55,8 +55,6 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	user := entity.User{
-		ID:         uuid.New(),
-		Name:       data.Name,
 		Username:   data.Username,
 		Email:      data.Email,
 		Password:   string(hashedPassword),
@@ -64,12 +62,18 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	var dbUser entity.User
+	errors := make(map[string]string)
+
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
-		return res.ErrValidationError(data.AsResponse(), map[string]string{"email": res.EmailExist})
+		errors["email"] = res.EmailExist
 	}
 
 	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
-		return res.ErrValidationError(data.AsResponse(), map[string]string{"username": res.UsernameExist})
+		errors["username"] = res.UsernameExist
+	}
+
+	if len(errors) > 0 {
+		return res.ErrValidationError(nil, errors)
 	}
 
 	if err := u.UserRepository.Create(&user); err != nil {
@@ -82,7 +86,7 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	user := new(entity.User)
 
-	err := u.UserRepository.Check(user, data)
+	err := u.UserRepository.Login(user, data)
 	if err != nil {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
@@ -96,7 +100,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 		return "", res.ErrForbidden(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
@@ -294,7 +298,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		user = &dbUser
 	}
 
-	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
+	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}

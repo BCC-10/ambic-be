@@ -15,32 +15,47 @@ type UserHandler struct {
 	UserUsecase usecase.UserUsecaseItf
 }
 
-func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, middleware middleware.MiddlewareIf) {
+func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
 	}
 
 	routerGroup = routerGroup.Group("/users")
-	routerGroup.Patch("/update", middleware.Authentication, middleware.EnsureVerified, UserHandler.UpdateUser)
+	routerGroup.Patch("/update", m.Authentication, UserHandler.UpdateUser)
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
-	user := new(dto.UpdateUserRequest)
-	if err := ctx.BodyParser(user); err != nil {
-		return res.BadRequest(ctx)
+	req := new(dto.UpdateUserRequest)
+	if ctx.Get("Content-Type") == "application/json" {
+		if err := ctx.BodyParser(req); err != nil {
+			return res.BadRequest(ctx)
+		}
+	} else {
+		req = &dto.UpdateUserRequest{
+			Name:     ctx.FormValue("name"),
+			Phone:    ctx.FormValue("phone"),
+			Address:  ctx.FormValue("address"),
+			BornDate: ctx.FormValue("born_date"),
+			Gender:   ctx.FormValue("gender"),
+		}
 	}
 
-	if err := h.Validator.Struct(user); err != nil {
-		return res.ValidationError(ctx, user.ToResponse(), err)
+	if err := h.Validator.Struct(req); err != nil {
+		return res.ErrValidationError(ctx, err)
+	}
+
+	file, err := ctx.FormFile("photo")
+	if err == nil {
+		req.Photo = file
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	if err := h.UserUsecase.UpdateUser(userId, *user); err != nil {
+	if err := h.UserUsecase.UpdateUser(userId, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
-		"updated_data": user.ToResponse(),
+		"user": req.ToResponse(),
 	})
 }

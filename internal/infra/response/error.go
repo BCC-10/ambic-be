@@ -46,8 +46,15 @@ func ErrValidationError(val interface{}, err interface{}) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
-func ErrInternalServer() *Err {
-	return &Err{Code: fiber.ErrInternalServerError.Code, Message: fiber.ErrInternalServerError.Message}
+func ErrInternalServer(message ...string) *Err {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrInternalServerError.Message
+	}
+
+	return &Err{Code: fiber.ErrInternalServerError.Code, Message: msg}
 }
 
 func ErrUnauthorized(message ...string) *Err {
@@ -108,7 +115,7 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 	})
 }
 
-func InternalSeverError(ctx *fiber.Ctx) error {
+func InternalServerError(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.ErrInternalServerError.Code).JSON(Res{
 		StatusCode: fiber.ErrInternalServerError.Code,
 		Message:    fiber.ErrInternalServerError.Message,
@@ -167,5 +174,5 @@ func Error(ctx *fiber.Ctx, err *Err) error {
 		})
 	}
 
-	return InternalSeverError(ctx)
+	return InternalServerError(ctx)
 }

@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"ambic/internal/domain/env"
+	res "ambic/internal/infra/response"
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -9,8 +10,8 @@ import (
 )
 
 type JWTIf interface {
-	GenerateToken(userId uuid.UUID, isVerified bool) (string, error)
-	ValidateToken(token string) (uuid.UUID, bool, error)
+	GenerateToken(userId uuid.UUID, isVerified bool, isPartner bool) (string, error)
+	ValidateToken(token string) (uuid.UUID, bool, bool, error)
 }
 type JWT struct {
 	secretKey   string
@@ -30,13 +31,15 @@ func NewJwt(env *env.Env) JWTIf {
 type Claims struct {
 	Id         uuid.UUID
 	IsVerified bool
+	IsPartner  bool
 	jwt.RegisteredClaims
 }
 
-func (j *JWT) GenerateToken(userId uuid.UUID, isVerified bool) (string, error) {
+func (j *JWT) GenerateToken(userId uuid.UUID, isVerified bool, isPartner bool) (string, error) {
 	claim := Claims{
 		Id:               userId,
 		IsVerified:       isVerified,
+		IsPartner:        isPartner,
 		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.expiredTime))},
 	}
 
@@ -50,7 +53,7 @@ func (j *JWT) GenerateToken(userId uuid.UUID, isVerified bool) (string, error) {
 	return tokenString, err
 }
 
-func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, bool, error) {
+func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, bool, bool, error) {
 	claim := new(Claims)
 
 	token, err := jwt.ParseWithClaims(tokenString, claim, func(token *jwt.Token) (interface{}, error) {
@@ -58,15 +61,16 @@ func (j *JWT) ValidateToken(tokenString string) (uuid.UUID, bool, error) {
 	})
 
 	if err != nil {
-		return uuid.Nil, false, err
+		return uuid.Nil, false, false, err
 	}
 
 	if !token.Valid {
-		return uuid.Nil, false, errors.New("invalid token")
+		return uuid.Nil, false, false, errors.New(res.InvalidToken)
 	}
 
 	userId := claim.Id
 	isVerified := claim.IsVerified
+	isPartner := claim.IsPartner
 
-	return userId, isVerified, nil
+	return userId, isVerified, isPartner, nil
 }

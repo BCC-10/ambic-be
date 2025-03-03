@@ -28,3 +28,8 @@ go.work
 
 # Temporary folder
 tmp/
+
+# Redis dump file
+dump.rdb
+
+internal/infra/maps

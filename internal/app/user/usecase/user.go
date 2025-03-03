@@ -6,8 +6,11 @@ import (
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	res "ambic/internal/infra/response"
+	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -17,11 +20,15 @@ type UserUsecaseItf interface {
 
 type UserUsecase struct {
 	UserRepository repository.UserMySQLItf
+	Supabase       supabase.SupabaseIf
+	env            *env.Env
 }
 
-func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf) UserUsecaseItf {
+func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supabase supabase.SupabaseIf) UserUsecaseItf {
 	return &UserUsecase{
 		UserRepository: userRepository,
+		Supabase:       supabase,
+		env:            env,
 	}
 }
 
@@ -35,6 +42,8 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	if data.Gender != "" {
 		g := entity.Gender(data.Gender)
 		gender = &g
+	} else {
+		gender = nil
 	}
 
 	user := &entity.User{
@@ -55,8 +64,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if data.NewPassword != "" {
-		err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword))
-		if err != nil {
+		if err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword)); err != nil {
 			return res.ErrForbidden(res.IncorrectOldPassword)
 		}
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
@@ -67,8 +75,37 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 		user.Password = string(hashedPassword)
 	}
 
-	err := u.UserRepository.Update(user)
-	if err != nil {
+	if data.Photo != nil {
+		src, err := data.Photo.Open()
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		defer src.Close()
+
+		bucket := u.env.SupabaseBucket
+		path := "profiles/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
+		contentType := data.Photo.Header.Get("Content-Type")
+
+		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		user.PhotoURL = publicURL
+
+		if userDB.PhotoURL != "" {
+			oldPhotoURL := userDB.PhotoURL
+			index := strings.Index(oldPhotoURL, bucket)
+			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
+
+			if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+				return res.ErrBadRequest(err.Error())
+			}
+		}
+	}
+
+	if err := u.UserRepository.Update(user); err != nil {
 		return res.ErrInternalServer()
 	}
 

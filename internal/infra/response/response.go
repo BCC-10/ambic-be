@@ -25,26 +25,37 @@ const (
 	IncorrectIdentifier = "Email or password is incorrect"
 	LoginSuccess        = "User logged in successfully"
 	InvalidState        = "State is invalid"
-	OAuthAccessDenied   = "Access denied"
 	OAuthLoginSuccess   = "OAuth login URL generated successfully"
 
 	ForgotPasswordSuccess = "Password reset link has been sent"
 	MissingToken          = "Authentication token is missing"
 	ResetPasswordSuccess  = "Password has been reset successfully"
 
-	UpdateSuccess        = "User profile updated successfully"
 	IncorrectOldPassword = "Old password is incorrect"
 )
 
 // middleware
 const (
-	LimitExceeded   = "Too many requests. Please try again later."
-	UserNotVerified = "User is not verified"
-	UserVerified    = "User is already verified"
-	InvalidToken    = "Token is invalid or has expired"
+	LimitExceeded      = "Too many requests. Please try again later."
+	UserNotVerified    = "User is not verified"
+	UserVerified       = "User is already verified"
+	InvalidToken       = "Token is invalid or has expired"
+	InvalidTokenFormat = "Token format is invalid"
 )
 
 // User Domain
 const (
-	InvalidDateFormat = "Invalid date format"
+	InvalidDateFormat = "Date format is invalid"
+	UpdateSuccess     = "User profile updated successfully"
+)
+
+// Partner Domain
+const (
+	PartnerRegisterSuccess = "Partner registered successfully"
+)
+
+// Product Domain
+const (
+	ProductCreateSuccess       = "Product created successfully"
+	ProfileNotFilledCompletely = "Profile is not filled completely"
 )
