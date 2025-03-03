@@ -9,7 +9,7 @@ type RegisterRequest struct {
 	IsVerified bool   `json:"is_verified"`
 }
 
-type RequestTokenRequest struct {
+type EmailVerificationRequest struct {
 	Email string `json:"email" validate:"required,email"`
 }
 

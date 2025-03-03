@@ -18,7 +18,7 @@ import (
 type AuthUsecaseItf interface {
 	Register(dto.RegisterRequest) *res.Err
 	Login(login dto.LoginRequest) (string, *res.Err)
-	RequestVerification(requestToken dto.RequestTokenRequest) *res.Err
+	ResendVerification(requestToken dto.EmailVerificationRequest) *res.Err
 	VerifyUser(verifyUser dto.VerifyUserRequest) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
 	ResetPassword(data dto.ResetPasswordRequest) *res.Err
@@ -108,7 +108,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	return token, nil
 }
 
-func (u *AuthUsecase) RequestVerification(data dto.RequestTokenRequest) *res.Err {
+func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res.Err {
 	user := new(entity.User)
 	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
 	if err != nil {
