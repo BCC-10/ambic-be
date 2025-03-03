@@ -2,6 +2,7 @@ package entity
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -29,7 +30,7 @@ type User struct {
 	UpdatedAt  time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
 
-func (u *User) BeforeCreate() (err error) {
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = uuid.New()
 	return
 }
