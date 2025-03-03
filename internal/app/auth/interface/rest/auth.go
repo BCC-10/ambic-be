@@ -23,7 +23,7 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup = routerGroup.Group("/auth")
 	routerGroup.Post("/register", AuthHandler.Register)
 	routerGroup.Post("/login", AuthHandler.Login)
-	routerGroup.Post("/request-verification", limiter.Set(3, "15m"), AuthHandler.RequestVerification)
+	routerGroup.Post("/resend-verification", limiter.Set(3, "15m"), AuthHandler.ResendVerification)
 	routerGroup.Post("/verify", AuthHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
@@ -45,15 +45,15 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	if err := h.AuthUsecase.RequestVerification(dto.RequestTokenRequest{Email: user.Email}); err != nil {
+	if err := h.AuthUsecase.ResendVerification(dto.EmailVerificationRequest{Email: user.Email}); err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.RegisterSuccess, user.AsResponse())
+	return res.SuccessResponse(ctx, res.RegisterSuccess, nil)
 }
 
-func (h AuthHandler) RequestVerification(ctx *fiber.Ctx) error {
-	requestToken := new(dto.RequestTokenRequest)
+func (h AuthHandler) ResendVerification(ctx *fiber.Ctx) error {
+	requestToken := new(dto.EmailVerificationRequest)
 	if err := ctx.BodyParser(requestToken); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -62,7 +62,7 @@ func (h AuthHandler) RequestVerification(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	if err := h.AuthUsecase.RequestVerification(*requestToken); err != nil {
+	if err := h.AuthUsecase.ResendVerification(*requestToken); err != nil {
 		return res.Error(ctx, err)
 	}
 

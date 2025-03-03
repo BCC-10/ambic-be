@@ -22,7 +22,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup = routerGroup.Group("/partners")
-	routerGroup.Post("/register", m.Authentication, PartnerHandler.RegisterPartner)
+	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
@@ -32,7 +32,7 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, data.AsResponse(), err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -40,7 +40,5 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, fiber.Map{
-		"partner": data.AsResponse(),
-	})
+	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, nil)
 }
