@@ -82,7 +82,7 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	user := new(entity.User)
 
-	err := u.UserRepository.Check(user, data)
+	err := u.UserRepository.Login(user, data)
 	if err != nil {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
@@ -96,7 +96,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 		return "", res.ErrForbidden(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
@@ -294,7 +294,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		user = &dbUser
 	}
 
-	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified)
+	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
