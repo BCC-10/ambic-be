@@ -23,10 +23,10 @@ type ProductUsecase struct {
 	Supabase          supabase.SupabaseIf
 }
 
-func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLItf, userRepostiory userRepo.UserMySQLItf, supabase supabase.SupabaseIf) ProductUsecaseItf {
+func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLItf, userRepository userRepo.UserMySQLItf, supabase supabase.SupabaseIf) ProductUsecaseItf {
 	return &ProductUsecase{
 		env:               env,
-		UserRepository:    userRepostiory,
+		UserRepository:    userRepository,
 		ProductRepository: productRepository,
 		Supabase:          supabase,
 	}

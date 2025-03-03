@@ -115,7 +115,7 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 	})
 }
 
-func InternalSeverError(ctx *fiber.Ctx) error {
+func InternalServerError(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.ErrInternalServerError.Code).JSON(Res{
 		StatusCode: fiber.ErrInternalServerError.Code,
 		Message:    fiber.ErrInternalServerError.Message,
@@ -174,5 +174,5 @@ func Error(ctx *fiber.Ctx, err *Err) error {
 		})
 	}
 
-	return InternalSeverError(ctx)
+	return InternalServerError(ctx)
 }
