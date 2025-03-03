@@ -85,7 +85,7 @@ func Start() error {
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
 
 	productRepository := ProductRepo.NewProductMySQL(db)
-	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository)
+	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository, userRepository, s)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))

@@ -55,4 +55,6 @@ const (
 )
 
 // Product Domain
-const ()
+const (
+	ProductCreateSuccess = "Product created successfully"
+)
