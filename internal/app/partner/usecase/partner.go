@@ -40,8 +40,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		Latitude:  data.Latitude,
 	}
 
-	err := u.PartnerRepository.Create(&partner)
-	if err != nil {
+	if err := u.PartnerRepository.Create(&partner); err != nil {
 		return res.ErrInternalServer()
 	}
 

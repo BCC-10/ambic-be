@@ -36,8 +36,7 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	err := h.PartnerUsecase.RegisterPartner(userId, *data)
-	if err != nil {
+	if err := h.PartnerUsecase.RegisterPartner(userId, *data); err != nil {
 		return res.Error(ctx, err)
 	}
 

@@ -50,8 +50,7 @@ func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductReq
 	}
 
 	user := new(entity.User)
-	err = u.UserRepository.Get(user, dto.UserParam{Id: userId})
-	if err != nil {
+	if err = u.UserRepository.Get(user, dto.UserParam{Id: userId}); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -68,8 +67,7 @@ func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductReq
 		PhotoURL:     publicURL,
 	}
 
-	err = u.ProductRepository.Create(product)
-	if err != nil {
+	if err = u.ProductRepository.Create(product); err != nil {
 		return res.ErrInternalServer()
 	}
 
