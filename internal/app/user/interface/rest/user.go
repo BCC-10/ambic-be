@@ -26,13 +26,13 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
-	data := new(dto.UpdateUserRequest)
+	req := new(dto.UpdateUserRequest)
 	if ctx.Get("Content-Type") == "application/json" {
-		if err := ctx.BodyParser(data); err != nil {
+		if err := ctx.BodyParser(req); err != nil {
 			return res.BadRequest(ctx)
 		}
 	} else {
-		data = &dto.UpdateUserRequest{
+		req = &dto.UpdateUserRequest{
 			Name:     ctx.FormValue("name"),
 			Phone:    ctx.FormValue("phone"),
 			Address:  ctx.FormValue("address"),
@@ -41,23 +41,21 @@ func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 		}
 	}
 
-	err := h.Validator.Struct(data)
-	if err != nil {
+	if err := h.Validator.Struct(req); err != nil {
 		return res.ErrValidationError(ctx, err)
 	}
 
 	file, err := ctx.FormFile("photo")
 	if err == nil {
-		data.Photo = file
+		req.Photo = file
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	_err := h.UserUsecase.UpdateUser(userId, *data)
-	if _err != nil {
-		return res.Error(ctx, _err)
+	if err := h.UserUsecase.UpdateUser(userId, *req); err != nil {
+		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
-		"data": data.ToResponse(),
+		"user": req.ToResponse(),
 	})
 }
