@@ -56,7 +56,7 @@ func (e *Email) SendEmailVerification(to string, token string) error {
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", "Email Verification")
 
-	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, token))
+	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, to, token))
 
 	return e.sendEmail(e.connect(), message)
 }
