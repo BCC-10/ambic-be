@@ -93,7 +93,7 @@ func (h AuthHandler) Login(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(user); err != nil {
-		return res.ValidationError(ctx, user.AsResponse(), err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	token, err := h.AuthUsecase.Login(*user)
