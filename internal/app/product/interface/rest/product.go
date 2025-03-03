@@ -1,7 +1,22 @@
 package rest
 
-type ProductHandler struct {}
+import (
+	"ambic/internal/app/product/usecase"
+	"ambic/internal/middleware"
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+)
 
-func NewProductHandler() {
-    ProductHandler := ProductHandler{}
+type ProductHandler struct {
+	ProductUsecase usecase.ProductUsecaseItf
+	validator      *validator.Validate
+}
+
+func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
+	ProductHandler := ProductHandler{
+		ProductUsecase: productUsecase,
+		validator:      validator,
+	}
+
+	routerGroup.Group("/products")
 }

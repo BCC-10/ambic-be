@@ -6,6 +6,9 @@ import (
 	PartnerHandler "ambic/internal/app/partner/interface/rest"
 	PartnerRepo "ambic/internal/app/partner/repository"
 	PartnerUsecase "ambic/internal/app/partner/usecase"
+	ProductHandler "ambic/internal/app/product/interface/rest"
+	ProductRepo "ambic/internal/app/product/repository"
+	ProductUsecase "ambic/internal/app/product/usecase"
 	UserHandler "ambic/internal/app/user/interface/rest"
 	UserRepo "ambic/internal/app/user/repository"
 	UserUsecase "ambic/internal/app/user/usecase"
@@ -80,6 +83,10 @@ func Start() error {
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
 	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, ma)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
+
+	productRepository := ProductRepo.NewProductMySQL(db)
+	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository)
+	ProductHandler.NewProductHandler(v1, productUsecase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }

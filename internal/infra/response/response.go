@@ -53,3 +53,6 @@ const (
 const (
 	PartnerRegisterSuccess = "Partner registered successfully"
 )
+
+// Product Domain
+const ()
