@@ -162,5 +162,15 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 		return res.ErrInternalServer()
 	}
 
+	if productDB.PhotoURL != "" {
+		bucket := u.env.SupabaseBucket
+		index := strings.Index(productDB.PhotoURL, bucket)
+		path := productDB.PhotoURL[index+len(bucket+"/"):]
+
+		if err := u.Supabase.DeleteFile(bucket, path); err != nil {
+			return res.ErrInternalServer()
+		}
+	}
+
 	return nil
 }
