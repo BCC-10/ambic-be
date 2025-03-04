@@ -51,6 +51,7 @@ const (
 
 // Partner Domain
 const (
+	PartnerNotVerified     = "Partner is not verified"
 	PartnerRegisterSuccess = "Partner registered successfully"
 )
 
