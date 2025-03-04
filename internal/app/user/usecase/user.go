@@ -36,7 +36,7 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supaba
 
 func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err {
 	userDB := new(entity.User)
-	if err := u.UserRepository.Get(userDB, dto.UserParam{Id: id}); err != nil {
+	if err := u.UserRepository.Show(userDB, dto.UserParam{Id: id}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}

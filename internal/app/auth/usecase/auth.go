@@ -66,11 +66,11 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	var dbUser entity.User
 	errors := make(map[string]string)
 
-	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
+	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
 		errors["email"] = res.EmailExist
 	}
 
-	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
+	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
 		errors["username"] = res.UsernameExist
 	}
 
@@ -116,7 +116,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 
 func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res.Err {
 	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email})
 	if err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
@@ -149,7 +149,7 @@ func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res
 
 func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
+	err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email})
 	if err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
@@ -186,7 +186,7 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 
 func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}
@@ -218,7 +218,7 @@ func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 
 func (u *AuthUsecase) ResetPassword(data dto.ResetPasswordRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}
@@ -310,7 +310,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 	}
 
 	var dbUser entity.User
-	if err = u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err != nil {
+	if err = u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			if err := u.UserRepository.Create(user); err != nil {
 				return "", res.ErrInternalServer()

@@ -55,7 +55,7 @@ func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductReq
 	}
 
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Id: userId}); err != nil {
+	if err := u.UserRepository.Show(user, dto.UserParam{Id: userId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}

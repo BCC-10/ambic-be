@@ -36,7 +36,7 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 
 func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Id: id}); err != nil {
+	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -68,7 +68,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}
