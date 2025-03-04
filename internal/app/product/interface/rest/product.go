@@ -23,8 +23,8 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 	}
 
 	routerGroup = routerGroup.Group("/products")
-	routerGroup.Post("/create", m.Authentication, m.EnsurePartner, ProductHandler.CreateProduct)
-	routerGroup.Patch("/:id/update", m.Authentication, m.EnsurePartner, ProductHandler.UpdateProduct)
+	routerGroup.Post("/create", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
+	routerGroup.Patch("/:id/update", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.UpdateProduct)
 }
 
 func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
