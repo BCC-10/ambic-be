@@ -62,4 +62,5 @@ const (
 	ProfileNotFilledCompletely = "Profile is not filled completely"
 	ProductNotExists           = "Product does not exist"
 	ProductNotBelongToPartner  = "Product does not belong to partner"
+	ProductDeleteSuccess       = "Product deleted successfully"
 )

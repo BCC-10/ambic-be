@@ -24,6 +24,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 
 	routerGroup = routerGroup.Group("/products")
 	routerGroup.Post("/create", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
+	routerGroup.Delete("/:id", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.DeleteProduct)
 	routerGroup.Patch("/:id/update", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.UpdateProduct)
 }
 
@@ -67,4 +68,18 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.ProductUpdateSuccess, nil)
+}
+
+func (h ProductHandler) DeleteProduct(ctx *fiber.Ctx) error {
+	productId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
+	if err := h.ProductUsecase.DeleteProduct(productId, partnerId); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.ProductDeleteSuccess, nil)
 }
