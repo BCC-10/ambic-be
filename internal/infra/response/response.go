@@ -57,5 +57,7 @@ const (
 // Product Domain
 const (
 	ProductCreateSuccess       = "Product created successfully"
+	ProductUpdateSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
+	ProductNotExists           = "Product does not exist"
 )

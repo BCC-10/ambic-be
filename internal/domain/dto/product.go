@@ -36,6 +36,21 @@ type CreateProductResponse struct {
 	PickupTime   string  `json:"pickup_time"`
 }
 
+type UpdateProductRequest struct {
+	Name         string                `form:"name"`
+	Description  string                `form:"description"`
+	InitialPrice float32               `form:"initial_price" validate:"omitempty,numeric"`
+	FinalPrice   float32               `form:"final_price" validate:"omitempty,numeric"`
+	Stock        int                   `form:"stock" validate:"omitempty,numeric"`
+	PickupTime   string                `form:"pickup_time" validate:"omitempty,datetime=2006-01-02 15:04:05"`
+	Photo        *multipart.FileHeader `form:"photo"`
+}
+
+type ProductParam struct {
+	Id   uuid.UUID
+	Name string
+}
+
 func (r CreateProductRequest) ToResponse() CreateProductResponse {
 	return CreateProductResponse{
 		Name:         r.Name,
