@@ -5,10 +5,12 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"path/filepath"
 	"strings"
 	"time"
@@ -35,7 +37,11 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supaba
 func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err {
 	userDB := new(entity.User)
 	if err := u.UserRepository.Get(userDB, dto.UserParam{Id: id}); err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
 	}
 
 	gender := new(entity.Gender)
