@@ -2,10 +2,10 @@ package mysql
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-sql-driver/mysql"
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 )
 
 func New(dsn string) (*gorm.DB, error) {
@@ -31,13 +31,13 @@ func CheckError(err error, target interface{}) bool {
 	case int:
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) && mysqlErr.Number == uint16(t) {
-			fmt.Printf("MySQL Error [%d]: %s\n", mysqlErr.Number, mysqlErr.Message)
+			log.Printf("MySQL Error [%d]: %s\n", mysqlErr.Number, mysqlErr.Message)
 			return true
 		}
 
 	case error:
 		if errors.Is(err, t) {
-			fmt.Println("GORM Error:", err.Error())
+			log.Println("GORM Error:", err.Error())
 			return true
 		}
 	}
