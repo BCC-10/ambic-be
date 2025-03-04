@@ -21,7 +21,7 @@ func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx, res.InvalidTokenFormat)
 	}
 
-	userId, isVerified, isPartner, err := m.jwt.ValidateToken(token[1])
+	userId, isVerified, partnerId, isVerifiedPartner, err := m.jwt.ValidateToken(token[1])
 	if err != nil {
 		return res.Unauthorized(ctx, res.InvalidToken)
 	}
@@ -31,7 +31,8 @@ func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	}
 
 	ctx.Locals("userId", userId)
-	ctx.Locals("isPartner", isPartner)
+	ctx.Locals("partnerId", partnerId)
+	ctx.Locals("isVerifiedPartner", isVerifiedPartner)
 
 	return ctx.Next()
 }
