@@ -8,7 +8,7 @@ import (
 func (m *Middleware) EnsureNotPartner(ctx *fiber.Ctx) error {
 	isPartner := ctx.Locals("isPartner").(bool)
 	if isPartner {
-		return res.Unauthorized(ctx)
+		return res.Forbidden(ctx)
 	}
 
 	return ctx.Next()
