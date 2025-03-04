@@ -9,6 +9,7 @@ type MiddlewareIf interface {
 	Authentication(ctx *fiber.Ctx) error
 	EnsurePartner(ctx *fiber.Ctx) error
 	EnsureNotPartner(ctx *fiber.Ctx) error
+	EnsureVerifiedPartner(ctx *fiber.Ctx) error
 }
 
 type Middleware struct {

@@ -106,7 +106,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 		return "", res.ErrForbidden(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
@@ -322,7 +322,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		user = &dbUser
 	}
 
-	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
+	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
