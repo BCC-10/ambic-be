@@ -24,7 +24,7 @@ type CreateProductRequest struct {
 	FinalPrice   float32               `form:"final_price" validate:"required,numeric"`
 	Stock        int                   `form:"stock" validate:"required,numeric"`
 	PickupTime   string                `form:"pickup_time" validate:"required,datetime=2006-01-02 15:04:05"`
-	Photo        *multipart.FileHeader `json:"photo" form:"photo" validate:"required"`
+	Photo        *multipart.FileHeader `json:"photo" form:"photo" validate:"required,file"`
 }
 
 type CreateProductResponse struct {
@@ -43,7 +43,7 @@ type UpdateProductRequest struct {
 	FinalPrice   float32               `form:"final_price" validate:"omitempty,numeric"`
 	Stock        int                   `form:"stock" validate:"omitempty,numeric"`
 	PickupTime   string                `form:"pickup_time" validate:"omitempty,datetime=2006-01-02 15:04:05"`
-	Photo        *multipart.FileHeader `form:"photo"`
+	Photo        *multipart.FileHeader `form:"photo" validate:"omitempty,file"`
 }
 
 type ProductParam struct {
