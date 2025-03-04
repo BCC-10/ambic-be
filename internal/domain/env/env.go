@@ -9,7 +9,7 @@ import (
 type Env struct {
 	AppPort       int    `env:"APP_PORT"`
 	AppURL        string `env:"APP_URL"`
-	MaxUploadSize int64  `env:"MAX_UPLOAD_SIZE"`
+	MaxUploadSize int    `env:"MAX_UPLOAD_SIZE"`
 
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
