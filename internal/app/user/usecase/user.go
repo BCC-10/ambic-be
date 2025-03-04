@@ -106,7 +106,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
 			if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
-				return res.ErrBadRequest(err.Error())
+				return res.ErrInternalServer()
 			}
 		}
 	}
