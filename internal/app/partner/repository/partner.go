@@ -19,9 +19,9 @@ func NewPartnerMySQL(db *gorm.DB) PartnerMySQLItf {
 }
 
 func (r *PartnerMySQL) Get(partner *entity.Partner) error {
-	return r.db.Find(partner).Error
+	return r.db.Debug().Find(partner).Error
 }
 
 func (r *PartnerMySQL) Create(partner *entity.Partner) error {
-	return r.db.Create(partner).Error
+	return r.db.Debug().Create(partner).Error
 }
