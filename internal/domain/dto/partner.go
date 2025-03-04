@@ -8,3 +8,8 @@ type RegisterPartnerRequest struct {
 	Longitude float64 `form:"longitude" validate:"required,longitude"`
 	Latitude  float64 `form:"latitude" validate:"required,latitude"`
 }
+
+type VerifyPartnerRequest struct {
+	Email string `json:"email" validate:"required,email"`
+	Token string `json:"token" validate:"required"`
+}

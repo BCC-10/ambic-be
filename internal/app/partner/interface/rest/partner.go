@@ -23,6 +23,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 
 	routerGroup = routerGroup.Group("/partners")
 	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
+	routerGroup.Post("/verify", PartnerHandler.VerifyPartner)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
@@ -41,4 +42,21 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, nil)
+}
+
+func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
+	data := new(dto.VerifyPartnerRequest)
+	if err := ctx.BodyParser(&data); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(data); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	if err := h.PartnerUsecase.VerifyPartner(*data); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.PartnerVerifySuccess, nil)
 }

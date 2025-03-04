@@ -7,12 +7,15 @@ import (
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/maps"
+	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type PartnerUsecaseItf interface {
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err
+	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
 }
 
 type PartnerUsecase struct {
@@ -52,6 +55,37 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 	}
 
 	if err := u.PartnerRepository.Create(&partner); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
+}
+
+func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) *res.Err {
+	user := new(entity.User)
+	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
+	}
+
+	if user.Partner.ID == uuid.Nil {
+		return res.ErrNotFound(res.PartnerNotExists)
+	}
+
+	if user.Partner.IsVerified {
+		return res.ErrForbidden(res.PartnerVerified)
+	}
+
+	if data.Token != u.env.PartnerVerificationToken {
+		return res.ErrForbidden(res.InvalidToken)
+	}
+
+	user.Partner.IsVerified = true
+
+	if err := u.PartnerRepository.Update(&user.Partner); err != nil {
 		return res.ErrInternalServer()
 	}
 

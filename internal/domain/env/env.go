@@ -10,6 +10,8 @@ type Env struct {
 	AppPort int    `env:"APP_PORT"`
 	AppURL  string `env:"APP_URL"`
 
+	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
+
 	TokenLength      int           `env:"TOKEN_LENGTH"`
 	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
 
