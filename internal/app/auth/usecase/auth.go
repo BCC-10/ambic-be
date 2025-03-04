@@ -322,7 +322,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		user = &dbUser
 	}
 
-	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil, user.Partner.IsVerified)
+	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
