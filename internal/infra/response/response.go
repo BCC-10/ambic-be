@@ -61,4 +61,5 @@ const (
 	ProductUpdateSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
 	ProductNotExists           = "Product does not exist"
+	ProductNotBelongToPartner  = "Product does not belong to partner"
 )

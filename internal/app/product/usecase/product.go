@@ -17,7 +17,7 @@ import (
 
 type ProductUsecaseItf interface {
 	CreateProduct(userId uuid.UUID, request dto.CreateProductRequest) *res.Err
-	UpdateProduct(productId uuid.UUID, req dto.UpdateProductRequest) *res.Err
+	UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err
 }
 
 type ProductUsecase struct {
@@ -82,7 +82,7 @@ func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductReq
 	return nil
 }
 
-func (u ProductUsecase) UpdateProduct(productId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
+func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{Id: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -90,6 +90,10 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, req dto.UpdateProduct
 		}
 
 		return res.ErrInternalServer()
+	}
+
+	if productDB.PartnerID != partnerId {
+		return res.ErrForbidden(res.ProductNotBelongToPartner)
 	}
 
 	product := &entity.Product{

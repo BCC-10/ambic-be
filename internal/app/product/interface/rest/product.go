@@ -61,7 +61,8 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	if err := h.ProductUsecase.UpdateProduct(productId, *req); err != nil {
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
+	if err := h.ProductUsecase.UpdateProduct(productId, partnerId, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 
