@@ -5,6 +5,7 @@ type RegisterPartnerRequest struct {
 	Type      string  `form:"type" validate:"required"`
 	Address   string  `form:"address" validate:"required"`
 	City      string  `form:"city" validate:"required"`
+	Instagram string  `form:"instagram" validate:"required"`
 	Longitude float64 `form:"longitude" validate:"required,longitude"`
 	Latitude  float64 `form:"latitude" validate:"required,latitude"`
 }

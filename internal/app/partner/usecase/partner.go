@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	repository "ambic/internal/app/partner/repository"
+	"ambic/internal/app/partner/repository"
 	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -44,12 +44,17 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		return res.ErrForbidden(res.ProfileNotFilledCompletely)
 	}
 
+	if data.Instagram[0] == '@' {
+		data.Instagram = data.Instagram[1:]
+	}
+
 	partner := entity.Partner{
 		UserID:    id,
 		Name:      data.Name,
 		Type:      data.Type,
 		Address:   data.Address,
 		City:      data.City,
+		Instagram: data.Instagram,
 		Longitude: data.Longitude,
 		Latitude:  data.Latitude,
 	}
