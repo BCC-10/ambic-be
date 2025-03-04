@@ -106,7 +106,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 		return "", res.ErrForbidden(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil, user.Partner.IsVerified)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
