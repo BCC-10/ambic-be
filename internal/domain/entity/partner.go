@@ -40,5 +40,6 @@ func (p *Partner) ParseDTOGet() dto.GetPartnerResponse {
 		Instagram: p.Instagram,
 		Longitude: p.Longitude,
 		Latitude:  p.Latitude,
+		Photo:     p.PhotoURL,
 	}
 }
