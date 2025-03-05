@@ -17,6 +17,7 @@ const (
 type User struct {
 	ID         uuid.UUID `gorm:"type:varchar(36);primaryKey"`
 	Partner    Partner
+	Ratings    []Rating
 	Name       string    `gorm:"type:varchar(255)"`
 	Username   string    `gorm:"type:varchar(255);unique;not null"`
 	Email      string    `gorm:"type:varchar(255);unique;not null"`

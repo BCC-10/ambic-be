@@ -10,7 +10,7 @@ import (
 type Partner struct {
 	ID             uuid.UUID `gorm:"type:varchar(36);primary_key"`
 	UserID         uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex"`
-	BusinessTypeID uint
+	BusinessTypeID uuid.UUID `gorm:"type:varchar(36);not null"`
 	Products       []Product
 	Name           string    `gorm:"type:varchar(255);not null"`
 	Type           string    `gorm:"type:varchar(255);not null"`

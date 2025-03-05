@@ -7,9 +7,10 @@ import (
 )
 
 type Product struct {
-	ID           uuid.UUID `gorm:"primaryKey"`
+	ID           uuid.UUID `gorm:"type:varchar(26);primaryKey"`
 	PartnerID    uuid.UUID `gorm:"type:varchar(36);not null"`
 	Partner      Partner
+	Ratings      []Rating
 	Name         string    `gorm:"type:varchar(255);not null"`
 	Description  string    `gorm:"type:text;not null;"`
 	InitialPrice float32   `gorm:"type:float;not null"`
