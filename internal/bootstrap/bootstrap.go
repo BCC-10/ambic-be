@@ -16,6 +16,7 @@ import (
 	"ambic/internal/infra/code"
 	"ambic/internal/infra/email"
 	"ambic/internal/infra/fiber"
+	"ambic/internal/infra/helper"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/limiter"
 	"ambic/internal/infra/maps"
@@ -49,6 +50,8 @@ func Start() error {
 		return err
 	}
 
+	h := helper.New(config)
+
 	v := validator.New()
 
 	j := jwt.NewJwt(config)
@@ -74,8 +77,8 @@ func Start() error {
 	l := limiter.NewLimiter(r)
 
 	userRepository := UserRepo.NewUserMySQL(db)
-	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s)
-	UserHandler.NewUserHandler(v1, userUsecase, v, m)
+	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s, h)
+	UserHandler.NewUserHandler(v1, userUsecase, v, m, h)
 
 	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
@@ -85,8 +88,8 @@ func Start() error {
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m)
 
 	productRepository := ProductRepo.NewProductMySQL(db)
-	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository, s)
-	ProductHandler.NewProductHandler(v1, productUsecase, v, m)
+	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository, s, h)
+	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
