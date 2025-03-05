@@ -5,16 +5,16 @@ import (
 	"mime/multipart"
 )
 
-type GetProductsResponse struct {
-	ID           uuid.UUID `json:"id"`
-	PartnerID    uuid.UUID `json:"partner_id"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
-	InitialPrice float32   `json:"initial_price"`
-	FinalPrice   float32   `json:"final_price"`
-	Stock        int       `json:"stock"`
-	PickupTime   string    `json:"pickup_time"`
-	PhotoURL     string    `json:"photo"`
+type GetProductResponse struct {
+	ID           string  `json:"id"`
+	PartnerID    string  `json:"partner_id,omitempty"`
+	Name         string  `json:"name"`
+	Description  string  `json:"description"`
+	InitialPrice float32 `json:"initial_price"`
+	FinalPrice   float32 `json:"final_price"`
+	Stock        int     `json:"stock"`
+	PickupTime   string  `json:"pickup_time"`
+	PhotoURL     string  `json:"photo"`
 }
 
 type CreateProductRequest struct {
