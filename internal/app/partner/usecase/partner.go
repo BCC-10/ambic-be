@@ -16,6 +16,7 @@ import (
 type PartnerUsecaseItf interface {
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err
 	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
+	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -95,4 +96,38 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) *res.Err {
 	}
 
 	return nil
+}
+
+func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err) {
+	if query.Limit < 1 {
+		query.Limit = 1
+	}
+
+	if query.Page < 1 {
+		query.Page = 1
+	}
+
+	limit := query.Limit
+	offset := (query.Page - 1) * query.Limit
+
+	partner := new(entity.Partner)
+	if err := u.PartnerRepository.GetProducts(partner, dto.PartnerParam{ID: id}, limit, offset); err != nil {
+		return nil, res.ErrInternalServer()
+	}
+
+	products := make([]dto.GetProductResponse, 0)
+	for _, product := range partner.Products {
+		products = append(products, dto.GetProductResponse{
+			ID:           product.ID.String(),
+			Name:         product.Name,
+			Description:  product.Description,
+			InitialPrice: product.InitialPrice,
+			FinalPrice:   product.FinalPrice,
+			Stock:        product.Stock,
+			PickupTime:   product.PickupTime,
+			PhotoURL:     product.PhotoURL,
+		})
+	}
+
+	return products, nil
 }
