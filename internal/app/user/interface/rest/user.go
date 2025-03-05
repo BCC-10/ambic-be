@@ -14,12 +14,14 @@ import (
 type UserHandler struct {
 	Validator   *validator.Validate
 	UserUsecase usecase.UserUsecaseItf
+	helper      helper.HelperIf
 }
 
-func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
+func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf, helper helper.HelperIf) {
 	UserHandler := UserHandler{
 		Validator:   validator,
 		UserUsecase: userUsecase,
+		helper:      helper,
 	}
 
 	routerGroup = routerGroup.Group("/users")
@@ -28,7 +30,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 	req := new(dto.UpdateUserRequest)
-	if err := helper.FormParser(ctx, req); err != nil {
+	if err := h.helper.FormParser(ctx, req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
