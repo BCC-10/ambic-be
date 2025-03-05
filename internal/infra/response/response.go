@@ -47,6 +47,7 @@ const (
 	InvalidTokenFormat = "Token format is invalid"
 	PhotoSizeLimit     = "Photo size is too large"
 	PhotoOnly          = "Only photo is allowed"
+	InvalidUUID        = "UUID is invalid"
 )
 
 // User Domain
