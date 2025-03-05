@@ -3,13 +3,13 @@ package response
 type Err struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
-	Payload interface{} `json:"payload"`
+	Payload interface{} `json:"payload,omitempty"`
 }
 
 type Res struct {
 	StatusCode int         `json:"status_code"`
 	Message    string      `json:"message"`
-	Payload    interface{} `json:"payload"`
+	Payload    interface{} `json:"payload,omitempty"`
 }
 
 // Auth Domain
@@ -62,6 +62,7 @@ const (
 
 // Product Domain
 const (
+	GetProductSuccess          = "Products retrieved successfully"
 	ProductCreateSuccess       = "Product created successfully"
 	ProductUpdateSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
