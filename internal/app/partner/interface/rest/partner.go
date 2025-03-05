@@ -27,7 +27,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	routerGroup = routerGroup.Group("/partners")
 	routerGroup.Get("/:id/products", PartnerHandler.GetProducts)
 	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
-	routerGroup.Post("/verify", PartnerHandler.VerifyPartner)
+	routerGroup.Post("/verify", m.Authentication, m.EnsurePartner, PartnerHandler.VerifyPartner)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
