@@ -12,7 +12,6 @@ import (
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
 	res "ambic/internal/infra/response"
-	"fmt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -57,13 +56,11 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 		return res.ErrInternalServer()
 	}
 
-	photoURL := fmt.Sprintf("%s/%s/%s", u.env.SupabaseURL, u.env.SupabaseBucket, u.env.DefaultProfilePhotoPath)
-
 	user := entity.User{
 		Username: data.Username,
 		Email:    data.Email,
 		Password: string(hashedPassword),
-		PhotoURL: photoURL,
+		PhotoURL: u.env.DefaultProfilePhotoURL,
 	}
 
 	var dbUser entity.User
