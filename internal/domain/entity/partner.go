@@ -9,7 +9,7 @@ import (
 
 type Partner struct {
 	ID             uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	UserID         uuid.UUID `gorm:"type:varchar(36);not null;"`
+	UserID         uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex"`
 	BusinessTypeID uint
 	Products       []Product
 	Name           string    `gorm:"type:varchar(255);not null"`
@@ -20,6 +20,7 @@ type Partner struct {
 	Latitude       float64   `gorm:"type:float;not null"`
 	Instagram      string    `gorm:"type:varchar(255);not null"`
 	IsVerified     bool      `gorm:"type:boolean;default:false"`
+	PhotoURL       string    `gorm:"type:varchar(255);default:null"`
 	CreatedAt      time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt      time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
