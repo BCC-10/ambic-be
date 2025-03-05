@@ -6,11 +6,14 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/helper"
 	"ambic/internal/infra/maps"
 	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
+	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"path/filepath"
 )
 
 type PartnerUsecaseItf interface {
@@ -24,14 +27,18 @@ type PartnerUsecase struct {
 	PartnerRepository repository.PartnerMySQLItf
 	UserRepository    userRepo.UserMySQLItf
 	Maps              maps.MapsIf
+	Supabase          supabase.SupabaseIf
+	helper            helper.HelperIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, maps maps.MapsIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:               env,
 		PartnerRepository: partnerRepository,
 		Maps:              maps,
 		UserRepository:    userRepository,
+		Supabase:          supabase,
+		helper:            helper,
 	}
 }
 
@@ -58,6 +65,30 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		Instagram: data.Instagram,
 		Longitude: data.Longitude,
 		Latitude:  data.Latitude,
+	}
+
+	if data.Photo != nil {
+		if err := u.helper.ValidateImage(data.Photo); err != nil {
+			return err
+		}
+
+		src, err := data.Photo.Open()
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		defer src.Close()
+
+		bucket := u.env.SupabaseBucket
+		path := "partners/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
+		contentType := data.Photo.Header.Get("Content-Type")
+
+		photoURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
+		if err != nil {
+			return res.ErrInternalServer()
+		}
+
+		partner.PhotoURL = photoURL
 	}
 
 	if err := u.PartnerRepository.Create(&partner); err != nil {

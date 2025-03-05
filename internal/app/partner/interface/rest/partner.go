@@ -3,6 +3,7 @@ package rest
 import (
 	"ambic/internal/app/partner/usecase"
 	"ambic/internal/domain/dto"
+	"ambic/internal/infra/helper"
 	res "ambic/internal/infra/response"
 	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
@@ -13,12 +14,14 @@ import (
 type PartnerHandler struct {
 	Validator      *validator.Validate
 	PartnerUsecase usecase.PartnerUsecaseItf
+	helper         helper.HelperIf
 }
 
-func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
+func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf, helper helper.HelperIf) {
 	PartnerHandler := PartnerHandler{
 		PartnerUsecase: partnerUsecase,
 		Validator:      validator,
+		helper:         helper,
 	}
 
 	routerGroup = routerGroup.Group("/partners")
@@ -29,7 +32,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	data := new(dto.RegisterPartnerRequest)
-	if err := ctx.BodyParser(&data); err != nil {
+	if err := h.helper.FormParser(ctx, data); err != nil {
 		return res.BadRequest(ctx)
 	}
 

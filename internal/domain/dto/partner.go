@@ -1,15 +1,19 @@
 package dto
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"mime/multipart"
+)
 
 type RegisterPartnerRequest struct {
-	Name      string  `form:"name" validate:"required"`
-	Type      string  `form:"type" validate:"required"`
-	Address   string  `form:"address" validate:"required"`
-	City      string  `form:"city" validate:"required"`
-	Instagram string  `form:"instagram" validate:"required"`
-	Longitude float64 `form:"longitude" validate:"required,longitude"`
-	Latitude  float64 `form:"latitude" validate:"required,latitude"`
+	Name      string                `form:"name" validate:"required"`
+	Type      string                `form:"type" validate:"required"`
+	Address   string                `form:"address" validate:"required"`
+	City      string                `form:"city" validate:"required"`
+	Instagram string                `form:"instagram" validate:"required"`
+	Longitude float64               `form:"longitude" validate:"required,longitude"`
+	Latitude  float64               `form:"latitude" validate:"required,latitude"`
+	Photo     *multipart.FileHeader `form:"photo"`
 }
 
 type VerifyPartnerRequest struct {
@@ -31,6 +35,7 @@ type GetPartnerResponse struct {
 	Instagram string  `json:"instagram"`
 	Longitude float64 `json:"longitude"`
 	Latitude  float64 `json:"latitude"`
+	Photo     string  `json:"photo"`
 }
 
 type PartnerParam struct {
