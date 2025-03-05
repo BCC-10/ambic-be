@@ -25,7 +25,7 @@ type User struct {
 	Gender     *Gender   `gorm:"type:ENUM('male','female');default:null"`
 	Password   string    `gorm:"type:varchar(255)"`
 	IsVerified bool      `gorm:"type:boolean;default:false"`
-	PhotoURL   string    `gorm:"type:varchar(255);default:https://uqrnpvnydqwyreivieki.supabase.co/storage/v1/object/public/uploads/profiles/default.png"`
+	PhotoURL   string    `gorm:"type:varchar(255);not null"`
 	CreatedAt  time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
