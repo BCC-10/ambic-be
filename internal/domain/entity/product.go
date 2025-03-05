@@ -11,7 +11,7 @@ type Product struct {
 	PartnerID    uuid.UUID `gorm:"type:varchar(36);not null"`
 	Partner      Partner
 	Ratings      []Rating
-	Name         string    `gorm:"type:varchar(255);not null"`
+	Name         string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_partner_product"`
 	Description  string    `gorm:"type:text;not null;"`
 	InitialPrice float32   `gorm:"type:float;not null"`
 	FinalPrice   float32   `gorm:"type:float;not null"`

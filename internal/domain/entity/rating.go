@@ -8,15 +8,17 @@ import (
 
 type Rating struct {
 	ID        uuid.UUID `gorm:"type:varchar(36);primaryKey"`
-	ProductID uuid.UUID `gorm:"type:varchar(36);not null"`
-	UserID    uuid.UUID `gorm:"type:varchar(36);not null"`
+	ProductID uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_user"`
+	UserID    uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_user"`
 	Star      int       `gorm:"type:int(8);not null"`
-	Feedback  string    `gorm:"type:varchar(1000);not null"`
+	Feedback  string    `gorm:"type:varchar(1000)"`
 	PhotoURL  string    `gorm:"type:varchar(255)"`
 }
 
 func (r *Rating) BeforeCreate(tx *gorm.DB) (err error) {
-	return tx.Exec("ALTER TABLE ratings ADD CONSTRAINT unique_user_product UNIQUE (user_id, product_id)").Error
+	id, _ := uuid.NewUUID()
+	r.ID = id
+	return
 }
 
 func (r *Rating) ParseDTOGet() dto.GetRatingResponse {
