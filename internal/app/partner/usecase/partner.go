@@ -14,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"path/filepath"
+	"strings"
 )
 
 type PartnerUsecaseItf interface {
@@ -21,6 +22,7 @@ type PartnerUsecaseItf interface {
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err
 	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
+	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 }
 
 type PartnerUsecase struct {
@@ -175,4 +177,50 @@ func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res
 	}
 
 	return partner.ParseDTOGet(), nil
+}
+
+func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err {
+	partnerDB := new(entity.Partner)
+	if err := u.PartnerRepository.Show(partnerDB, dto.PartnerParam{ID: id}); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	if err := u.helper.ValidateImage(data.Photo); err != nil {
+		return err
+	}
+
+	src, err := data.Photo.Open()
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	defer src.Close()
+
+	bucket := u.env.SupabaseBucket
+	path := "partners/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
+	contentType := data.Photo.Header.Get("Content-Type")
+
+	photoURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
+	if err != nil {
+		return res.ErrInternalServer()
+	}
+
+	partner := &entity.Partner{
+		ID:       id,
+		PhotoURL: photoURL,
+	}
+
+	if err := u.PartnerRepository.Update(partner); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	oldPhotoURL := partnerDB.PhotoURL
+	index := strings.Index(oldPhotoURL, bucket)
+	oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
+
+	if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
 }

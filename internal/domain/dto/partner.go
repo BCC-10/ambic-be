@@ -21,6 +21,10 @@ type VerifyPartnerRequest struct {
 	Token string `json:"token" validate:"required"`
 }
 
+type UpdatePhotoRequest struct {
+	Photo *multipart.FileHeader `form:"photo" validate:"required"`
+}
+
 type GetPartnerProductsQuery struct {
 	Page  int `query:"page"`
 	Limit int `query:"limit"`
