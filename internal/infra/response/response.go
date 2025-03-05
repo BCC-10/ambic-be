@@ -12,6 +12,10 @@ type Res struct {
 	Payload    interface{} `json:"payload,omitempty"`
 }
 
+const (
+	EntityTooLarge = "Entity too large, max size is %d MB"
+)
+
 // Auth Domain
 const (
 	UsernameExist   = "Username already exists"
