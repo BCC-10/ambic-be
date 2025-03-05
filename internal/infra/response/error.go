@@ -36,8 +36,9 @@ func ErrValidationError(val interface{}, err interface{}) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
-func ErrEntityTooLarge(message ...string) *Err {
-	return newError(fiber.ErrRequestEntityTooLarge.Code, fiber.ErrRequestEntityTooLarge.Message, message...)
+func ErrEntityTooLarge(max int, message ...string) *Err {
+	defaultMessage := fmt.Sprintf(EntityTooLarge, max)
+	return newError(fiber.ErrRequestEntityTooLarge.Code, defaultMessage, message...)
 }
 
 func ErrUnprocessableEntity(message ...string) *Err {
