@@ -37,7 +37,7 @@ func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLIt
 	}
 }
 
-func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductRequest) *res.Err {
+func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProductRequest) *res.Err {
 	contentType := req.Photo.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "image/") {
 		return res.ErrUnprocessableEntity(res.PhotoOnly)
@@ -61,17 +61,6 @@ func (u ProductUsecase) CreateProduct(userId uuid.UUID, req dto.CreateProductReq
 	if err != nil {
 		return res.ErrInternalServer()
 	}
-
-	user := new(entity.User)
-	if err := u.UserRepository.Show(user, dto.UserParam{Id: userId}); err != nil {
-		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrNotFound(res.UserNotExists)
-		}
-
-		return res.ErrInternalServer()
-	}
-
-	partnerId := user.Partner.ID
 
 	product := &entity.Product{
 		PartnerID:    partnerId,

@@ -34,13 +34,13 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx)
 	}
 
-	userId := ctx.Locals("userId").(uuid.UUID)
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
 	if err := h.validator.Struct(req); err != nil {
 		return res.ValidationError(ctx, req.ToResponse(), err)
 	}
 
-	if err := h.ProductUsecase.CreateProduct(userId, *req); err != nil {
+	if err := h.ProductUsecase.CreateProduct(partnerId, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 
