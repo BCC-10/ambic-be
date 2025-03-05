@@ -45,6 +45,8 @@ type Env struct {
 	SupabaseBucket string `env:"SUPABASE_BUCKET"`
 	SupabaseURL    string `env:"SUPABASE_URL"`
 	SupabaseSecret string `env:"SUPABASE_SECRET"`
+
+	MidtransServerKey string `env:"MIDTRANS_SERVER_KEY"`
 }
 
 func New() (*Env, error) {
