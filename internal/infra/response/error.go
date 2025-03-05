@@ -76,7 +76,7 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 	errorsMap := make(map[string]string)
 	for _, err := range err.(validator.ValidationErrors) {
 		field := strings.ToLower(err.Field())
-		errorsMap[field] = fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param())
+		errorsMap[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
 	}
 
 	payload := map[string]interface{}{"errors": errorsMap}
