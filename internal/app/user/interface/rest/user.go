@@ -43,7 +43,5 @@ func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.UpdateSuccess, fiber.Map{
-		"user": req.ToResponse(),
-	})
+	return res.SuccessResponse(ctx, res.UpdateSuccess, nil)
 }
