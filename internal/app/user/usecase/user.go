@@ -108,7 +108,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 
 		user.PhotoURL = publicURL
 
-		if userDB.PhotoURL != "" {
+		if userDB.PhotoURL != u.env.DefaultProfilePhotoURL {
 			oldPhotoURL := userDB.PhotoURL
 			index := strings.Index(oldPhotoURL, bucket)
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
