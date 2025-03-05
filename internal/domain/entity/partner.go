@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"ambic/internal/domain/dto"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"time"
@@ -26,4 +27,17 @@ type Partner struct {
 func (p *Partner) BeforeCreate(tx *gorm.DB) (err error) {
 	p.ID = uuid.New()
 	return
+}
+
+func (p *Partner) ParseDTOGet() dto.GetPartnerResponse {
+	return dto.GetPartnerResponse{
+		ID:        p.ID.String(),
+		Name:      p.Name,
+		Type:      p.Type,
+		Address:   p.Address,
+		City:      p.City,
+		Instagram: p.Instagram,
+		Longitude: p.Longitude,
+		Latitude:  p.Latitude,
+	}
 }

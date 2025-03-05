@@ -22,6 +22,17 @@ type GetPartnerProductsQuery struct {
 	Limit int `query:"limit"`
 }
 
+type GetPartnerResponse struct {
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Type      string  `json:"type"`
+	Address   string  `json:"address"`
+	City      string  `json:"city"`
+	Instagram string  `json:"instagram"`
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
+}
+
 type PartnerParam struct {
 	ID    uuid.UUID
 	Email string
