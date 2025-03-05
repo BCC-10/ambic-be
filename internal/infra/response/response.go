@@ -65,6 +65,7 @@ const (
 	PartnerVerifySuccess       = "Partner verified successfully"
 	PartnerVerified            = "Partner is already verified"
 	PartnerNotExists           = "Partner does not exist"
+	GetPartnerSuccess          = "Partner retrieved successfully"
 )
 
 // Product Domain

@@ -17,6 +17,7 @@ import (
 )
 
 type PartnerUsecaseItf interface {
+	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err
 	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
@@ -161,4 +162,17 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQ
 	}
 
 	return products, nil
+}
+
+func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err) {
+	partner := new(entity.Partner)
+	if err := u.PartnerRepository.Show(partner, dto.PartnerParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return dto.GetPartnerResponse{}, res.ErrNotFound(res.PartnerNotExists)
+		}
+
+		return dto.GetPartnerResponse{}, res.ErrInternalServer()
+	}
+
+	return partner.ParseDTOGet(), nil
 }

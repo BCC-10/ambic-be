@@ -8,6 +8,7 @@ import (
 
 type PartnerMySQLItf interface {
 	GetProducts(partner *entity.Partner, param dto.PartnerParam, limit int, offset int) error
+	Show(partner *entity.Partner, param dto.PartnerParam) error
 	Create(partner *entity.Partner) error
 	Update(partner *entity.Partner) error
 }
@@ -32,4 +33,8 @@ func (r *PartnerMySQL) Create(partner *entity.Partner) error {
 
 func (r *PartnerMySQL) Update(partner *entity.Partner) error {
 	return r.db.Debug().Updates(partner).Error
+}
+
+func (r *PartnerMySQL) Show(partner *entity.Partner, param dto.PartnerParam) error {
+	return r.db.Debug().First(partner, param).Error
 }

@@ -25,6 +25,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup = routerGroup.Group("/partners")
+	routerGroup.Get("/:id", m.Authentication, m.EnsurePartner, PartnerHandler.Show)
 	routerGroup.Get("/:id/products", m.Authentication, m.EnsurePartner, PartnerHandler.GetProducts)
 	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
 	routerGroup.Post("/verify", m.Authentication, PartnerHandler.VerifyPartner)
@@ -83,5 +84,21 @@ func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
 
 	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
 		"products": products,
+	})
+}
+
+func (h *PartnerHandler) Show(ctx *fiber.Ctx) error {
+	partnerId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, err.Error())
+	}
+
+	partner, _err := h.PartnerUsecase.ShowPartner(partnerId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetPartnerSuccess, fiber.Map{
+		"partner": partner,
 	})
 }
