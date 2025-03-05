@@ -82,6 +82,15 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if data.Photo != nil {
+		contentType := data.Photo.Header.Get("Content-Type")
+		if !strings.HasPrefix(contentType, "image/") {
+			return res.ErrUnprocessableEntity(res.PhotoOnly)
+		}
+
+		if data.Photo.Size > u.env.MaxUploadSize*1024*1024 {
+			return res.ErrEntityTooLarge(res.PhotoSizeLimit)
+		}
+
 		src, err := data.Photo.Open()
 		if err != nil {
 			return res.ErrInternalServer()
@@ -91,7 +100,6 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 
 		bucket := u.env.SupabaseBucket
 		path := "profiles/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
-		contentType := data.Photo.Header.Get("Content-Type")
 
 		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 		if err != nil {
