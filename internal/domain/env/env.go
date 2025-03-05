@@ -11,6 +11,8 @@ type Env struct {
 	AppURL        string `env:"APP_URL"`
 	MaxUploadSize int64  `env:"MAX_UPLOAD_SIZE"`
 
+	DefaultProfilePhotoPath string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
+
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
 	TokenLength      int           `env:"TOKEN_LENGTH"`
