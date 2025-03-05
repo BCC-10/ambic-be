@@ -5,6 +5,7 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/helper"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
@@ -22,13 +23,15 @@ type UserUsecase struct {
 	UserRepository repository.UserMySQLItf
 	Supabase       supabase.SupabaseIf
 	env            *env.Env
+	helper         helper.HelperIf
 }
 
-func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supabase supabase.SupabaseIf) UserUsecaseItf {
+func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) UserUsecaseItf {
 	return &UserUsecase{
 		UserRepository: userRepository,
 		Supabase:       supabase,
 		env:            env,
+		helper:         helper,
 	}
 }
 
@@ -76,13 +79,8 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if data.Photo != nil {
-		contentType := data.Photo.Header.Get("Content-Type")
-		if !strings.HasPrefix(contentType, "image/") {
-			return res.ErrUnprocessableEntity(res.PhotoOnly)
-		}
-
-		if data.Photo.Size > u.env.MaxUploadSize*1024*1024 {
-			return res.ErrEntityTooLarge(res.PhotoSizeLimit)
+		if err := u.helper.ValidateImage(data.Photo); err != nil {
+			return err
 		}
 
 		src, err := data.Photo.Open()
@@ -94,6 +92,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 
 		bucket := u.env.SupabaseBucket
 		path := "profiles/" + uuid.NewString() + filepath.Ext(data.Photo.Filename)
+		contentType := data.Photo.Header.Get("Content-Type")
 
 		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 		if err != nil {

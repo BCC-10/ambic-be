@@ -14,12 +14,14 @@ import (
 type ProductHandler struct {
 	ProductUsecase usecase.ProductUsecaseItf
 	validator      *validator.Validate
+	helper         helper.HelperIf
 }
 
-func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
+func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf, helper helper.HelperIf) {
 	ProductHandler := ProductHandler{
 		ProductUsecase: productUsecase,
 		validator:      validator,
+		helper:         helper,
 	}
 
 	routerGroup = routerGroup.Group("/products")
@@ -30,7 +32,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 
 func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 	req := new(dto.CreateProductRequest)
-	if err := helper.FormParser(ctx, req); err != nil {
+	if err := h.helper.FormParser(ctx, req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
@@ -49,7 +51,7 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 
 func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 	req := new(dto.UpdateProductRequest)
-	if err := helper.FormParser(ctx, req); err != nil {
+	if err := h.helper.FormParser(ctx, req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
