@@ -1,6 +1,7 @@
 package env
 
 import (
+	"fmt"
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 	"time"
@@ -12,6 +13,7 @@ type Env struct {
 	MaxUploadSize int64  `env:"MAX_UPLOAD_SIZE"`
 
 	DefaultProfilePhotoPath string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
+	DefaultProfilePhotoURL  string
 
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
@@ -62,6 +64,8 @@ func New() (*Env, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
 
 	return _env, nil
 }
