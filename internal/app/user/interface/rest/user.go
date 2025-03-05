@@ -25,6 +25,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 	}
 
 	routerGroup = routerGroup.Group("/users")
+	routerGroup.Get("/:id", m.Authentication, UserHandler.ShowUser)
 	routerGroup.Patch("/update", m.Authentication, UserHandler.UpdateUser)
 }
 
@@ -44,4 +45,25 @@ func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.UpdateSuccess, nil)
+}
+
+func (h UserHandler) ShowUser(ctx *fiber.Ctx) error {
+	userId := ctx.Params("id")
+	if userId == "" {
+		return res.BadRequest(ctx)
+	}
+
+	id, err := uuid.Parse(userId)
+	if err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	user, _err := h.UserUsecase.ShowUser(id)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.ShowUserSuccess, fiber.Map{
+		"user": user,
+	})
 }
