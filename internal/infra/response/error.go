@@ -46,6 +46,28 @@ func ErrValidationError(val interface{}, err interface{}) *Err {
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
+func ErrEntityTooLarge(message ...string) *Err {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrRequestEntityTooLarge.Message
+	}
+
+	return &Err{Code: fiber.ErrRequestEntityTooLarge.Code, Message: msg}
+}
+
+func ErrUnprocessableEntity(message ...string) *Err {
+	var msg string
+	if len(message) == 1 {
+		msg = message[0]
+	} else {
+		msg = fiber.ErrUnprocessableEntity.Message
+	}
+
+	return &Err{Code: fiber.ErrUnprocessableEntity.Code, Message: msg}
+}
+
 func ErrInternalServer(message ...string) *Err {
 	var msg string
 	if len(message) == 1 {
