@@ -32,7 +32,8 @@ type User struct {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
-	u.ID = uuid.NewV7()
+	id, _ := uuid.NewV7()
+	u.ID = id
 	return
 }
 
