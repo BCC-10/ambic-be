@@ -26,7 +26,7 @@ type Partner struct {
 }
 
 func (p *Partner) BeforeCreate(tx *gorm.DB) (err error) {
-	p.ID = uuid.New()
+	p.ID = uuid.NewV7()
 	return
 }
 

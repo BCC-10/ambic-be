@@ -22,6 +22,6 @@ type Product struct {
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
-	p.ID = uuid.New()
+	p.ID = uuid.NewV7()
 	return
 }

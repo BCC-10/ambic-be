@@ -302,7 +302,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 	}
 
 	user := &entity.User{
-		ID:         uuid.New(),
+		ID:         uuid.NewV7(),
 		Name:       profile.Name,
 		Username:   profile.Username,
 		Email:      profile.Email,
