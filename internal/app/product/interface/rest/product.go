@@ -39,14 +39,14 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, req.ToResponse(), err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	if err := h.ProductUsecase.CreateProduct(partnerId, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.ProductCreateSuccess, req.ToResponse())
+	return res.SuccessResponse(ctx, res.ProductCreateSuccess, nil)
 }
 
 func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {

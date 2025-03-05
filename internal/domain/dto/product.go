@@ -27,15 +27,6 @@ type CreateProductRequest struct {
 	Photo        *multipart.FileHeader `json:"photo" form:"photo" validate:"required"`
 }
 
-type CreateProductResponse struct {
-	Name         string  `json:"name"`
-	Description  string  `json:"description"`
-	InitialPrice float32 `json:"initial_price"`
-	FinalPrice   float32 `json:"final_price"`
-	Stock        int     `json:"stock"`
-	PickupTime   string  `json:"pickup_time"`
-}
-
 type UpdateProductRequest struct {
 	Name         string                `form:"name"`
 	Description  string                `form:"description"`
@@ -49,15 +40,4 @@ type UpdateProductRequest struct {
 type ProductParam struct {
 	Id   uuid.UUID
 	Name string
-}
-
-func (r CreateProductRequest) ToResponse() CreateProductResponse {
-	return CreateProductResponse{
-		Name:         r.Name,
-		Description:  r.Description,
-		InitialPrice: r.InitialPrice,
-		FinalPrice:   r.FinalPrice,
-		Stock:        r.Stock,
-		PickupTime:   r.PickupTime,
-	}
 }
