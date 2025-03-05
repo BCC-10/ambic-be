@@ -51,6 +51,7 @@ const (
 
 // User Domain
 const (
+	ShowUserSuccess   = "User retrieved successfully"
 	InvalidDateFormat = "Date format is invalid"
 	UpdateSuccess     = "User profile updated successfully"
 )
