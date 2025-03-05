@@ -30,7 +30,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 
 func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 	req := new(dto.CreateProductRequest)
-	if err := helper.ParseForm(ctx, req); err != nil {
+	if err := helper.FormParser(ctx, req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
@@ -49,7 +49,7 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 
 func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 	req := new(dto.UpdateProductRequest)
-	if err := helper.ParseForm(ctx, req); err != nil {
+	if err := helper.FormParser(ctx, req); err != nil {
 		return res.BadRequest(ctx)
 	}
 

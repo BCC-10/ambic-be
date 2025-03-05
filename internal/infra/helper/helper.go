@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func ParseForm(ctx *fiber.Ctx, target interface{}) error {
+func FormParser(ctx *fiber.Ctx, target interface{}) error {
 	val := reflect.ValueOf(target)
 	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct {
 		return fmt.Errorf("target must be a pointer to a struct")
