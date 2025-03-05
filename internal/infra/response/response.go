@@ -34,13 +34,15 @@ const (
 	IncorrectOldPassword = "Old password is incorrect"
 )
 
-// middleware
+// others
 const (
 	LimitExceeded      = "Too many requests. Please try again later."
 	UserNotVerified    = "User is not verified"
 	UserVerified       = "User is already verified"
 	InvalidToken       = "Token is invalid or has expired"
 	InvalidTokenFormat = "Token format is invalid"
+	PhotoSizeLimit     = "Photo size is too large"
+	PhotoOnly          = "Only photo is allowed"
 )
 
 // User Domain
