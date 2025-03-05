@@ -58,11 +58,13 @@ const (
 
 // Partner Domain
 const (
-	PartnerNotVerified     = "Partner is not verified"
-	PartnerRegisterSuccess = "Partner registered successfully"
-	PartnerVerifySuccess   = "Partner verified successfully"
-	PartnerVerified        = "Partner is already verified"
-	PartnerNotExists       = "Partner does not exist"
+	AlreadyRegisteredAsPartner = "Partner is already registered"
+	NotPartner                 = "User is not a partner"
+	PartnerNotVerified         = "Partner is not verified"
+	PartnerRegisterSuccess     = "Partner registered successfully"
+	PartnerVerifySuccess       = "Partner verified successfully"
+	PartnerVerified            = "Partner is already verified"
+	PartnerNotExists           = "Partner does not exist"
 )
 
 // Product Domain

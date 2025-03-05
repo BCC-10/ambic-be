@@ -9,7 +9,7 @@ import (
 func (m *Middleware) EnsureNotPartner(ctx *fiber.Ctx) error {
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 	if partnerId != uuid.Nil {
-		return res.Forbidden(ctx)
+		return res.Forbidden(ctx, res.AlreadyRegisteredAsPartner)
 	}
 
 	return ctx.Next()
