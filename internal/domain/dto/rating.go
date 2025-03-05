@@ -1,6 +1,9 @@
 package dto
 
-import "mime/multipart"
+import (
+	"github.com/google/uuid"
+	"mime/multipart"
+)
 
 type GetRatingResponse struct {
 	ID        uint   `json:"id"`
@@ -29,6 +32,6 @@ type UpdateRatingRequest struct {
 
 type RatingParam struct {
 	ID        uint
-	ProductID string
-	UserID    string
+	ProductID uuid.UUID
+	UserID    uuid.UUID
 }
