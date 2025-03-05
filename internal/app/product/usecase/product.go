@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"ambic/internal/app/product/repository"
-	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/helper"
 	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
@@ -23,28 +23,23 @@ type ProductUsecaseItf interface {
 
 type ProductUsecase struct {
 	env               *env.Env
-	UserRepository    userRepo.UserMySQLItf
 	ProductRepository repository.ProductMySQLItf
 	Supabase          supabase.SupabaseIf
+	helper            helper.HelperIf
 }
 
-func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLItf, userRepository userRepo.UserMySQLItf, supabase supabase.SupabaseIf) ProductUsecaseItf {
+func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) ProductUsecaseItf {
 	return &ProductUsecase{
 		env:               env,
-		UserRepository:    userRepository,
 		ProductRepository: productRepository,
 		Supabase:          supabase,
+		helper:            helper,
 	}
 }
 
 func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProductRequest) *res.Err {
-	contentType := req.Photo.Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, "image/") {
-		return res.ErrUnprocessableEntity(res.PhotoOnly)
-	}
-
-	if req.Photo.Size > u.env.MaxUploadSize*1024*1024 {
-		return res.ErrEntityTooLarge(res.PhotoSizeLimit)
+	if err := u.helper.ValidateImage(req.Photo); err != nil {
+		return err
 	}
 
 	src, err := req.Photo.Open()
@@ -56,6 +51,7 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 
 	bucket := u.env.SupabaseBucket
 	path := "products/" + uuid.NewString() + filepath.Ext(req.Photo.Filename)
+	contentType := req.Photo.Header.Get("Content-Type")
 
 	publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 	if err != nil {
@@ -105,13 +101,8 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 	}
 
 	if req.Photo != nil {
-		contentType := req.Photo.Header.Get("Content-Type")
-		if !strings.HasPrefix(contentType, "image/") {
-			return res.ErrUnprocessableEntity(res.PhotoOnly)
-		}
-
-		if req.Photo.Size > u.env.MaxUploadSize*1024*1024 {
-			return res.ErrEntityTooLarge(res.PhotoSizeLimit)
+		if err := u.helper.ValidateImage(req.Photo); err != nil {
+			return err
 		}
 
 		src, err := req.Photo.Open()
@@ -123,6 +114,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 
 		bucket := u.env.SupabaseBucket
 		path := "products/" + uuid.NewString() + filepath.Ext(req.Photo.Filename)
+		contentType := req.Photo.Header.Get("Content-Type")
 
 		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 		if err != nil {
