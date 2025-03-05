@@ -54,14 +54,12 @@ type Env struct {
 }
 
 func New() (*Env, error) {
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
 
 	_env := new(Env)
-	err = env.Parse(_env)
-	if err != nil {
+	if err := env.Parse(_env); err != nil {
 		return nil, err
 	}
 

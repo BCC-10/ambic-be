@@ -45,8 +45,7 @@ func Start() error {
 		config.DBName,
 	))
 
-	err = mysql.Migrate(db)
-	if err != nil {
+	if err := mysql.Migrate(db); err != nil {
 		return err
 	}
 
