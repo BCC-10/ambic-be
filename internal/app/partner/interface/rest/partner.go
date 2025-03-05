@@ -74,7 +74,7 @@ func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
 
 	partnerId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
 	products, _err := h.PartnerUsecase.GetProducts(partnerId, *query)
@@ -90,7 +90,7 @@ func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
 func (h *PartnerHandler) Show(ctx *fiber.Ctx) error {
 	partnerId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
-		return res.BadRequest(ctx, err.Error())
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
 	partner, _err := h.PartnerUsecase.ShowPartner(partnerId)

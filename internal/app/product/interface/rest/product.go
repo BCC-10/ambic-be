@@ -57,7 +57,7 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 
 	productId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
 	if err := h.validator.Struct(req); err != nil {
@@ -75,7 +75,7 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 func (h ProductHandler) DeleteProduct(ctx *fiber.Ctx) error {
 	productId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
