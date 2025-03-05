@@ -15,7 +15,7 @@ type Rating struct {
 	PhotoURL  string    `gorm:"type:varchar(255)"`
 }
 
-func (r *Rating) AfterCreate(tx *gorm.DB) (err error) {
+func (r *Rating) BeforeCreate(tx *gorm.DB) (err error) {
 	return tx.Exec("ALTER TABLE ratings ADD CONSTRAINT unique_user_product UNIQUE (user_id, product_id)").Error
 }
 
