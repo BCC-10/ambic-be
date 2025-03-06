@@ -18,7 +18,7 @@ import (
 
 type UserUsecaseItf interface {
 	UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err
-	ShowUser(id uuid.UUID) (dto.GetUserResponse, *res.Err)
+	GetUserProfile(id uuid.UUID) (dto.GetUserResponse, *res.Err)
 }
 
 type UserUsecase struct {
@@ -37,7 +37,7 @@ func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supaba
 	}
 }
 
-func (u *UserUsecase) ShowUser(id uuid.UUID) (dto.GetUserResponse, *res.Err) {
+func (u *UserUsecase) GetUserProfile(id uuid.UUID) (dto.GetUserResponse, *res.Err) {
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
 		return dto.GetUserResponse{}, res.ErrInternalServer()
