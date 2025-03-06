@@ -4,7 +4,6 @@ import (
 	PaymentUsecase "ambic/internal/app/payment/usecase"
 	"ambic/internal/domain/dto"
 	res "ambic/internal/infra/response"
-	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,7 +13,7 @@ type PaymentHandler struct {
 	PaymentUsecase PaymentUsecase.PaymentUsecaseItf
 }
 
-func NewPaymentHandler(routerGroup fiber.Router, paymentUsecase PaymentUsecase.PaymentUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf) {
+func NewPaymentHandler(routerGroup fiber.Router, paymentUsecase PaymentUsecase.PaymentUsecaseItf, validator *validator.Validate) {
 	PaymentHandler := PaymentHandler{
 		Validator:      validator,
 		PaymentUsecase: paymentUsecase,
