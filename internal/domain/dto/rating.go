@@ -3,6 +3,7 @@ package dto
 import (
 	"github.com/google/uuid"
 	"mime/multipart"
+	"time"
 )
 
 type GetRatingResponse struct {
@@ -12,6 +13,7 @@ type GetRatingResponse struct {
 	Star      int       `json:"star"`
 	Feedback  string    `json:"feedback"`
 	Photo     string    `json:"photo"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type CreateRatingRequest struct {
