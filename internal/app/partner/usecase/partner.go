@@ -164,6 +164,10 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQ
 
 	partner := new(entity.Partner)
 	if err := u.PartnerRepository.GetProducts(partner, dto.PartnerParam{ID: id}, limit, offset); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return nil, res.ErrNotFound(res.PartnerNotExists)
+		}
+
 		return nil, res.ErrInternalServer()
 	}
 
@@ -200,6 +204,10 @@ func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res
 func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err {
 	partnerDB := new(entity.Partner)
 	if err := u.PartnerRepository.Show(partnerDB, dto.PartnerParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.PartnerNotExists)
+		}
+
 		return res.ErrInternalServer()
 	}
 
