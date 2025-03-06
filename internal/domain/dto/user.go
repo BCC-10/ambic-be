@@ -21,7 +21,7 @@ type UpdateUserRequest struct {
 	Address     string                `form:"address"`
 	BornDate    string                `form:"born_date" validate:"omitempty,datetime=2006-01-02"`
 	Gender      string                `form:"gender" validate:"omitempty,oneof=male female"`
-	Photo       *multipart.FileHeader `form:"photo" validate:"omitempty,image"`
+	Photo       *multipart.FileHeader `form:"photo"`
 	OldPassword string                `form:"old_password" validate:"required_with=NewPassword,omitempty,min=6"`
 	NewPassword string                `form:"new_password" validate:"omitempty,min=6"`
 }
