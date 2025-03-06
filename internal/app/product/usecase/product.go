@@ -70,6 +70,9 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 	}
 
 	if err = u.ProductRepository.Create(product); err != nil {
+		if mysql.CheckError(err, mysql.ErrDuplicateEntry) {
+			return res.ErrConflict(res.ProductAlreadyExists)
+		}
 		return res.ErrInternalServer()
 	}
 

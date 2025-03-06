@@ -80,6 +80,7 @@ const (
 	ProductNotExists           = "Product does not exist"
 	RatingNotBelongToPartner   = "Product does not belong to partner"
 	ProductDeleteSuccess       = "Product deleted successfully"
+	ProductAlreadyExists       = "Product already exists"
 )
 
 // Rating Domain
