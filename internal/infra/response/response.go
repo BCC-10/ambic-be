@@ -52,9 +52,10 @@ const (
 
 // User Domain
 const (
-	ShowUserSuccess   = "User retrieved successfully"
-	InvalidDateFormat = "Date format is invalid"
-	UpdateSuccess     = "User profile updated successfully"
+	ShowUserSuccess    = "User retrieved successfully"
+	InvalidDateFormat  = "Date format is invalid"
+	UpdateSuccess      = "User profile updated successfully"
+	PhoneAlreadyExists = "Phone number already exists"
 )
 
 // Partner Domain

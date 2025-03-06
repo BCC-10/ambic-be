@@ -6,6 +6,7 @@ import (
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/helper"
+	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
@@ -123,6 +124,9 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if err := u.UserRepository.Update(user); err != nil {
+		if mysql.CheckError(err, mysql.ErrDuplicateEntry) {
+			return res.ErrBadRequest(res.PhoneAlreadyExists)
+		}
 		return res.ErrInternalServer()
 	}
 
