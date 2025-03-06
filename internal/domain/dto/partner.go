@@ -6,14 +6,15 @@ import (
 )
 
 type RegisterPartnerRequest struct {
-	Name      string                `form:"name" validate:"required"`
-	Type      string                `form:"type" validate:"required"`
-	Address   string                `form:"address" validate:"required"`
-	City      string                `form:"city" validate:"required"`
-	Instagram string                `form:"instagram" validate:"required"`
-	Longitude float64               `form:"longitude" validate:"required,longitude"`
-	Latitude  float64               `form:"latitude" validate:"required,latitude"`
-	Photo     *multipart.FileHeader `form:"photo"`
+	Name           string                `form:"name" validate:"required"`
+	Type           string                `form:"type" validate:"required"`
+	Address        string                `form:"address" validate:"required"`
+	City           string                `form:"city" validate:"required"`
+	Instagram      string                `form:"instagram" validate:"required"`
+	Longitude      float64               `form:"longitude" validate:"required,longitude"`
+	Latitude       float64               `form:"latitude" validate:"required,latitude"`
+	BusinessTypeID string                `form:"business_type_id" validate:"required,uuid"`
+	Photo          *multipart.FileHeader `form:"photo"`
 }
 
 type VerifyPartnerRequest struct {

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	businessTypeRepo "ambic/internal/app/business_type/repository"
 	"ambic/internal/app/partner/repository"
 	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
@@ -26,22 +27,24 @@ type PartnerUsecaseItf interface {
 }
 
 type PartnerUsecase struct {
-	env               *env.Env
-	PartnerRepository repository.PartnerMySQLItf
-	UserRepository    userRepo.UserMySQLItf
-	Maps              maps.MapsIf
-	Supabase          supabase.SupabaseIf
-	helper            helper.HelperIf
+	env                    *env.Env
+	PartnerRepository      repository.PartnerMySQLItf
+	UserRepository         userRepo.UserMySQLItf
+	BusinessTypeRepository businessTypeRepo.BusinessTypeMySQLItf
+	Maps                   maps.MapsIf
+	Supabase               supabase.SupabaseIf
+	helper                 helper.HelperIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
-		env:               env,
-		PartnerRepository: partnerRepository,
-		Maps:              maps,
-		UserRepository:    userRepository,
-		Supabase:          supabase,
-		helper:            helper,
+		env:                    env,
+		PartnerRepository:      partnerRepository,
+		Maps:                   maps,
+		UserRepository:         userRepository,
+		BusinessTypeRepository: businessTypeRepository,
+		Supabase:               supabase,
+		helper:                 helper,
 	}
 }
 
@@ -59,15 +62,30 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		data.Instagram = data.Instagram[1:]
 	}
 
+	businessTypeId, err := uuid.Parse(data.BusinessTypeID)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidBusinessType)
+	}
+
+	businessType := new(entity.BusinessType)
+	if err := u.BusinessTypeRepository.Show(businessType, dto.BusinessTypeParam{ID: businessTypeId}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.InvalidBusinessType)
+		}
+
+		return res.ErrInternalServer()
+	}
+
 	partner := entity.Partner{
-		UserID:    id,
-		Name:      data.Name,
-		Type:      data.Type,
-		Address:   data.Address,
-		City:      data.City,
-		Instagram: data.Instagram,
-		Longitude: data.Longitude,
-		Latitude:  data.Latitude,
+		UserID:         id,
+		Name:           data.Name,
+		Type:           data.Type,
+		Address:        data.Address,
+		City:           data.City,
+		Instagram:      data.Instagram,
+		Longitude:      data.Longitude,
+		Latitude:       data.Latitude,
+		BusinessTypeID: businessTypeId,
 	}
 
 	if data.Photo != nil {
