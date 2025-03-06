@@ -4,6 +4,7 @@ import (
 	"ambic/internal/domain/dto"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Rating struct {
@@ -13,6 +14,8 @@ type Rating struct {
 	Star      int       `gorm:"type:int(8);not null"`
 	Feedback  string    `gorm:"type:varchar(1000)"`
 	PhotoURL  string    `gorm:"type:varchar(255)"`
+	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`
+	UpdatedAt time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
 
 func (r *Rating) BeforeCreate(tx *gorm.DB) (err error) {
@@ -29,5 +32,6 @@ func (r *Rating) ParseDTOGet() dto.GetRatingResponse {
 		Star:      r.Star,
 		Feedback:  r.Feedback,
 		Photo:     r.PhotoURL,
+		UpdatedAt: r.UpdatedAt,
 	}
 }
