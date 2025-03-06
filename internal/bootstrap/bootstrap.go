@@ -18,6 +18,7 @@ import (
 	RatingHandler "ambic/internal/app/rating/interface/rest"
 	RatingRepo "ambic/internal/app/rating/repository"
 	RatingUsecase "ambic/internal/app/rating/usecase"
+	TransactionRepo "ambic/internal/app/transaction/repository"
 	UserHandler "ambic/internal/app/user/interface/rest"
 	UserRepo "ambic/internal/app/user/repository"
 	UserUsecase "ambic/internal/app/user/usecase"
@@ -110,9 +111,11 @@ func Start() error {
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
+	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
+
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
-	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, productRepository, snap)
-	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v, m)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository, snap)
+	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
