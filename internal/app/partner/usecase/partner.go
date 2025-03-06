@@ -3,6 +3,7 @@ package usecase
 import (
 	businessTypeRepo "ambic/internal/app/business_type/repository"
 	"ambic/internal/app/partner/repository"
+	productRepo "ambic/internal/app/product/repository"
 	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -31,15 +32,17 @@ type PartnerUsecase struct {
 	PartnerRepository      repository.PartnerMySQLItf
 	UserRepository         userRepo.UserMySQLItf
 	BusinessTypeRepository businessTypeRepo.BusinessTypeMySQLItf
+	ProductRepository      productRepo.ProductMySQLItf
 	Maps                   maps.MapsIf
 	Supabase               supabase.SupabaseIf
 	helper                 helper.HelperIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
+		ProductRepository:      productRepository,
 		Maps:                   maps,
 		UserRepository:         userRepository,
 		BusinessTypeRepository: businessTypeRepository,
@@ -162,8 +165,8 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQ
 	limit := query.Limit
 	offset := (query.Page - 1) * query.Limit
 
-	partner := new(entity.Partner)
-	if err := u.PartnerRepository.GetProducts(partner, dto.PartnerParam{ID: id}, limit, offset); err != nil {
+	products := new([]entity.Product)
+	if err := u.ProductRepository.GetByPartnerId(products, id, limit, offset); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return nil, res.ErrNotFound(res.PartnerNotExists)
 		}
@@ -171,21 +174,12 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQ
 		return nil, res.ErrInternalServer()
 	}
 
-	products := make([]dto.GetProductResponse, 0)
-	for _, product := range partner.Products {
-		products = append(products, dto.GetProductResponse{
-			ID:           product.ID.String(),
-			Name:         product.Name,
-			Description:  product.Description,
-			InitialPrice: product.InitialPrice,
-			FinalPrice:   product.FinalPrice,
-			Stock:        product.Stock,
-			PickupTime:   product.PickupTime,
-			PhotoURL:     product.PhotoURL,
-		})
+	productsResponse := make([]dto.GetProductResponse, 0)
+	for _, product := range *products {
+		productsResponse = append(productsResponse, product.ParseDTOGet())
 	}
 
-	return products, nil
+	return productsResponse, nil
 }
 
 func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err) {
@@ -204,10 +198,6 @@ func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res
 func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err {
 	partnerDB := new(entity.Partner)
 	if err := u.PartnerRepository.Show(partnerDB, dto.PartnerParam{ID: id}); err != nil {
-		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrNotFound(res.PartnerNotExists)
-		}
-
 		return res.ErrInternalServer()
 	}
 
