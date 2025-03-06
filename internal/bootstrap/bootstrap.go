@@ -18,7 +18,9 @@ import (
 	RatingHandler "ambic/internal/app/rating/interface/rest"
 	RatingRepo "ambic/internal/app/rating/repository"
 	RatingUsecase "ambic/internal/app/rating/usecase"
+	TransactionHandler "ambic/internal/app/transaction/interface/rest"
 	TransactionRepo "ambic/internal/app/transaction/repository"
+	TransactionUsecase "ambic/internal/app/transaction/usecase"
 	UserHandler "ambic/internal/app/user/interface/rest"
 	UserRepo "ambic/internal/app/user/repository"
 	UserUsecase "ambic/internal/app/user/usecase"
@@ -112,6 +114,8 @@ func Start() error {
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
 	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, transactionRepository)
+	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
 	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository, snap)
