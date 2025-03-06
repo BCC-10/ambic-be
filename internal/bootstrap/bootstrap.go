@@ -92,13 +92,13 @@ func Start() error {
 	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
 	BusinessTypeHandler.NewBusinessTypeHandler(v1, businessTypeUsecase, m)
 
-	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, s, h, ma)
-	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h)
-
 	productRepository := ProductRepo.NewProductMySQL(db)
 	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository, s, h)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
+
+	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, s, h, ma)
+	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h)
 
 	ratingRepository := RatingRepo.NewRatingMySQL(db)
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, s, h)
