@@ -87,7 +87,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 	}
 
 	if productDB.PartnerID != partnerId {
-		return res.ErrForbidden(res.ProductNotBelongToPartner)
+		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
 	product := &entity.Product{
@@ -152,7 +152,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 	}
 
 	if productDB.PartnerID != partnerId {
-		return res.ErrForbidden(res.ProductNotBelongToPartner)
+		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
 	if err := u.ProductRepository.Delete(productDB); err != nil {
