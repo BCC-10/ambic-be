@@ -7,7 +7,7 @@ import (
 )
 
 type RatingMySQLItf interface {
-	Get(rating *entity.Rating) error
+	Get(rating *[]entity.Rating) error
 	Show(rating *entity.Rating, param dto.RatingParam) error
 	Create(rating *entity.Rating) error
 	Update(rating *entity.Rating) error
@@ -22,7 +22,7 @@ func NewRatingMySQL(db *gorm.DB) RatingMySQLItf {
 	return &RatingMySQL{db}
 }
 
-func (r *RatingMySQL) Get(rating *entity.Rating) error {
+func (r *RatingMySQL) Get(rating *[]entity.Rating) error {
 	return r.db.Debug().Find(rating).Error
 }
 
