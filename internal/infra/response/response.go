@@ -68,6 +68,7 @@ const (
 	PartnerNotExists           = "Partner does not exist"
 	GetPartnerSuccess          = "Partner retrieved successfully"
 	UpdatePartnerPhotoSuccess  = "Partner photo updated successfully"
+	InvalidBusinessType        = "Business type is invalid"
 )
 
 // Product Domain
@@ -77,6 +78,15 @@ const (
 	ProductUpdateSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
 	ProductNotExists           = "Product does not exist"
-	ProductNotBelongToPartner  = "Product does not belong to partner"
+	RatingNotBelongToPartner   = "Product does not belong to partner"
 	ProductDeleteSuccess       = "Product deleted successfully"
+)
+
+// Rating Domain
+const (
+	RatingNotBelongToUser = "Rating does not belong to user"
+	RatingCreateSuccess   = "Rating created successfully"
+	RatingUpdateSuccess   = "Rating updated successfully"
+	UserAlreadyRated      = "User already rated"
+	RatingDeleteSuccess   = "Rating deleted successfully"
 )
