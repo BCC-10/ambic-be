@@ -84,6 +84,7 @@ const (
 
 // Rating Domain
 const (
+	GetRatingSuccess      = "Ratings retrieved successfully"
 	RatingNotBelongToUser = "Rating does not belong to user"
 	RatingCreateSuccess   = "Rating created successfully"
 	RatingUpdateSuccess   = "Rating updated successfully"

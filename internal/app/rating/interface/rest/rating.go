@@ -25,9 +25,34 @@ func NewRatingHandler(routerGroup fiber.Router, ratingUsecase RatingUsecase.Rati
 	}
 
 	routerGroup = routerGroup.Group("/ratings")
+	routerGroup.Get("/", m.Authentication, RatingHandler.Get)
+	routerGroup.Get("/:id", m.Authentication, RatingHandler.Show)
 	routerGroup.Post("/", m.Authentication, RatingHandler.Create)
 	routerGroup.Patch("/:id/update", m.Authentication, RatingHandler.Update)
 	routerGroup.Delete("/:id", m.Authentication, RatingHandler.Delete)
+}
+
+func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
+	ratings, err := h.RatingUsecase.Get()
+	if err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetRatingSuccess, ratings)
+}
+
+func (h *RatingHandler) Show(ctx *fiber.Ctx) error {
+	ratingId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	rating, _err := h.RatingUsecase.Show(ratingId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetRatingSuccess, rating)
 }
 
 func (h *RatingHandler) Create(ctx *fiber.Ctx) error {
