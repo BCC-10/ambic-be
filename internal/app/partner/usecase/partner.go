@@ -166,7 +166,7 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQ
 	offset := (query.Page - 1) * query.Limit
 
 	products := new([]entity.Product)
-	if err := u.ProductRepository.GetByPartnerId(products, id, limit, offset); err != nil {
+	if err := u.ProductRepository.GetByPartnerId(products, dto.ProductParam{PartnerId: id}, limit, offset); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return nil, res.ErrNotFound(res.PartnerNotExists)
 		}

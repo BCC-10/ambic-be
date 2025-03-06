@@ -3,7 +3,6 @@ package repository
 import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +11,7 @@ type ProductMySQLItf interface {
 	Update(product *entity.Product) error
 	Show(product *entity.Product, param dto.ProductParam) error
 	Delete(product *entity.Product) error
-	GetByPartnerId(products *[]entity.Product, partnerId uuid.UUID, limit int, offset int) error
+	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, limit int, offset int) error
 }
 
 type ProductMySQL struct {
@@ -39,10 +38,6 @@ func (r *ProductMySQL) Delete(product *entity.Product) error {
 	return r.db.Debug().Delete(product).Error
 }
 
-func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, partnerId uuid.UUID, limit int, offset int) error {
-	return r.db.Debug().Find(product, struct {
-		PartnerId uuid.UUID
-	}{
-		PartnerId: partnerId,
-	}).Error
+func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, param dto.ProductParam, limit int, offset int) error {
+	return r.db.Debug().Find(product, param).Limit(limit).Offset(offset).Error
 }
