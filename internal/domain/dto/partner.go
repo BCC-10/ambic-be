@@ -32,15 +32,15 @@ type GetPartnerProductsQuery struct {
 }
 
 type GetPartnerResponse struct {
-	ID        string  `json:"id"`
-	Name      string  `json:"name"`
-	Type      string  `json:"type"`
-	Address   string  `json:"address"`
-	City      string  `json:"city"`
-	Instagram string  `json:"instagram"`
-	Longitude float64 `json:"longitude"`
-	Latitude  float64 `json:"latitude"`
-	Photo     string  `json:"photo"`
+	ID        string  `json:"id,omitempty"`
+	Name      string  `json:"name,omitempty"`
+	Type      string  `json:"type,omitempty"`
+	Address   string  `json:"address,omitempty"`
+	City      string  `json:"city,omitempty"`
+	Instagram string  `json:"instagram,omitempty"`
+	Longitude float64 `json:"longitude,omitempty"`
+	Latitude  float64 `json:"latitude,omitempty"`
+	Photo     string  `json:"photo,omitempty"`
 }
 
 type PartnerParam struct {
