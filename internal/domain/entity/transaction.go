@@ -34,7 +34,7 @@ func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 		Payment:   t.Payment.ParseDTOGet(),
 		Invoice:   t.Invoice,
 		Total:     t.Total,
-		Status:    t.Status,
+		Status:    string(t.Status),
 		Note:      t.Note,
 		UpdatedAt: t.UpdatedAt,
 	}
