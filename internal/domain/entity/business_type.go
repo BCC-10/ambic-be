@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"ambic/internal/domain/dto"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -15,4 +16,11 @@ func (b *BusinessType) BeforeCreate(tx *gorm.DB) (err error) {
 	id, _ := uuid.NewUUID()
 	b.ID = id
 	return
+}
+
+func (b *BusinessType) ParseDTOGet() dto.GetBusinessTypeResponse {
+	return dto.GetBusinessTypeResponse{
+		ID:   b.ID,
+		Name: b.Name,
+	}
 }

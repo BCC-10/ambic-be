@@ -3,7 +3,9 @@ package bootstrap
 import (
 	AuthHandler "ambic/internal/app/auth/interface/rest"
 	AuthUsecase "ambic/internal/app/auth/usecase"
+	BusinessTypeHandler "ambic/internal/app/business_type/interface/rest"
 	BusinessTypeRepo "ambic/internal/app/business_type/repository"
+	BusinessTypeUsecase "ambic/internal/app/business_type/usecase"
 	PartnerHandler "ambic/internal/app/partner/interface/rest"
 	PartnerRepo "ambic/internal/app/partner/repository"
 	PartnerUsecase "ambic/internal/app/partner/usecase"
@@ -87,6 +89,8 @@ func Start() error {
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
 
 	businessTypeRepository := BusinessTypeRepo.NewBusinessTypeMySQL(db)
+	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
+	BusinessTypeHandler.NewBusinessTypeHandler(v1, businessTypeUsecase, m)
 
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
 	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, s, h, ma)

@@ -92,3 +92,9 @@ const (
 	RatingNotFound        = "Rating does not exist"
 	RatingEmpty           = "Rating is empty"
 )
+
+// Business Type Domain
+const (
+	BusinessTypeEmpty      = "Business type is empty"
+	GetBusinessTypeSuccess = "Business types retrieved successfully"
+)
