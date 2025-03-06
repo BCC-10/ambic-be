@@ -89,4 +89,6 @@ const (
 	RatingUpdateSuccess   = "Rating updated successfully"
 	UserAlreadyRated      = "User already rated"
 	RatingDeleteSuccess   = "Rating deleted successfully"
+	RatingNotFound        = "Rating does not exist"
+	RatingEmpty           = "Rating is empty"
 )
