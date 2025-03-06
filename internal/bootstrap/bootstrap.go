@@ -9,6 +9,9 @@ import (
 	PartnerHandler "ambic/internal/app/partner/interface/rest"
 	PartnerRepo "ambic/internal/app/partner/repository"
 	PartnerUsecase "ambic/internal/app/partner/usecase"
+	PaymentHandler "ambic/internal/app/payment/interface/rest"
+	PaymentRepo "ambic/internal/app/payment/repository"
+	PaymentUsecase "ambic/internal/app/payment/usecase"
 	ProductHandler "ambic/internal/app/product/interface/rest"
 	ProductRepo "ambic/internal/app/product/repository"
 	ProductUsecase "ambic/internal/app/product/usecase"
@@ -26,6 +29,7 @@ import (
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/limiter"
 	"ambic/internal/infra/maps"
+	"ambic/internal/infra/midtrans"
 	"ambic/internal/infra/mysql"
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
@@ -75,6 +79,8 @@ func Start() error {
 
 	ma := maps.NewMaps(config)
 
+	snap := midtrans.New(config)
+
 	app := fiber.New(config)
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
@@ -103,6 +109,10 @@ func Start() error {
 	ratingRepository := RatingRepo.NewRatingMySQL(db)
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
+
+	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, productRepository, snap)
+	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v, m)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
