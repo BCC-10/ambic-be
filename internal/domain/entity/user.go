@@ -44,19 +44,27 @@ func (g Gender) String() string {
 }
 
 func (t *User) ParseDTOGet() dto.GetUserResponse {
-	if t.Partner.ID == uuid.Nil {
-		t.Partner = Partner{}
-	}
-
-	return dto.GetUserResponse{
+	getUserResponse := dto.GetUserResponse{
 		ID:       t.ID.String(),
 		Name:     t.Name,
 		Username: t.Username,
 		Email:    t.Email,
 		Phone:    t.Phone,
 		Address:  t.Address,
-		BornDate: t.BornDate.String(),
-		Gender:   t.Gender.String(),
 		Photo:    t.PhotoURL,
 	}
+
+	if t.Partner.ID != uuid.Nil {
+		getUserResponse.Partner = t.Partner.ParseDTOGet()
+	}
+
+	if t.BornDate != (time.Time{}) {
+		getUserResponse.BornDate = t.BornDate.String()
+	}
+
+	if t.Gender != nil {
+		getUserResponse.Gender = t.Gender.String()
+	}
+
+	return getUserResponse
 }

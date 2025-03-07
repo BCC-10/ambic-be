@@ -14,14 +14,14 @@ type NotificationPayment struct {
 }
 
 type GetPaymentResponse struct {
-	ID                uuid.UUID `json:"id"`
-	TransactionID     uuid.UUID `json:"transaction_id"`
-	OrderID           string    `json:"order_id"`
-	ReferenceID       string    `json:"reference_id"`
-	TransactionStatus string    `json:"transaction_status"`
-	StatusMessage     string    `json:"status_message"`
-	PaymentType       string    `json:"payment_type"`
-	FraudStatus       string    `json:"fraud_status"`
-	TransactionTime   string    `json:"transaction_time"`
-	SettlementTime    string    `json:"settlement_time"`
+	ID                uuid.UUID `json:"id,omitempty"`
+	TransactionID     uuid.UUID `json:"transaction_id,omitempty"`
+	OrderID           string    `json:"order_id,omitempty"`
+	ReferenceID       string    `json:"reference_id,omitempty"`
+	TransactionStatus string    `json:"transaction_status,omitempty"`
+	StatusMessage     string    `json:"status_message,omitempty"`
+	PaymentType       string    `json:"payment_type,omitempty"`
+	FraudStatus       string    `json:"fraud_status,omitempty"`
+	TransactionTime   string    `json:"transaction_time,omitempty"`
+	SettlementTime    string    `json:"settlement_time,omitempty"`
 }
