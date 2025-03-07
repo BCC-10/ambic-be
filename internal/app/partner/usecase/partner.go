@@ -26,6 +26,7 @@ type PartnerUsecaseItf interface {
 	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
+	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -246,4 +247,13 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 	}
 
 	return nil
+}
+
+func (u *PartnerUsecase) AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err) {
+	suggestions, err := u.Maps.GetAutocomplete(req)
+	if err != nil {
+		return nil, res.ErrInternalServer()
+	}
+
+	return suggestions, nil
 }
