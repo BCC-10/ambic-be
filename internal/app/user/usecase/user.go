@@ -81,6 +81,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 		if err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword)); err != nil {
 			return res.ErrForbidden(res.IncorrectOldPassword)
 		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			return res.ErrInternalServer()
