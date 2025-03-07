@@ -114,7 +114,7 @@ func Start() error {
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
 	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
-	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, transactionRepository)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, h)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
