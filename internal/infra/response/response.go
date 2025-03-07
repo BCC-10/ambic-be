@@ -75,12 +75,12 @@ const (
 // Product Domain
 const (
 	GetProductSuccess          = "Products retrieved successfully"
-	ProductCreateSuccess       = "Product created successfully"
-	ProductUpdateSuccess       = "Product updated successfully"
+	CreateProductSuccess       = "Product created successfully"
+	UpdateProductSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
 	ProductNotExists           = "Product does not exist"
 	RatingNotBelongToPartner   = "Product does not belong to partner"
-	ProductDeleteSuccess       = "Product deleted successfully"
+	DeleteProductSuccess       = "Product deleted successfully"
 	ProductAlreadyExists       = "Product already exists"
 )
 
@@ -88,8 +88,8 @@ const (
 const (
 	GetRatingSuccess      = "Ratings retrieved successfully"
 	RatingNotBelongToUser = "Rating does not belong to user"
-	RatingCreateSuccess   = "Rating created successfully"
-	RatingUpdateSuccess   = "Rating updated successfully"
+	CreateRatingSuccess   = "Rating created successfully"
+	UpdateRatingSuccess   = "Rating updated successfully"
 	UserAlreadyRated      = "User already rated"
 	RatingDeleteSuccess   = "Rating deleted successfully"
 	RatingNotFound        = "Rating does not exist"
@@ -100,4 +100,11 @@ const (
 const (
 	BusinessTypeEmpty      = "Business type is empty"
 	GetBusinessTypeSuccess = "Business types retrieved successfully"
+)
+
+// Transaction Domain
+const (
+	GetTransactionSuccess    = "Transactions retrieved successfully"
+	CreateTransactionSuccess = "Transaction created successfully"
+	InsufficentStock         = "Insufficient stock for "
 )
