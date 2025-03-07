@@ -82,7 +82,7 @@ func Start() error {
 
 	ma := maps.NewMaps(config)
 
-	snap := midtrans.New(config)
+	mi := midtrans.New(config)
 
 	app := fiber.New(config)
 	app.Get("/metrics", monitor.New())
@@ -118,7 +118,7 @@ func Start() error {
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
-	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository, snap)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
