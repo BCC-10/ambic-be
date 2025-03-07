@@ -16,8 +16,8 @@ import (
 )
 
 type RatingUsecaseItf interface {
-	Get() (*[]dto.GetRatingResponse, *res.Err)
-	Show(ratingId uuid.UUID) (dto.GetRatingResponse, *res.Err)
+	Get(req dto.GetRatingRequest) (*[]dto.GetRatingResponse, *res.Err)
+	Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err)
 	Create(userId uuid.UUID, request dto.CreateRatingRequest) *res.Err
 	Update(userId uuid.UUID, ratingId uuid.UUID, request dto.UpdateRatingRequest) *res.Err
 	Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err
@@ -41,9 +41,9 @@ func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, 
 	}
 }
 
-func (u *RatingUsecase) Get() (*[]dto.GetRatingResponse, *res.Err) {
+func (u *RatingUsecase) Get(req dto.GetRatingRequest) (*[]dto.GetRatingResponse, *res.Err) {
 	ratings := new([]entity.Rating)
-	if err := u.RatingRepository.Get(ratings); err != nil {
+	if err := u.RatingRepository.Get(ratings, req.ParseParam()); err != nil {
 		return nil, res.ErrInternalServer()
 	}
 
@@ -55,9 +55,9 @@ func (u *RatingUsecase) Get() (*[]dto.GetRatingResponse, *res.Err) {
 	return &resp, nil
 }
 
-func (u *RatingUsecase) Show(ratingId uuid.UUID) (dto.GetRatingResponse, *res.Err) {
+func (u *RatingUsecase) Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err) {
 	rating := new(entity.Rating)
-	if err := u.RatingRepository.Show(rating, dto.RatingParam{ID: ratingId}); err != nil {
+	if err := u.RatingRepository.Show(rating, dto.RatingParam{ID: uuid.MustParse(req.ID)}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return dto.GetRatingResponse{}, res.ErrNotFound(res.RatingNotFound)
 		}
