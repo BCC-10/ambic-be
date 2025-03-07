@@ -8,11 +8,10 @@ import (
 
 type ProductMySQLItf interface {
 	Create(product *entity.Product) error
-	Update(product *entity.Product) error
 	Show(product *entity.Product, param dto.ProductParam) error
 	Delete(product *entity.Product) error
 	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, limit int, offset int) error
-	UpdateStock(tx *gorm.DB, product *entity.Product) error
+	Update(tx *gorm.DB, product *entity.Product) error
 }
 
 type ProductMySQL struct {
@@ -31,10 +30,6 @@ func (r *ProductMySQL) Create(product *entity.Product) error {
 	return r.db.Debug().Create(product).Error
 }
 
-func (r *ProductMySQL) Update(product *entity.Product) error {
-	return r.db.Debug().Updates(product).Error
-}
-
 func (r *ProductMySQL) Delete(product *entity.Product) error {
 	return r.db.Debug().Delete(product).Error
 }
@@ -43,6 +38,6 @@ func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, param dto.Produ
 	return r.db.Debug().Find(product, param).Limit(limit).Offset(offset).Error
 }
 
-func (r *ProductMySQL) UpdateStock(tx *gorm.DB, product *entity.Product) error {
+func (r *ProductMySQL) Update(tx *gorm.DB, product *entity.Product) error {
 	return tx.Debug().Updates(product).Error
 }

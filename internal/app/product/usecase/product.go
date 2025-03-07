@@ -23,14 +23,16 @@ type ProductUsecaseItf interface {
 
 type ProductUsecase struct {
 	env               *env.Env
+	db                *gorm.DB
 	ProductRepository repository.ProductMySQLItf
 	Supabase          supabase.SupabaseIf
 	helper            helper.HelperIf
 }
 
-func NewProductUsecase(env *env.Env, productRepository repository.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) ProductUsecaseItf {
+func NewProductUsecase(env *env.Env, db *gorm.DB, productRepository repository.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) ProductUsecaseItf {
 	return &ProductUsecase{
 		env:               env,
+		db:                db,
 		ProductRepository: productRepository,
 		Supabase:          supabase,
 		helper:            helper,
@@ -80,6 +82,8 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 }
 
 func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
+	tx := u.db.Begin()
+
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -137,9 +141,11 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 		}
 	}
 
-	if err := u.ProductRepository.Update(product); err != nil {
+	if err := u.ProductRepository.Update(tx, product); err != nil {
 		return res.ErrInternalServer()
 	}
+
+	tx.Commit()
 
 	return nil
 }
