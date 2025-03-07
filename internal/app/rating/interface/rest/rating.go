@@ -70,7 +70,7 @@ func (h *RatingHandler) Create(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.RatingCreateSuccess, nil)
+	return res.SuccessResponse(ctx, res.CreateRatingSuccess, nil)
 }
 
 func (h *RatingHandler) Update(ctx *fiber.Ctx) error {
@@ -93,7 +93,7 @@ func (h *RatingHandler) Update(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.RatingUpdateSuccess, nil)
+	return res.SuccessResponse(ctx, res.UpdateRatingSuccess, nil)
 }
 
 func (h *RatingHandler) Delete(ctx *fiber.Ctx) error {
