@@ -13,7 +13,7 @@ type GetRatingResponse struct {
 	Star      int       `json:"star"`
 	Feedback  string    `json:"feedback"`
 	Photo     string    `json:"photo"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Date      time.Time `json:"date"`
 }
 
 type CreateRatingRequest struct {
