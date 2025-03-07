@@ -13,7 +13,7 @@ type Rating struct {
 	UserID    uuid.UUID `gorm:"type:char(36);not null;uniqueIndex:idx_product_user"`
 	Star      int       `gorm:"type:int(8);not null"`
 	Feedback  string    `gorm:"type:varchar(1000)"`
-	PhotoURL  string    `gorm:"type:varchar(255)"`
+	PhotoURL  string    `gorm:"type:varchar(255);default:null"`
 	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }

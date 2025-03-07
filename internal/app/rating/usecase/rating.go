@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	productRepo "ambic/internal/app/product/repository"
 	"ambic/internal/app/rating/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -23,27 +24,27 @@ type RatingUsecaseItf interface {
 }
 
 type RatingUsecase struct {
-	env              *env.Env
-	RatingRepository repository.RatingMySQLItf
-	Supabase         supabase.SupabaseIf
-	helper           helper.HelperIf
+	env               *env.Env
+	RatingRepository  repository.RatingMySQLItf
+	ProductRepository productRepo.ProductMySQLItf
+	Supabase          supabase.SupabaseIf
+	helper            helper.HelperIf
 }
 
-func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
+func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
 	return &RatingUsecase{
-		env:              env,
-		RatingRepository: ratingRepository,
-		Supabase:         supabase,
-		helper:           helper,
+		env:               env,
+		RatingRepository:  ratingRepository,
+		ProductRepository: productRepository,
+		Supabase:          supabase,
+		helper:            helper,
 	}
 }
 
 func (u *RatingUsecase) Get() (*[]dto.GetRatingResponse, *res.Err) {
 	ratings := new([]entity.Rating)
 	if err := u.RatingRepository.Get(ratings); err != nil {
-		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return nil, res.ErrNotFound(res.RatingEmpty)
-		}
+		return nil, res.ErrInternalServer()
 	}
 
 	resp := make([]dto.GetRatingResponse, len(*ratings))
@@ -68,7 +69,19 @@ func (u *RatingUsecase) Show(ratingId uuid.UUID) (dto.GetRatingResponse, *res.Er
 }
 
 func (u *RatingUsecase) Create(userId uuid.UUID, request dto.CreateRatingRequest) *res.Err {
-	productId, _ := uuid.Parse(request.ProductID)
+	productId, err := uuid.Parse(request.ProductID)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidUUID)
+	}
+
+	product := new(entity.Product)
+	if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.ProductNotExists)
+		}
+
+		return res.ErrInternalServer()
+	}
 
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{UserID: userId, ProductID: productId}); err == nil {
@@ -171,7 +184,7 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: ratingId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrNotFound(res.ProductNotExists)
+			return res.ErrNotFound(res.RatingNotExists)
 		}
 
 		return res.ErrInternalServer()

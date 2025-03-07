@@ -32,11 +32,11 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 	req := new(dto.UpdateUserRequest)
 	if err := h.helper.FormParser(ctx, req); err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, err.Error())
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
-		return res.ErrValidationError(ctx, err)
+		return res.ValidationError(ctx, nil, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)

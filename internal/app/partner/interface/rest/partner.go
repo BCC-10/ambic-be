@@ -29,7 +29,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	routerGroup.Get("/:id/products", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
 	routerGroup.Post("/register", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
 	routerGroup.Post("/verify", m.Authentication, PartnerHandler.VerifyPartner)
-	routerGroup.Patch("/:id/update", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
+	routerGroup.Patch("/:id", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
@@ -114,10 +114,7 @@ func (h *PartnerHandler) UpdatePhoto(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	partnerId, err := uuid.Parse(ctx.Params("id"))
-	if err != nil {
-		return res.BadRequest(ctx, res.InvalidUUID)
-	}
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
 	if err := h.PartnerUsecase.UpdatePhoto(partnerId, *data); err != nil {
 		return res.Error(ctx, err)
