@@ -72,7 +72,7 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 		Description:  req.Description,
 		InitialPrice: req.InitialPrice,
 		FinalPrice:   req.FinalPrice,
-		Stock:        req.Stock,
+		Stock:        uint(req.Stock),
 		PickupTime:   pickupTime,
 		PhotoURL:     publicURL,
 	}
@@ -114,7 +114,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 		Description:  req.Description,
 		InitialPrice: req.InitialPrice,
 		FinalPrice:   req.FinalPrice,
-		Stock:        req.Stock,
+		Stock:        uint(req.Stock),
 		PickupTime:   pickupTime,
 	}
 
