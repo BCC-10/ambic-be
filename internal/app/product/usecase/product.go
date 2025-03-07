@@ -81,7 +81,7 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 
 func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
 	productDB := new(entity.Product)
-	if err := u.ProductRepository.Show(productDB, dto.ProductParam{Id: productId}); err != nil {
+	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.ProductNotExists)
 		}
@@ -146,7 +146,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 
 func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) *res.Err {
 	productDB := new(entity.Product)
-	if err := u.ProductRepository.Show(productDB, dto.ProductParam{Id: productId}); err != nil {
+	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.ProductNotExists)
 		}
