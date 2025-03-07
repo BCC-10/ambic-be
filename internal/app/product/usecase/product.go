@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type ProductUsecaseItf interface {
@@ -60,6 +61,11 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 		return res.ErrInternalServer()
 	}
 
+	pickupTime, err := time.Parse("2006-01-02 15:04:05", req.PickupTime)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidDateTime)
+	}
+
 	product := &entity.Product{
 		PartnerID:    partnerId,
 		Name:         req.Name,
@@ -67,7 +73,7 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 		InitialPrice: req.InitialPrice,
 		FinalPrice:   req.FinalPrice,
 		Stock:        req.Stock,
-		PickupTime:   req.PickupTime,
+		PickupTime:   pickupTime,
 		PhotoURL:     publicURL,
 	}
 
@@ -97,6 +103,11 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
+	pickupTime, err := time.Parse("2006-01-02 15:04:05", req.PickupTime)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidDateTime)
+	}
+
 	product := &entity.Product{
 		ID:           productId,
 		Name:         req.Name,
@@ -104,7 +115,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 		InitialPrice: req.InitialPrice,
 		FinalPrice:   req.FinalPrice,
 		Stock:        req.Stock,
-		PickupTime:   req.PickupTime,
+		PickupTime:   pickupTime,
 	}
 
 	if req.Photo != nil {

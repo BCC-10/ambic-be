@@ -18,7 +18,7 @@ type Product struct {
 	InitialPrice       float32   `gorm:"type:float;not null"`
 	FinalPrice         float32   `gorm:"type:float;not null"`
 	Stock              uint      `gorm:"type:int;not null"`
-	PickupTime         string    `gorm:"type:varchar(30);not null"`
+	PickupTime         time.Time `gorm:"type:timestamp;not null"`
 	PhotoURL           string    `gorm:"type:varchar(255)"`
 	CreatedAt          time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt          time.Time `gorm:"type:timestamp;autoUpdateTime"`
@@ -39,7 +39,7 @@ func (p *Product) ParseDTOGet() dto.GetProductResponse {
 		InitialPrice: p.InitialPrice,
 		FinalPrice:   p.FinalPrice,
 		Stock:        p.Stock,
-		PickupTime:   p.PickupTime,
+		PickupTime:   p.PickupTime.String(),
 		PhotoURL:     p.PhotoURL,
 	}
 }
