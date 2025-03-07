@@ -57,17 +57,21 @@ func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse,
 	var suggestions []dto.LocationResponse
 
 	request := &places.GoogleMapsPlacesV1AutocompletePlacesRequest{
-		Input:      req.Query,
-		RegionCode: "ID",
-		LocationBias: &places.GoogleMapsPlacesV1AutocompletePlacesRequestLocationBias{
-			Circle: &places.GoogleMapsPlacesV1Circle{
-				Center: &places.GoogleTypeLatLng{
-					Latitude:  req.Lat,
-					Longitude: req.Long,
-				},
-				Radius: req.Radius,
+		Input:        req.Query,
+		RegionCode:   "ID",
+		LocationBias: &places.GoogleMapsPlacesV1AutocompletePlacesRequestLocationBias{},
+	}
+	if req.Lat != 0 || req.Long != 0 {
+		req.Lat = -6.175110
+		req.Long = 106.865036
+
+		request.LocationBias.Circle = &places.GoogleMapsPlacesV1Circle{
+			Center: &places.GoogleTypeLatLng{
+				Latitude:  req.Lat,
+				Longitude: req.Long,
 			},
-		},
+			Radius: req.Radius,
+		}
 	}
 
 	response, err := m.PlacesService.Places.Autocomplete(request).Do()
