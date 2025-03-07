@@ -27,8 +27,8 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup.Post("/verification", AuthHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
-	routerGroup.Post("/google", AuthHandler.GoogleLogin)
-	routerGroup.Post("/google/callback", AuthHandler.GoogleCallback)
+	routerGroup.Get("/google", AuthHandler.GoogleLogin)
+	routerGroup.Post("/google", AuthHandler.GoogleCallback)
 }
 
 func (h AuthHandler) Register(ctx *fiber.Ctx) error {
