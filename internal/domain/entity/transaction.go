@@ -29,13 +29,19 @@ type Transaction struct {
 }
 
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
+	transactionDetails := make([]dto.GetTransactionDetailResponse, 0)
+	for _, detail := range t.TransactionDetails {
+		transactionDetails = append(transactionDetails, detail.ParseDTOGet())
+	}
+
 	res := dto.GetTransactionResponse{
-		ID:        t.ID.String(),
-		Invoice:   t.Invoice,
-		Total:     t.Total,
-		Status:    string(t.Status),
-		Note:      t.Note,
-		UpdatedAt: t.UpdatedAt,
+		ID:                 t.ID.String(),
+		Invoice:            t.Invoice,
+		Total:              t.Total,
+		Status:             string(t.Status),
+		Note:               t.Note,
+		Date:               t.UpdatedAt,
+		TransactionDetails: transactionDetails,
 	}
 
 	if t.Payment.ID != uuid.Nil {

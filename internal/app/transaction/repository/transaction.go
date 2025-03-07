@@ -21,7 +21,7 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 }
 
 func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam) error {
-	return r.db.Debug().Find(transaction, param).Error
+	return r.db.Debug().Preload("TransactionDetails").Find(transaction, param).Error
 }
 
 func (r *TransactionMySQL) Update(transaction *entity.Transaction) error {
