@@ -4,6 +4,8 @@ import (
 	"ambic/internal/domain/env"
 	gojson "github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cache"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/wI2L/jettison"
@@ -21,6 +23,10 @@ func New(env *env.Env) *fiber.App {
 	app.Use(logger.New())
 
 	app.Use(cors.New())
+
+	app.Use(cache.New())
+
+	app.Use(compress.New())
 
 	return app
 }
