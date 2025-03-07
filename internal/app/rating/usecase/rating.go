@@ -19,7 +19,7 @@ type RatingUsecaseItf interface {
 	Get(req dto.GetRatingRequest) (*[]dto.GetRatingResponse, *res.Err)
 	Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err)
 	Create(userId uuid.UUID, request dto.CreateRatingRequest) *res.Err
-	Update(userId uuid.UUID, ratingId uuid.UUID, request dto.UpdateRatingRequest) *res.Err
+	Update(userId uuid.UUID, param dto.UpdateRatingParam, request dto.UpdateRatingRequest) *res.Err
 	Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err
 }
 
@@ -123,9 +123,9 @@ func (u *RatingUsecase) Create(userId uuid.UUID, request dto.CreateRatingRequest
 	return nil
 }
 
-func (u *RatingUsecase) Update(userId uuid.UUID, ratingId uuid.UUID, request dto.UpdateRatingRequest) *res.Err {
+func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, request dto.UpdateRatingRequest) *res.Err {
 	ratingDB := new(entity.Rating)
-	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: ratingId}); err != nil {
+	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: param.ID}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.RatingNotFound)
 		}
@@ -138,7 +138,7 @@ func (u *RatingUsecase) Update(userId uuid.UUID, ratingId uuid.UUID, request dto
 	}
 
 	rating := &entity.Rating{
-		ID:       ratingId,
+		ID:       param.ID,
 		Star:     request.Star,
 		Feedback: request.Feedback,
 	}
