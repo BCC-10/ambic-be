@@ -95,6 +95,11 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 
 func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
 	tx := u.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
