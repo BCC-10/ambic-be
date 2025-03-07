@@ -7,7 +7,7 @@ import (
 )
 
 type BusinessType struct {
-	ID       uuid.UUID `gorm:"type:varchar(36);primaryKey"`
+	ID       uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Name     string    `gorm:"type:varchar(255);not null"`
 	Partners []Partner
 }
