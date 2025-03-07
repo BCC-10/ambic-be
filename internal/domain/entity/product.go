@@ -8,8 +8,9 @@ import (
 )
 
 type Product struct {
-	ID                 uuid.UUID           `gorm:"type:char(36);primaryKey"`
-	PartnerID          uuid.UUID           `gorm:"type:char(36)"`
+	ID                 uuid.UUID `gorm:"type:char(36);primaryKey"`
+	PartnerID          uuid.UUID `gorm:"type:char(36)"`
+	Partner            Partner
 	Ratings            []Rating            `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
 	TransactionDetails []TransactionDetail `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
 	Name               string              `gorm:"type:varchar(255);not null;uniqueIndex:idx_partner_product"`
