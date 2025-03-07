@@ -12,6 +12,7 @@ type ProductMySQLItf interface {
 	Show(product *entity.Product, param dto.ProductParam) error
 	Delete(product *entity.Product) error
 	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, limit int, offset int) error
+	UpdateStock(tx *gorm.DB, product *entity.Product) error
 }
 
 type ProductMySQL struct {
@@ -40,4 +41,8 @@ func (r *ProductMySQL) Delete(product *entity.Product) error {
 
 func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, param dto.ProductParam, limit int, offset int) error {
 	return r.db.Debug().Find(product, param).Limit(limit).Offset(offset).Error
+}
+
+func (r *ProductMySQL) UpdateStock(tx *gorm.DB, product *entity.Product) error {
+	return tx.Debug().Updates(product).Error
 }
