@@ -8,6 +8,6 @@ type GetTransactionDetailResponse struct {
 }
 
 type CreateTransactionDetailRequest struct {
-	ProductID string `json:"product_id" validate:"required"`
-	Qty       uint   `json:"qty" validate:"required"`
+	ProductID string `json:"product_id" validate:"required,uuid"`
+	Qty       int    `json:"qty" validate:"required,numeric,min=1"`
 }

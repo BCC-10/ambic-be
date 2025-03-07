@@ -20,11 +20,11 @@ type GetProductResponse struct {
 type CreateProductRequest struct {
 	Name         string                `form:"name" validate:"required"`
 	Description  string                `form:"description" validate:"required"`
-	InitialPrice float32               `form:"initial_price" validate:"required,numeric,min=0"`
-	FinalPrice   float32               `form:"final_price" validate:"required,numeric,min=0"`
-	Stock        uint                  `form:"stock" validate:"required,numeric,min=0"`
+	InitialPrice float32               `form:"initial_price" validate:"required,numeric,min=1"`
+	FinalPrice   float32               `form:"final_price" validate:"required,numeric,min=1"`
+	Stock        int                   `form:"stock" validate:"required,numeric,min=1"`
 	PickupTime   string                `form:"pickup_time" validate:"required,datetime=2006-01-02 15:04:05"`
-	Photo        *multipart.FileHeader `json:"photo" form:"photo" validate:"required"`
+	Photo        *multipart.FileHeader `form:"photo" validate:"required"`
 }
 
 type UpdateProductRequest struct {
@@ -32,7 +32,7 @@ type UpdateProductRequest struct {
 	Description  string                `form:"description"`
 	InitialPrice float32               `form:"initial_price" validate:"omitempty,numeric,min=0"`
 	FinalPrice   float32               `form:"final_price" validate:"omitempty,numeric,min=0"`
-	Stock        uint                  `form:"stock" validate:"omitempty,numeric,min=0"`
+	Stock        int                   `form:"stock" validate:"omitempty,numeric,min=0"`
 	PickupTime   string                `form:"pickup_time" validate:"omitempty,datetime=2006-01-02 15:04:05"`
 	Photo        *multipart.FileHeader `form:"photo"`
 }
