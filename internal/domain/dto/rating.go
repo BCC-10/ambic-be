@@ -39,6 +39,10 @@ type UpdateRatingRequest struct {
 	Photo    *multipart.FileHeader `form:"photo"`
 }
 
+type UpdateRatingParam struct {
+	ID uuid.UUID `param:"id" validate:"required,uuid"`
+}
+
 type RatingParam struct {
 	ID        uuid.UUID
 	ProductID uuid.UUID
