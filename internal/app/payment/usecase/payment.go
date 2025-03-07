@@ -78,7 +78,7 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		}
 
 		transaction.Status = entity.Process
-		transaction.PaymentID = payment.ID
+		transaction.Payment = *payment
 
 		if err := u.TransactionRepository.Update(transaction); err != nil {
 			return res.ErrInternalServer()
