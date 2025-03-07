@@ -24,7 +24,7 @@ func NewAuthHandler(routerGroup fiber.Router, userUsecase usecase.AuthUsecaseItf
 	routerGroup.Post("/register", AuthHandler.Register)
 	routerGroup.Post("/login", AuthHandler.Login)
 	routerGroup.Post("/resend-verification", limiter.Set(3, "15m"), AuthHandler.ResendVerification)
-	routerGroup.Post("/verify", AuthHandler.VerifyUser)
+	routerGroup.Post("/verification", AuthHandler.VerifyUser)
 	routerGroup.Post("/forgot-password", limiter.Set(3, "15m"), AuthHandler.ForgotPassword)
 	routerGroup.Patch("/reset-password", AuthHandler.ResetPassword)
 	routerGroup.Post("/google", AuthHandler.GoogleLogin)
