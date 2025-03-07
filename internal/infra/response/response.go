@@ -94,7 +94,7 @@ const (
 	UserAlreadyRated      = "User already rated"
 	RatingDeleteSuccess   = "Rating deleted successfully"
 	RatingNotFound        = "Rating does not exist"
-	RatingEmpty           = "Rating is empty"
+	RatingNotExists       = "Rating does not exist"
 )
 
 // Business Type Domain
