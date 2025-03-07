@@ -73,7 +73,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 	businessType := new(entity.BusinessType)
 	if err := u.BusinessTypeRepository.Show(businessType, dto.BusinessTypeParam{ID: businessTypeId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrNotFound(res.InvalidBusinessType)
+			return res.ErrBadRequest(res.InvalidBusinessType)
 		}
 
 		return res.ErrInternalServer()
@@ -82,7 +82,6 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 	partner := entity.Partner{
 		UserID:         id,
 		Name:           data.Name,
-		Type:           data.Type,
 		Address:        data.Address,
 		City:           data.City,
 		Instagram:      data.Instagram,
