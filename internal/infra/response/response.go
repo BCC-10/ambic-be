@@ -70,6 +70,7 @@ const (
 	GetPartnerSuccess          = "Partner retrieved successfully"
 	UpdatePartnerPhotoSuccess  = "Partner photo updated successfully"
 	InvalidBusinessType        = "Business type is invalid"
+	GetAutoCompleteSuccess     = "Auto complete suggestions retrieved successfully"
 )
 
 // Product Domain
