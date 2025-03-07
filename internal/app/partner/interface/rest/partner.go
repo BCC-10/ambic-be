@@ -25,7 +25,7 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup = routerGroup.Group("/partners")
-	routerGroup.Get("/location", PartnerHandler.AutocompleteLocation)
+	routerGroup.Get("/location", m.Authentication, PartnerHandler.AutocompleteLocation)
 	routerGroup.Get("/:id", m.Authentication, m.EnsurePartner, PartnerHandler.ShowPartner)
 	routerGroup.Get("/:id/products", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
 	routerGroup.Post("/", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
