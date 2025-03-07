@@ -84,7 +84,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		}
 
 		if product.Stock < uint(item.Qty) {
-			return res.ErrBadRequest(res.InsufficentStock + product.Name)
+			return res.ErrBadRequest(res.InsufficientStock + product.Name)
 		}
 
 		transactionDetail := entity.TransactionDetail{
