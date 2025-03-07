@@ -4,5 +4,10 @@ type GetTransactionDetailResponse struct {
 	ID            string `json:"id"`
 	TransactionID string `json:"transaction_id"`
 	ProductID     string `json:"product_id"`
-	Qty           int    `json:"qty"`
+	Qty           uint   `json:"qty"`
+}
+
+type CreateTransactionDetailRequest struct {
+	ProductID string `json:"product_id" validate:"required"`
+	Qty       uint   `json:"qty" validate:"required"`
 }
