@@ -29,8 +29,8 @@ func (u *Payment) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (u *Payment) ParseDTOGet() dto.GetPaymentResponse {
 	return dto.GetPaymentResponse{
-		ID:                u.ID,
-		TransactionID:     u.TransactionID,
+		ID:                u.ID.String(),
+		TransactionID:     u.TransactionID.String(),
 		ReferenceID:       u.ReferenceID,
 		TransactionStatus: u.TransactionStatus,
 		StatusMessage:     u.StatusMessage,

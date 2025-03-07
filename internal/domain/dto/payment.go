@@ -1,7 +1,5 @@
 package dto
 
-import "github.com/google/uuid"
-
 type NotificationPayment struct {
 	OrderID           string `json:"order_id" validate:"required"`
 	ReferenceID       string `json:"reference_id" validate:"required"`
@@ -14,14 +12,14 @@ type NotificationPayment struct {
 }
 
 type GetPaymentResponse struct {
-	ID                uuid.UUID `json:"id,omitempty"`
-	TransactionID     uuid.UUID `json:"transaction_id,omitempty"`
-	OrderID           string    `json:"order_id,omitempty"`
-	ReferenceID       string    `json:"reference_id,omitempty"`
-	TransactionStatus string    `json:"transaction_status,omitempty"`
-	StatusMessage     string    `json:"status_message,omitempty"`
-	PaymentType       string    `json:"payment_type,omitempty"`
-	FraudStatus       string    `json:"fraud_status,omitempty"`
-	TransactionTime   string    `json:"transaction_time,omitempty"`
-	SettlementTime    string    `json:"settlement_time,omitempty"`
+	ID                string `json:"id,omitempty"`
+	TransactionID     string `json:"transaction_id,omitempty"`
+	OrderID           string `json:"order_id,omitempty"`
+	ReferenceID       string `json:"reference_id,omitempty"`
+	TransactionStatus string `json:"transaction_status,omitempty"`
+	StatusMessage     string `json:"status_message,omitempty"`
+	PaymentType       string `json:"payment_type,omitempty"`
+	FraudStatus       string `json:"fraud_status,omitempty"`
+	TransactionTime   string `json:"transaction_time,omitempty"`
+	SettlementTime    string `json:"settlement_time,omitempty"`
 }

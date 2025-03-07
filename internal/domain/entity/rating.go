@@ -26,7 +26,7 @@ func (r *Rating) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (r *Rating) ParseDTOGet() dto.GetRatingResponse {
 	return dto.GetRatingResponse{
-		ID:        r.ID,
+		ID:        r.ID.String(),
 		ProductID: r.ProductID.String(),
 		UserID:    r.UserID.String(),
 		Star:      r.Star,

@@ -7,7 +7,7 @@ import (
 )
 
 type GetRatingResponse struct {
-	ID        uuid.UUID `json:"id"`
+	ID        string    `json:"id"`
 	ProductID string    `json:"product_id"`
 	UserID    string    `json:"user_id"`
 	Star      int       `json:"star"`

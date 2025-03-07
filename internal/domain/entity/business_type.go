@@ -20,7 +20,7 @@ func (b *BusinessType) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (b *BusinessType) ParseDTOGet() dto.GetBusinessTypeResponse {
 	return dto.GetBusinessTypeResponse{
-		ID:   b.ID,
+		ID:   b.ID.String(),
 		Name: b.Name,
 	}
 }

@@ -29,13 +29,18 @@ type Transaction struct {
 }
 
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
-	return dto.GetTransactionResponse{
-		ID:        t.ID,
-		Payment:   t.Payment.ParseDTOGet(),
+	res := dto.GetTransactionResponse{
+		ID:        t.ID.String(),
 		Invoice:   t.Invoice,
 		Total:     t.Total,
 		Status:    string(t.Status),
 		Note:      t.Note,
 		UpdatedAt: t.UpdatedAt,
 	}
+
+	if t.Payment.ID != uuid.Nil {
+		res.Payment = t.Payment.ParseDTOGet()
+	}
+
+	return res
 }

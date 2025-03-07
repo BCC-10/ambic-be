@@ -6,8 +6,8 @@ import (
 )
 
 type GetTransactionResponse struct {
-	ID        uuid.UUID          `json:"id"`
-	Payment   GetPaymentResponse `json:"payment"`
+	ID        string             `json:"id"`
+	Payment   GetPaymentResponse `json:"payment,omitempty"`
 	Invoice   string             `json:"invoice"`
 	Total     float32            `json:"total"`
 	Status    string             `json:"status"`
