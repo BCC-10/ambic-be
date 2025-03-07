@@ -16,8 +16,8 @@ const (
 
 type User struct {
 	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
-	Partner      Partner
-	Ratings      []Rating
+	Partner      Partner   `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Ratings      []Rating  `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
 	Transactions []Transaction
 	Name         string    `gorm:"type:varchar(255);default:null"`
 	Username     string    `gorm:"type:varchar(255);unique;not null"`

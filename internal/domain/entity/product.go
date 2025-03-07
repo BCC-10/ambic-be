@@ -8,21 +8,20 @@ import (
 )
 
 type Product struct {
-	ID                 uuid.UUID `gorm:"type:char(36);primaryKey"`
-	PartnerID          uuid.UUID `gorm:"type:char(36);not null"`
-	Partner            Partner
-	Ratings            []Rating
-	TransactionDetails []TransactionDetail
-	Name               string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_partner_product"`
-	Description        string    `gorm:"type:text;not null;"`
-	InitialPrice       float32   `gorm:"type:float;not null"`
-	FinalPrice         float32   `gorm:"type:float;not null"`
-	Stock              uint      `gorm:"type:int;not null"`
-	PickupTime         time.Time `gorm:"type:timestamp;not null"`
-	EndPickupTime      time.Time `gorm:"type:timestamp;not null"`
-	PhotoURL           string    `gorm:"type:varchar(255)"`
-	CreatedAt          time.Time `gorm:"type:timestamp;autoCreateTime"`
-	UpdatedAt          time.Time `gorm:"type:timestamp;autoUpdateTime"`
+	ID                 uuid.UUID           `gorm:"type:char(36);primaryKey"`
+	PartnerID          uuid.UUID           `gorm:"type:char(36)"`
+	Ratings            []Rating            `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	TransactionDetails []TransactionDetail `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Name               string              `gorm:"type:varchar(255);not null;uniqueIndex:idx_partner_product"`
+	Description        string              `gorm:"type:text;not null;"`
+	InitialPrice       float32             `gorm:"type:float;not null"`
+	FinalPrice         float32             `gorm:"type:float;not null"`
+	Stock              uint                `gorm:"type:int;not null"`
+	PickupTime         time.Time           `gorm:"type:timestamp;not null"`
+	EndPickupTime      time.Time           `gorm:"type:timestamp;not null"`
+	PhotoURL           string              `gorm:"type:varchar(255)"`
+	CreatedAt          time.Time           `gorm:"type:timestamp;autoCreateTime"`
+	UpdatedAt          time.Time           `gorm:"type:timestamp;autoUpdateTime"`
 }
 
 func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
