@@ -64,7 +64,7 @@ const (
 	NotPartner                 = "User is not a partner"
 	PartnerNotVerified         = "Partner is not verified"
 	PartnerRegisterSuccess     = "Partner registered successfully"
-	PartnerVerifySuccess       = "Partner verified successfully"
+	PartnerVerificationSuccess = "Partner verified successfully"
 	PartnerVerified            = "Partner is already verified"
 	PartnerNotExists           = "Partner does not exist"
 	GetPartnerSuccess          = "Partner retrieved successfully"
@@ -108,5 +108,5 @@ const (
 const (
 	GetTransactionSuccess    = "Transactions retrieved successfully"
 	CreateTransactionSuccess = "Transaction created successfully"
-	InsufficentStock         = "Insufficient stock for "
+	InsufficientStock        = "Insufficient stock for "
 )
