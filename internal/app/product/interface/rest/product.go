@@ -25,7 +25,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 	}
 
 	routerGroup = routerGroup.Group("/products")
-	routerGroup.Post("/create", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
+	routerGroup.Post("/", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
 	routerGroup.Delete("/:id", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.DeleteProduct)
 	routerGroup.Patch("/:id/update", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, ProductHandler.UpdateProduct)
 }
@@ -46,7 +46,7 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.ProductCreateSuccess, nil)
+	return res.SuccessResponse(ctx, res.CreateProductSuccess, nil)
 }
 
 func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
@@ -69,7 +69,7 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.ProductUpdateSuccess, nil)
+	return res.SuccessResponse(ctx, res.UpdateProductSuccess, nil)
 }
 
 func (h ProductHandler) DeleteProduct(ctx *fiber.Ctx) error {
@@ -83,5 +83,5 @@ func (h ProductHandler) DeleteProduct(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.ProductDeleteSuccess, nil)
+	return res.SuccessResponse(ctx, res.DeleteProductSuccess, nil)
 }
