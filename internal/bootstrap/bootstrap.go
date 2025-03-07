@@ -102,7 +102,7 @@ func Start() error {
 	BusinessTypeHandler.NewBusinessTypeHandler(v1, businessTypeUsecase, m)
 
 	productRepository := ProductRepo.NewProductMySQL(db)
-	productUsecase := ProductUsecase.NewProductUsecase(config, productRepository, s, h)
+	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, s, h)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
