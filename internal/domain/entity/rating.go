@@ -8,9 +8,9 @@ import (
 )
 
 type Rating struct {
-	ID        uuid.UUID `gorm:"type:varchar(36);primaryKey"`
-	ProductID uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_user"`
-	UserID    uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex:idx_product_user"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
+	ProductID uuid.UUID `gorm:"type:char(36);not null;uniqueIndex:idx_product_user"`
+	UserID    uuid.UUID `gorm:"type:char(36);not null;uniqueIndex:idx_product_user"`
 	Star      int       `gorm:"type:int(8);not null"`
 	Feedback  string    `gorm:"type:varchar(1000)"`
 	PhotoURL  string    `gorm:"type:varchar(255)"`
