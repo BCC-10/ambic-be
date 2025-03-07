@@ -96,13 +96,14 @@ func (h *RatingHandler) Update(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	userId := ctx.Locals("userId").(uuid.UUID)
-	ratingId, err := uuid.Parse(ctx.Params("id"))
-	if err != nil {
-		return res.BadRequest(ctx)
+	param := new(dto.UpdateRatingParam)
+	if err := ctx.ParamsParser(param); err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	if err := h.RatingUsecase.Update(userId, ratingId, *req); err != nil {
+	userId := ctx.Locals("userId").(uuid.UUID)
+
+	if err := h.RatingUsecase.Update(userId, *param, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 
