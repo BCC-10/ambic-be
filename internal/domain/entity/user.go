@@ -15,11 +15,11 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:varchar(36);primaryKey"`
+	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Partner      Partner
 	Ratings      []Rating
 	Transactions []Transaction
-	Name         string    `gorm:"type:varchar(255)"`
+	Name         string    `gorm:"type:varchar(255);default:null"`
 	Username     string    `gorm:"type:varchar(255);unique;not null"`
 	Email        string    `gorm:"type:varchar(255);unique;not null"`
 	Phone        string    `gorm:"type:varchar(15);uniqueIndex;default:null"`
@@ -33,9 +33,9 @@ type User struct {
 	UpdatedAt    time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+func (t *User) BeforeCreate(tx *gorm.DB) (err error) {
 	id, _ := uuid.NewV7()
-	u.ID = id
+	t.ID = id
 	return
 }
 
@@ -43,20 +43,20 @@ func (g Gender) String() string {
 	return string(g)
 }
 
-func (u *User) ParseDTOGet() dto.GetUserResponse {
-	if u.Partner.ID == uuid.Nil {
-		u.Partner = Partner{}
+func (t *User) ParseDTOGet() dto.GetUserResponse {
+	if t.Partner.ID == uuid.Nil {
+		t.Partner = Partner{}
 	}
 
 	return dto.GetUserResponse{
-		ID:       u.ID.String(),
-		Name:     u.Name,
-		Username: u.Username,
-		Email:    u.Email,
-		Phone:    u.Phone,
-		Address:  u.Address,
-		BornDate: u.BornDate.String(),
-		Gender:   u.Gender.String(),
-		Photo:    u.PhotoURL,
+		ID:       t.ID.String(),
+		Name:     t.Name,
+		Username: t.Username,
+		Email:    t.Email,
+		Phone:    t.Phone,
+		Address:  t.Address,
+		BornDate: t.BornDate.String(),
+		Gender:   t.Gender.String(),
+		Photo:    t.PhotoURL,
 	}
 }

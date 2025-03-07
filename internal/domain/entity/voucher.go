@@ -10,7 +10,7 @@ const (
 )
 
 type Voucher struct {
-	ID       uuid.UUID `gorm:"type:varchar(36);primaryKey"`
+	ID       uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Code     string    `gorm:"type:varchar(255);unique;not null"`
 	Type     Type      `gorm:"type:ENUM('percentage','amount');default:null"`
 	Discount int       `gorm:"type:int;not null"`
