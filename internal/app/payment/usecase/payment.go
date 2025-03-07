@@ -11,7 +11,6 @@ import (
 
 	//"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
-	"ambic/internal/infra/midtrans"
 	res "ambic/internal/infra/response"
 	//"time"
 )
@@ -22,17 +21,15 @@ type PaymentUsecaseItf interface {
 
 type PaymentUsecase struct {
 	env                   *env.Env
-	Snap                  midtrans.MidtransIf
 	PaymentRepository     repository.PaymentMySQLItf
 	TransactionRepository transactionRepo.TransactionMySQLItf
 }
 
-func NewPaymentUsecase(env *env.Env, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, snap midtrans.MidtransIf) PaymentUsecaseItf {
+func NewPaymentUsecase(env *env.Env, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf) PaymentUsecaseItf {
 	return &PaymentUsecase{
 		env:                   env,
 		PaymentRepository:     paymentRepository,
 		TransactionRepository: transactionRepository,
-		Snap:                  snap,
 	}
 }
 
