@@ -12,98 +12,74 @@ func (e *Err) Error() string {
 	return e.Message
 }
 
-func ErrNotFound(message ...string) *Err {
-	var msg string
+func newError(code int, defaultMsg string, message ...string) *Err {
+	msg := defaultMsg
 	if len(message) == 1 {
 		msg = message[0]
-	} else {
-		msg = fiber.ErrNotFound.Message
 	}
+	return &Err{Code: code, Message: msg}
+}
 
-	return &Err{Code: fiber.ErrNotFound.Code, Message: msg}
+func ErrNotFound(message ...string) *Err {
+	return newError(fiber.ErrNotFound.Code, fiber.ErrNotFound.Message, message...)
 }
 
 func ErrBadRequest(message ...string) *Err {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrBadRequest.Message
-	}
-
-	return &Err{Code: fiber.ErrBadRequest.Code, Message: msg}
+	return newError(fiber.ErrBadRequest.Code, fiber.ErrBadRequest.Message, message...)
 }
 
 func ErrValidationError(val interface{}, err interface{}) *Err {
-	payload := map[string]interface{}{
-		"errors": err,
-	}
-
+	payload := map[string]interface{}{"errors": err}
 	if val != nil {
 		payload["old"] = val
 	}
-
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
-func ErrInternalServer(message ...string) *Err {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrInternalServerError.Message
-	}
+func ErrEntityTooLarge(max int, message ...string) *Err {
+	defaultMessage := fmt.Sprintf(EntityTooLarge, max)
+	return newError(fiber.ErrRequestEntityTooLarge.Code, defaultMessage, message...)
+}
 
-	return &Err{Code: fiber.ErrInternalServerError.Code, Message: msg}
+func ErrUnprocessableEntity(message ...string) *Err {
+	return newError(fiber.ErrUnprocessableEntity.Code, fiber.ErrUnprocessableEntity.Message, message...)
+}
+
+func ErrInternalServer(message ...string) *Err {
+	return newError(fiber.ErrInternalServerError.Code, fiber.ErrInternalServerError.Message, message...)
 }
 
 func ErrUnauthorized(message ...string) *Err {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrUnauthorized.Message
-	}
-
-	return &Err{Code: fiber.ErrUnauthorized.Code, Message: msg}
+	return newError(fiber.ErrUnauthorized.Code, fiber.ErrUnauthorized.Message, message...)
 }
 
 func ErrForbidden(message ...string) *Err {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrForbidden.Message
-	}
-
-	return &Err{Code: fiber.ErrForbidden.Code, Message: msg}
+	return newError(fiber.ErrForbidden.Code, fiber.ErrForbidden.Message, message...)
 }
 
-func BadRequest(ctx *fiber.Ctx, message ...string) error {
-	var msg string
+func respondWithError(ctx *fiber.Ctx, code int, defaultMsg string, message ...string) error {
+	msg := defaultMsg
 	if len(message) == 1 {
 		msg = message[0]
-	} else {
-		msg = fiber.ErrBadRequest.Message
 	}
-
-	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
-		StatusCode: fiber.ErrBadRequest.Code,
+	return ctx.Status(code).JSON(Res{
+		StatusCode: code,
 		Message:    msg,
 	})
 }
 
+func BadRequest(ctx *fiber.Ctx, message ...string) error {
+	return respondWithError(ctx, fiber.ErrBadRequest.Code, fiber.ErrBadRequest.Message, message...)
+}
+
 func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
-	_errors := make(map[string]string)
+	errorsMap := make(map[string]string)
 	for _, err := range err.(validator.ValidationErrors) {
 		field := strings.ToLower(err.Field())
-		_errors[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
+		errorsMap[field] = strings.Trim(fmt.Sprintf("%s: %s %s", field, err.Tag(), err.Param()), " ")
 	}
 
-	payload := map[string]interface{}{
-		"errors": _errors,
-	}
-
+	payload := map[string]interface{}{"errors": errorsMap}
 	if val != nil {
 		payload["old"] = val
 	}
@@ -116,52 +92,19 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 }
 
 func InternalServerError(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.ErrInternalServerError.Code).JSON(Res{
-		StatusCode: fiber.ErrInternalServerError.Code,
-		Message:    fiber.ErrInternalServerError.Message,
-	})
+	return respondWithError(ctx, fiber.ErrInternalServerError.Code, fiber.ErrInternalServerError.Message)
 }
 
 func Unauthorized(ctx *fiber.Ctx, message ...string) error {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrUnauthorized.Message
-	}
-
-	return ctx.Status(fiber.ErrUnauthorized.Code).JSON(Res{
-		StatusCode: fiber.ErrUnauthorized.Code,
-		Message:    msg,
-	})
+	return respondWithError(ctx, fiber.ErrUnauthorized.Code, fiber.ErrUnauthorized.Message, message...)
 }
 
 func Forbidden(ctx *fiber.Ctx, message ...string) error {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrForbidden.Message
-	}
-
-	return ctx.Status(fiber.ErrForbidden.Code).JSON(Res{
-		StatusCode: fiber.ErrForbidden.Code,
-		Message:    msg,
-	})
+	return respondWithError(ctx, fiber.ErrForbidden.Code, fiber.ErrForbidden.Message, message...)
 }
 
 func TooManyRequests(ctx *fiber.Ctx, message ...string) error {
-	var msg string
-	if len(message) == 1 {
-		msg = message[0]
-	} else {
-		msg = fiber.ErrTooManyRequests.Message
-	}
-
-	return ctx.Status(fiber.ErrTooManyRequests.Code).JSON(Res{
-		StatusCode: fiber.ErrTooManyRequests.Code,
-		Message:    msg,
-	})
+	return respondWithError(ctx, fiber.ErrTooManyRequests.Code, fiber.ErrTooManyRequests.Message, message...)
 }
 
 func Error(ctx *fiber.Ctx, err *Err) error {
@@ -173,6 +116,5 @@ func Error(ctx *fiber.Ctx, err *Err) error {
 			Payload:    customErr.Payload,
 		})
 	}
-
 	return InternalServerError(ctx)
 }

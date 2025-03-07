@@ -146,7 +146,9 @@ func (h AuthHandler) GoogleLogin(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.OAuthLoginSuccess, url)
+	return res.SuccessResponse(ctx, res.OAuthLoginSuccess, fiber.Map{
+		"url": url,
+	})
 }
 
 func (h AuthHandler) GoogleCallback(ctx *fiber.Ctx) error {

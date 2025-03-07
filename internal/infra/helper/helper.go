@@ -1,14 +1,35 @@
 package helper
 
 import (
+	"ambic/internal/domain/env"
+	res "ambic/internal/infra/response"
+	"crypto/rand"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"math/big"
 	"mime/multipart"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
-func ParseForm(ctx *fiber.Ctx, target interface{}) error {
+type HelperIf interface {
+	FormParser(ctx *fiber.Ctx, target interface{}) error
+	ValidateImage(file *multipart.FileHeader) *res.Err
+	GenerateInvoiceNumber() string
+}
+
+type Helper struct {
+	env *env.Env
+}
+
+func New(env *env.Env) HelperIf {
+	return &Helper{
+		env: env,
+	}
+}
+
+func (h Helper) FormParser(ctx *fiber.Ctx, target interface{}) error {
 	val := reflect.ValueOf(target)
 	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Struct {
 		return fmt.Errorf("target must be a pointer to a struct")
@@ -59,4 +80,23 @@ func ParseForm(ctx *fiber.Ctx, target interface{}) error {
 	}
 
 	return nil
+}
+
+func (h Helper) ValidateImage(file *multipart.FileHeader) *res.Err {
+	contentType := file.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		return res.ErrUnprocessableEntity(res.PhotoOnly)
+	}
+
+	if file.Size > h.env.MaxUploadSize*1024*1024 {
+		return res.ErrEntityTooLarge(int(h.env.MaxUploadSize), res.PhotoSizeLimit)
+	}
+
+	return nil
+}
+
+func (h Helper) GenerateInvoiceNumber() string {
+	num, _ := rand.Int(rand.Reader, big.NewInt(999999999999))
+
+	return fmt.Sprintf("%012d", num)
 }

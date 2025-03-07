@@ -8,11 +8,13 @@ import (
 	"ambic/internal/infra/code"
 	"ambic/internal/infra/email"
 	"ambic/internal/infra/jwt"
+	"ambic/internal/infra/mysql"
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
 	res "ambic/internal/infra/response"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 type AuthUsecaseItf interface {
@@ -55,20 +57,20 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	user := entity.User{
-		Username:   data.Username,
-		Email:      data.Email,
-		Password:   string(hashedPassword),
-		IsVerified: false,
+		Username: data.Username,
+		Email:    data.Email,
+		Password: string(hashedPassword),
+		PhotoURL: u.env.DefaultProfilePhotoURL,
 	}
 
 	var dbUser entity.User
 	errors := make(map[string]string)
 
-	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
+	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err == nil {
 		errors["email"] = res.EmailExist
 	}
 
-	if err := u.UserRepository.Get(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
+	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Username: user.Username}); err == nil {
 		errors["username"] = res.UsernameExist
 	}
 
@@ -86,13 +88,15 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	user := new(entity.User)
 
-	err := u.UserRepository.Login(user, data)
-	if err != nil {
-		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
+	if err := u.UserRepository.Login(user, data); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return "", res.ErrUnauthorized(res.IncorrectIdentifier)
+		}
+
+		return "", res.ErrInternalServer()
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password)); err != nil {
 		return "", res.ErrUnauthorized(res.IncorrectIdentifier)
 	}
 
@@ -100,7 +104,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 		return "", res.ErrForbidden(res.UserNotVerified)
 	}
 
-	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
@@ -110,9 +114,12 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 
 func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res.Err {
 	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
-	if err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
 	}
 
 	if user.IsVerified {
@@ -124,13 +131,11 @@ func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Set(data.Email, []byte(token), u.env.TokenExpiresTime)
-	if err != nil {
+	if err := u.redis.Set(data.Email, []byte(token), u.env.TokenExpiresTime); err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.email.SendEmailVerification(data.Email, token)
-	if err != nil {
+	if err := u.email.SendEmailVerification(data.Email, token); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -139,9 +144,12 @@ func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res
 
 func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	user := new(entity.User)
-	err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email})
-	if err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
 	}
 
 	if user.IsVerified {
@@ -157,13 +165,11 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 		return res.ErrBadRequest(res.InvalidToken)
 	}
 
-	err = u.UserRepository.Verify(user)
-	if err != nil {
+	if err := u.UserRepository.Verify(user); err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(data.Email)
-	if err != nil {
+	if err := u.redis.Delete(data.Email); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -172,8 +178,12 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 
 func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
 	}
 
 	if !user.IsVerified {
@@ -185,13 +195,11 @@ func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Set(user.Email, []byte(token), u.env.TokenExpiresTime)
-	if err != nil {
+	if err := u.redis.Set(user.Email, []byte(token), u.env.TokenExpiresTime); err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.email.SendResetPasswordLink(user.Email, token)
-	if err != nil {
+	if err := u.email.SendResetPasswordLink(user.Email, token); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -200,8 +208,12 @@ func (u *AuthUsecase) ForgotPassword(data dto.ForgotPasswordRequest) *res.Err {
 
 func (u *AuthUsecase) ResetPassword(data dto.ResetPasswordRequest) *res.Err {
 	user := new(entity.User)
-	if err := u.UserRepository.Get(user, dto.UserParam{Email: data.Email}); err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.UserNotExists)
+		}
+
+		return res.ErrInternalServer()
 	}
 
 	if !user.IsVerified {
@@ -223,13 +235,11 @@ func (u *AuthUsecase) ResetPassword(data dto.ResetPasswordRequest) *res.Err {
 	}
 
 	user.Password = string(hashedPassword)
-	err = u.UserRepository.Update(user)
-	if err != nil {
+	if err := u.UserRepository.Update(user); err != nil {
 		return res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(data.Email)
-	if err != nil {
+	if err := u.redis.Delete(data.Email); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -242,8 +252,7 @@ func (u *AuthUsecase) GoogleLogin() (string, *res.Err) {
 		return "", res.ErrInternalServer()
 	}
 
-	err = u.redis.Set(state, []byte(state), u.env.StateExpiresTime)
-	if err != nil {
+	if err := u.redis.Set(state, []byte(state), u.env.StateExpiresTime); err != nil {
 		return "", res.ErrInternalServer()
 	}
 
@@ -279,8 +288,10 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		return "", res.ErrInternalServer()
 	}
 
+	id, _ := uuid.NewV7()
+
 	user := &entity.User{
-		ID:         uuid.New(),
+		ID:         id,
 		Name:       profile.Name,
 		Username:   profile.Username,
 		Email:      profile.Email,
@@ -288,23 +299,24 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 	}
 
 	var dbUser entity.User
-	err = u.UserRepository.Get(&dbUser, dto.UserParam{Email: user.Email})
-	if err != nil {
-		err = u.UserRepository.Create(user)
-		if err != nil {
+	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			if err := u.UserRepository.Create(user); err != nil {
+				return "", res.ErrInternalServer()
+			}
+		} else {
 			return "", res.ErrInternalServer()
 		}
 	} else {
 		user = &dbUser
 	}
 
-	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID != uuid.Nil)
+	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
 		return "", res.ErrInternalServer()
 	}
 
-	err = u.redis.Delete(data.State)
-	if err != nil {
+	if err := u.redis.Delete(data.State); err != nil {
 		return "", res.ErrInternalServer()
 	}
 

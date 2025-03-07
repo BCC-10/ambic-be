@@ -31,3 +31,5 @@ tmp/
 
 # Redis dump file
 dump.rdb
+
+qodana.yaml

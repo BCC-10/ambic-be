@@ -1,13 +1,15 @@
 package repository
 
 import (
+	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"gorm.io/gorm"
 )
 
 type PartnerMySQLItf interface {
-	Get(partner *entity.Partner) error
+	Show(partner *entity.Partner, param dto.PartnerParam) error
 	Create(partner *entity.Partner) error
+	Update(partner *entity.Partner) error
 }
 
 type PartnerMySQL struct {
@@ -18,10 +20,14 @@ func NewPartnerMySQL(db *gorm.DB) PartnerMySQLItf {
 	return &PartnerMySQL{db}
 }
 
-func (r *PartnerMySQL) Get(partner *entity.Partner) error {
-	return r.db.Find(partner).Error
+func (r *PartnerMySQL) Create(partner *entity.Partner) error {
+	return r.db.Debug().Create(partner).Error
 }
 
-func (r *PartnerMySQL) Create(partner *entity.Partner) error {
-	return r.db.Create(partner).Error
+func (r *PartnerMySQL) Update(partner *entity.Partner) error {
+	return r.db.Debug().Updates(partner).Error
+}
+
+func (r *PartnerMySQL) Show(partner *entity.Partner, param dto.PartnerParam) error {
+	return r.db.Debug().First(partner, param).Error
 }

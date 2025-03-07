@@ -3,14 +3,18 @@ package response
 type Err struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
-	Payload interface{} `json:"payload"`
+	Payload interface{} `json:"payload,omitempty"`
 }
 
 type Res struct {
 	StatusCode int         `json:"status_code"`
 	Message    string      `json:"message"`
-	Payload    interface{} `json:"payload"`
+	Payload    interface{} `json:"payload,omitempty"`
 }
+
+const (
+	EntityTooLarge = "Entity too large, max size is %d MB"
+)
 
 // Auth Domain
 const (
@@ -34,28 +38,74 @@ const (
 	IncorrectOldPassword = "Old password is incorrect"
 )
 
-// middleware
+// others
 const (
 	LimitExceeded      = "Too many requests. Please try again later."
 	UserNotVerified    = "User is not verified"
 	UserVerified       = "User is already verified"
 	InvalidToken       = "Token is invalid or has expired"
 	InvalidTokenFormat = "Token format is invalid"
+	PhotoSizeLimit     = "Photo size is too large"
+	PhotoOnly          = "Only photo is allowed"
+	InvalidUUID        = "UUID is invalid"
 )
 
 // User Domain
 const (
-	InvalidDateFormat = "Date format is invalid"
-	UpdateSuccess     = "User profile updated successfully"
+	ShowUserSuccess    = "User retrieved successfully"
+	InvalidDateFormat  = "Date format is invalid"
+	UpdateSuccess      = "User profile updated successfully"
+	PhoneAlreadyExists = "Phone number already exists"
 )
 
 // Partner Domain
 const (
-	PartnerRegisterSuccess = "Partner registered successfully"
+	AlreadyRegisteredAsPartner = "Partner is already registered"
+	NotPartner                 = "User is not a partner"
+	PartnerNotVerified         = "Partner is not verified"
+	PartnerRegisterSuccess     = "Partner registered successfully"
+	PartnerVerifySuccess       = "Partner verified successfully"
+	PartnerVerified            = "Partner is already verified"
+	PartnerNotExists           = "Partner does not exist"
+	GetPartnerSuccess          = "Partner retrieved successfully"
+	UpdatePartnerPhotoSuccess  = "Partner photo updated successfully"
+	InvalidBusinessType        = "Business type is invalid"
 )
 
 // Product Domain
 const (
-	ProductCreateSuccess       = "Product created successfully"
+	GetProductSuccess          = "Products retrieved successfully"
+	CreateProductSuccess       = "Product created successfully"
+	UpdateProductSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
+	ProductNotExists           = "Product does not exist"
+	RatingNotBelongToPartner   = "Product does not belong to partner"
+	DeleteProductSuccess       = "Product deleted successfully"
+	ProductAlreadyExists       = "Product already exists"
+	InvalidDateTime            = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+)
+
+// Rating Domain
+const (
+	GetRatingSuccess      = "Ratings retrieved successfully"
+	RatingNotBelongToUser = "Rating does not belong to user"
+	CreateRatingSuccess   = "Rating created successfully"
+	UpdateRatingSuccess   = "Rating updated successfully"
+	UserAlreadyRated      = "User already rated"
+	RatingDeleteSuccess   = "Rating deleted successfully"
+	RatingNotFound        = "Rating does not exist"
+	RatingEmpty           = "Rating is empty"
+)
+
+// Business Type Domain
+const (
+	BusinessTypeEmpty      = "Business type is empty"
+	GetBusinessTypeSuccess = "Business types retrieved successfully"
+)
+
+// Transaction Domain
+const (
+	GetTransactionSuccess    = "Transactions retrieved successfully"
+	CreateTransactionSuccess = "Transaction created successfully"
+	InsufficentStock         = "Insufficient stock for "
 )

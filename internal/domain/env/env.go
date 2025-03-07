@@ -1,14 +1,21 @@
 package env
 
 import (
+	"fmt"
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 	"time"
 )
 
 type Env struct {
-	AppPort int    `env:"APP_PORT"`
-	AppURL  string `env:"APP_URL"`
+	AppPort       int    `env:"APP_PORT"`
+	AppURL        string `env:"APP_URL"`
+	MaxUploadSize int64  `env:"MAX_UPLOAD_SIZE"`
+
+	DefaultProfilePhotoPath string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
+	DefaultProfilePhotoURL  string
+
+	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
 	TokenLength      int           `env:"TOKEN_LENGTH"`
 	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
@@ -42,19 +49,21 @@ type Env struct {
 	SupabaseBucket string `env:"SUPABASE_BUCKET"`
 	SupabaseURL    string `env:"SUPABASE_URL"`
 	SupabaseSecret string `env:"SUPABASE_SECRET"`
+
+	MidtransServerKey string `env:"MIDTRANS_SERVER_KEY"`
 }
 
 func New() (*Env, error) {
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		panic(err)
 	}
 
 	_env := new(Env)
-	err = env.Parse(_env)
-	if err != nil {
+	if err := env.Parse(_env); err != nil {
 		return nil, err
 	}
+
+	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
 
 	return _env, nil
 }

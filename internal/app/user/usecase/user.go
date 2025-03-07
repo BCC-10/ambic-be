@@ -5,6 +5,8 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/helper"
+	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
@@ -16,26 +18,38 @@ import (
 
 type UserUsecaseItf interface {
 	UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err
+	GetUserProfile(id uuid.UUID) (dto.GetUserResponse, *res.Err)
 }
 
 type UserUsecase struct {
 	UserRepository repository.UserMySQLItf
 	Supabase       supabase.SupabaseIf
 	env            *env.Env
+	helper         helper.HelperIf
 }
 
-func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supabase supabase.SupabaseIf) UserUsecaseItf {
+func NewUserUsecase(env *env.Env, userRepository repository.UserMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) UserUsecaseItf {
 	return &UserUsecase{
 		UserRepository: userRepository,
 		Supabase:       supabase,
 		env:            env,
+		helper:         helper,
 	}
+}
+
+func (u *UserUsecase) GetUserProfile(id uuid.UUID) (dto.GetUserResponse, *res.Err) {
+	user := new(entity.User)
+	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
+		return dto.GetUserResponse{}, res.ErrInternalServer()
+	}
+
+	return user.ParseDTOGet(), nil
 }
 
 func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.Err {
 	userDB := new(entity.User)
-	if err := u.UserRepository.Get(userDB, dto.UserParam{Id: id}); err != nil {
-		return res.ErrNotFound(res.UserNotExists)
+	if err := u.UserRepository.Show(userDB, dto.UserParam{Id: id}); err != nil {
+		return res.ErrInternalServer()
 	}
 
 	gender := new(entity.Gender)
@@ -67,6 +81,7 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 		if err := bcrypt.CompareHashAndPassword([]byte(userDB.Password), []byte(data.OldPassword)); err != nil {
 			return res.ErrForbidden(res.IncorrectOldPassword)
 		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			return res.ErrInternalServer()
@@ -76,6 +91,10 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 	}
 
 	if data.Photo != nil {
+		if err := u.helper.ValidateImage(data.Photo); err != nil {
+			return err
+		}
+
 		src, err := data.Photo.Open()
 		if err != nil {
 			return res.ErrInternalServer()
@@ -94,18 +113,21 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 
 		user.PhotoURL = publicURL
 
-		if userDB.PhotoURL != "" {
+		if userDB.PhotoURL != u.env.DefaultProfilePhotoURL {
 			oldPhotoURL := userDB.PhotoURL
 			index := strings.Index(oldPhotoURL, bucket)
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
 			if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
-				return res.ErrBadRequest(err.Error())
+				return res.ErrInternalServer()
 			}
 		}
 	}
 
 	if err := u.UserRepository.Update(user); err != nil {
+		if mysql.CheckError(err, mysql.ErrDuplicateEntry) {
+			return res.ErrBadRequest(res.PhoneAlreadyExists)
+		}
 		return res.ErrInternalServer()
 	}
 

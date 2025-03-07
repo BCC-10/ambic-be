@@ -8,7 +8,7 @@ import (
 
 type UserMySQLItf interface {
 	Login(user *entity.User, param dto.LoginRequest) error
-	Get(user *entity.User, param dto.UserParam) error
+	Show(user *entity.User, param dto.UserParam) error
 	Create(user *entity.User) error
 	Verify(user *entity.User) error
 	Update(user *entity.User) error
@@ -26,7 +26,7 @@ func (r UserMySQL) Login(user *entity.User, param dto.LoginRequest) error {
 	return r.db.Debug().Where("email = ? OR username = ?", param.Identifier, param.Identifier).Preload("Partner").First(&user).Error
 }
 
-func (r UserMySQL) Get(user *entity.User, param dto.UserParam) error {
+func (r UserMySQL) Show(user *entity.User, param dto.UserParam) error {
 	return r.db.Debug().Preload("Partner").First(&user, param).Error
 }
 
