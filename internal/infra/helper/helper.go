@@ -3,8 +3,10 @@ package helper
 import (
 	"ambic/internal/domain/env"
 	res "ambic/internal/infra/response"
+	"crypto/rand"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"math/big"
 	"mime/multipart"
 	"reflect"
 	"strconv"
@@ -14,6 +16,7 @@ import (
 type HelperIf interface {
 	FormParser(ctx *fiber.Ctx, target interface{}) error
 	ValidateImage(file *multipart.FileHeader) *res.Err
+	GenerateInvoiceNumber() string
 }
 
 type Helper struct {
@@ -90,4 +93,10 @@ func (h Helper) ValidateImage(file *multipart.FileHeader) *res.Err {
 	}
 
 	return nil
+}
+
+func (h Helper) GenerateInvoiceNumber() string {
+	num, _ := rand.Int(rand.Reader, big.NewInt(999999999999))
+
+	return fmt.Sprintf("%012d", num)
 }
