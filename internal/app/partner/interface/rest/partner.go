@@ -64,11 +64,14 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	if err := h.PartnerUsecase.VerifyPartner(*data); err != nil {
+	token, err := h.PartnerUsecase.VerifyPartner(*data)
+	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.PartnerVerifySuccess, nil)
+	return res.SuccessResponse(ctx, res.PartnerVerificationSuccess, fiber.Map{
+		"new_token": token,
+	})
 }
 
 func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {

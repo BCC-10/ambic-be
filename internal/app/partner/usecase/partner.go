@@ -23,7 +23,7 @@ import (
 type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
-	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
+	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
@@ -130,35 +130,40 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 	return token, nil
 }
 
-func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) *res.Err {
+func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *res.Err) {
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrNotFound(res.UserNotExists)
+			return "", res.ErrNotFound(res.UserNotExists)
 		}
 
-		return res.ErrInternalServer()
+		return "", res.ErrInternalServer()
 	}
 
 	if user.Partner.ID == uuid.Nil {
-		return res.ErrNotFound(res.PartnerNotExists)
+		return "", res.ErrNotFound(res.PartnerNotExists)
 	}
 
 	if user.Partner.IsVerified {
-		return res.ErrForbidden(res.PartnerVerified)
+		return "", res.ErrForbidden(res.PartnerVerified)
 	}
 
 	if data.Token != u.env.PartnerVerificationToken {
-		return res.ErrForbidden(res.InvalidToken)
+		return "", res.ErrForbidden(res.InvalidToken)
 	}
 
 	user.Partner.IsVerified = true
 
 	if err := u.PartnerRepository.Update(&user.Partner); err != nil {
-		return res.ErrInternalServer()
+		return "", res.ErrInternalServer()
 	}
 
-	return nil
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
+	if err != nil {
+		return "", res.ErrInternalServer()
+	}
+
+	return token, nil
 }
 
 func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err) {
