@@ -22,7 +22,7 @@ type Transaction struct {
 	TransactionDetails []TransactionDetail
 	Invoice            string    `gorm:"type:varchar(255);not null;uniqueIndex"`
 	Total              float32   `gorm:"type:float(24);not null"`
-	Status             Status    `gorm:"type:ENUM('finish','process','cancelled');default:null"`
+	Status             Status    `gorm:"type:ENUM('waiting for payment','finish','process','cancelled');default:null"`
 	Note               string    `gorm:"type:text"`
 	CreatedAt          time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt          time.Time `gorm:"type:timestamp;autoUpdateTime"`
