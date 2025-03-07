@@ -8,12 +8,11 @@ import (
 )
 
 type Partner struct {
-	ID             uuid.UUID `gorm:"type:varchar(36);primary_key"`
-	UserID         uuid.UUID `gorm:"type:varchar(36);not null;uniqueIndex"`
-	BusinessTypeID uuid.UUID `gorm:"type:varchar(36);not null"`
+	ID             uuid.UUID `gorm:"type:char(36);primary_key"`
+	UserID         uuid.UUID `gorm:"type:char(36);not null;uniqueIndex"`
+	BusinessTypeID uuid.UUID `gorm:"type:char(36);not null"`
 	Products       []Product
 	Name           string    `gorm:"type:varchar(255);not null"`
-	Type           string    `gorm:"type:varchar(255);not null"`
 	Address        string    `gorm:"type:varchar(255);not null"`
 	City           string    `gorm:"type:varchar(255);not null"`
 	Longitude      float64   `gorm:"type:float;not null"`
@@ -33,14 +32,14 @@ func (p *Partner) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (p *Partner) ParseDTOGet() dto.GetPartnerResponse {
 	return dto.GetPartnerResponse{
-		ID:        p.ID.String(),
-		Name:      p.Name,
-		Type:      p.Type,
-		Address:   p.Address,
-		City:      p.City,
-		Instagram: p.Instagram,
-		Longitude: p.Longitude,
-		Latitude:  p.Latitude,
-		Photo:     p.PhotoURL,
+		ID:             p.ID.String(),
+		Name:           p.Name,
+		BusinessTypeID: p.BusinessTypeID.String(),
+		Address:        p.Address,
+		City:           p.City,
+		Instagram:      p.Instagram,
+		Longitude:      p.Longitude,
+		Latitude:       p.Latitude,
+		Photo:          p.PhotoURL,
 	}
 }
