@@ -12,6 +12,7 @@ const (
 	WaitingForPayment  Status = "waiting for payment"
 	Finish             Status = "finish"
 	Process            Status = "process"
+	CancelledBySystem  Status = "cancelled by system"
 	CancelledByUser    Status = "cancelled by user"
 	CancelledByPartner Status = "cancelled by partner"
 )
@@ -23,7 +24,7 @@ type Transaction struct {
 	TransactionDetails []TransactionDetail
 	Invoice            string    `gorm:"type:varchar(255);not null;uniqueIndex"`
 	Total              float32   `gorm:"type:float(24);not null"`
-	Status             Status    `gorm:"type:ENUM('waiting for payment','finish','process','cancelled by user','cancelled by partner');default:null"`
+	Status             Status    `gorm:"type:ENUM('waiting for payment','finish','process','cancelled by user','cancelled by partner','cancelled by system');default:null"`
 	Note               string    `gorm:"type:text"`
 	CreatedAt          time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt          time.Time `gorm:"type:timestamp;autoUpdateTime"`
