@@ -26,7 +26,7 @@ func NewUserHandler(routerGroup fiber.Router, userUsecase usecase.UserUsecaseItf
 
 	routerGroup = routerGroup.Group("/users")
 	routerGroup.Get("/profile", m.Authentication, UserHandler.GetUserProfile)
-	routerGroup.Patch("/update", m.Authentication, UserHandler.UpdateUser)
+	routerGroup.Patch("/", m.Authentication, UserHandler.UpdateUser)
 }
 
 func (h UserHandler) UpdateUser(ctx *fiber.Ctx) error {

@@ -10,7 +10,7 @@ type RegisterRequest struct {
 }
 
 type EmailVerificationRequest struct {
-	Email string `json:"email" validate:"required,email"`
+	Email string `query:"email" validate:"required,email"`
 }
 
 type VerifyUserRequest struct {

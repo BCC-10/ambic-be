@@ -84,7 +84,7 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 			return res.ErrInternalServer()
 		}
 	} else if status == "cancelled" {
-		transaction.Status = entity.Cancelled
+		transaction.Status = entity.CancelledBySystem
 
 		if err := u.TransactionRepository.Update(transaction); err != nil {
 			return res.ErrInternalServer()
