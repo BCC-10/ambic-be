@@ -66,15 +66,21 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 		return res.ErrBadRequest(res.InvalidDateTime)
 	}
 
+	endPickupTime, err := time.Parse("2006-01-02 15:04:05", req.EndPickupTime)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidDateTime)
+	}
+
 	product := &entity.Product{
-		PartnerID:    partnerId,
-		Name:         req.Name,
-		Description:  req.Description,
-		InitialPrice: req.InitialPrice,
-		FinalPrice:   req.FinalPrice,
-		Stock:        uint(req.Stock),
-		PickupTime:   pickupTime,
-		PhotoURL:     publicURL,
+		PartnerID:     partnerId,
+		Name:          req.Name,
+		Description:   req.Description,
+		InitialPrice:  req.InitialPrice,
+		FinalPrice:    req.FinalPrice,
+		Stock:         uint(req.Stock),
+		PickupTime:    pickupTime,
+		EndPickupTime: endPickupTime,
+		PhotoURL:      publicURL,
 	}
 
 	if err = u.ProductRepository.Create(product); err != nil {
@@ -108,14 +114,20 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 		return res.ErrBadRequest(res.InvalidDateTime)
 	}
 
+	endPickupTime, err := time.Parse("2006-01-02 15:04:05", req.PickupTime)
+	if err != nil {
+		return res.ErrBadRequest(res.InvalidDateTime)
+	}
+
 	product := &entity.Product{
-		ID:           productId,
-		Name:         req.Name,
-		Description:  req.Description,
-		InitialPrice: req.InitialPrice,
-		FinalPrice:   req.FinalPrice,
-		Stock:        uint(req.Stock),
-		PickupTime:   pickupTime,
+		ID:            productId,
+		Name:          req.Name,
+		Description:   req.Description,
+		InitialPrice:  req.InitialPrice,
+		FinalPrice:    req.FinalPrice,
+		Stock:         uint(req.Stock),
+		PickupTime:    pickupTime,
+		EndPickupTime: endPickupTime,
 	}
 
 	if req.Photo != nil {
