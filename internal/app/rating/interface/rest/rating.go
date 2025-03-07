@@ -28,7 +28,7 @@ func NewRatingHandler(routerGroup fiber.Router, ratingUsecase RatingUsecase.Rati
 	routerGroup.Get("/", m.Authentication, RatingHandler.Get)
 	routerGroup.Get("/:id", m.Authentication, RatingHandler.Show)
 	routerGroup.Post("/", m.Authentication, RatingHandler.Create)
-	routerGroup.Patch("/:id/update", m.Authentication, RatingHandler.Update)
+	routerGroup.Patch("/:id", m.Authentication, RatingHandler.Update)
 	routerGroup.Delete("/:id", m.Authentication, RatingHandler.Delete)
 }
 
