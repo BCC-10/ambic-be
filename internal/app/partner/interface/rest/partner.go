@@ -43,11 +43,14 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	if err := h.PartnerUsecase.RegisterPartner(userId, *data); err != nil {
+	token, err := h.PartnerUsecase.RegisterPartner(userId, *data)
+	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, nil)
+	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, fiber.Map{
+		"new_token": token,
+	})
 }
 
 func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {

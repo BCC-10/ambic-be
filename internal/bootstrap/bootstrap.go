@@ -106,7 +106,7 @@ func Start() error {
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
 	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, s, h, ma)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, s, h, ma, j)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h)
 
 	ratingRepository := RatingRepo.NewRatingMySQL(db)

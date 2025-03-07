@@ -9,6 +9,7 @@ import (
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/helper"
+	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/maps"
 	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
@@ -21,7 +22,7 @@ import (
 
 type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
-	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err
+	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
 	VerifyPartner(request dto.VerifyPartnerRequest) *res.Err
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
@@ -36,9 +37,10 @@ type PartnerUsecase struct {
 	Maps                   maps.MapsIf
 	Supabase               supabase.SupabaseIf
 	helper                 helper.HelperIf
+	jwt                    jwt.JWTIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
@@ -48,17 +50,18 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 		BusinessTypeRepository: businessTypeRepository,
 		Supabase:               supabase,
 		helper:                 helper,
+		jwt:                    jwt,
 	}
 }
 
-func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) *res.Err {
+func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err) {
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
-		return res.ErrInternalServer()
+		return "", res.ErrInternalServer()
 	}
 
 	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil || user.BornDate.IsZero() {
-		return res.ErrForbidden(res.ProfileNotFilledCompletely)
+		return "", res.ErrForbidden(res.ProfileNotFilledCompletely)
 	}
 
 	if data.Instagram[0] == '@' {
@@ -67,16 +70,16 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	businessTypeId, err := uuid.Parse(data.BusinessTypeID)
 	if err != nil {
-		return res.ErrBadRequest(res.InvalidBusinessType)
+		return "", res.ErrBadRequest(res.InvalidBusinessType)
 	}
 
 	businessType := new(entity.BusinessType)
 	if err := u.BusinessTypeRepository.Show(businessType, dto.BusinessTypeParam{ID: businessTypeId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return res.ErrBadRequest(res.InvalidBusinessType)
+			return "", res.ErrBadRequest(res.InvalidBusinessType)
 		}
 
-		return res.ErrInternalServer()
+		return "", res.ErrInternalServer()
 	}
 
 	partner := entity.Partner{
@@ -92,12 +95,12 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	if data.Photo != nil {
 		if err := u.helper.ValidateImage(data.Photo); err != nil {
-			return err
+			return "", err
 		}
 
 		src, err := data.Photo.Open()
 		if err != nil {
-			return res.ErrInternalServer()
+			return "", res.ErrInternalServer()
 		}
 
 		defer src.Close()
@@ -108,17 +111,22 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 		photoURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 		if err != nil {
-			return res.ErrInternalServer()
+			return "", res.ErrInternalServer()
 		}
 
 		partner.PhotoURL = photoURL
 	}
 
 	if err := u.PartnerRepository.Create(&partner); err != nil {
-		return res.ErrInternalServer()
+		return "", res.ErrInternalServer()
 	}
 
-	return nil
+	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
+	if err != nil {
+		return "", res.ErrInternalServer()
+	}
+
+	return token, nil
 }
 
 func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) *res.Err {
