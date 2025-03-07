@@ -165,6 +165,10 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 	}
 
 	if err := u.ProductRepository.Update(tx, product); err != nil {
+		if mysql.CheckError(err, mysql.ErrDuplicateEntry) {
+			return res.ErrBadRequest(res.ProductAlreadyExists)
+		}
+
 		return res.ErrInternalServer()
 	}
 
