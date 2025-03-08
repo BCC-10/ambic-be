@@ -41,7 +41,7 @@ func (h *TransactionHandler) GetByUser(ctx *fiber.Ctx) error {
 func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	req := new(dto.CreateTransactionRequest)
 	if err := ctx.BodyParser(req); err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, "err")
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
