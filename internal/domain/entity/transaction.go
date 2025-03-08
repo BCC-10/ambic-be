@@ -37,13 +37,12 @@ func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	}
 
 	res := dto.GetTransactionResponse{
-		ID:                 t.ID.String(),
-		Invoice:            t.Invoice,
-		Total:              t.Total,
-		Status:             string(t.Status),
-		Note:               t.Note,
-		Date:               t.UpdatedAt,
-		TransactionDetails: transactionDetails,
+		ID:      t.ID.String(),
+		Invoice: t.Invoice,
+		Total:   t.Total,
+		Status:  string(t.Status),
+		Note:    t.Note,
+		Date:    t.UpdatedAt,
 	}
 
 	if t.Payment.ID != uuid.Nil {
