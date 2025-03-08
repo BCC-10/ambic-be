@@ -31,11 +31,6 @@ type Transaction struct {
 }
 
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
-	transactionDetails := make([]dto.GetTransactionDetailResponse, 0)
-	for _, detail := range t.TransactionDetails {
-		transactionDetails = append(transactionDetails, detail.ParseDTOGet())
-	}
-
 	res := dto.GetTransactionResponse{
 		ID:      t.ID.String(),
 		Invoice: t.Invoice,
@@ -43,6 +38,29 @@ func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 		Status:  string(t.Status),
 		Note:    t.Note,
 		Date:    t.UpdatedAt,
+	}
+
+	if t.Payment.ID != uuid.Nil {
+		res.Payment = t.Payment.ParseDTOGet()
+	}
+
+	return res
+}
+
+func (t *Transaction) ParseDTOShow() dto.ShowTransactionResponse {
+	products := make([]dto.GetProductResponse, len(t.TransactionDetails))
+	for i, detail := range t.TransactionDetails {
+		products[i] = detail.Product.ParseDTOGet()
+	}
+
+	res := dto.ShowTransactionResponse{
+		ID:      t.ID.String(),
+		Invoice: t.Invoice,
+		Total:   t.Total,
+		Status:  string(t.Status),
+		Note:    t.Note,
+		Date:    t.UpdatedAt,
+		Items:   products,
 	}
 
 	if t.Payment.ID != uuid.Nil {

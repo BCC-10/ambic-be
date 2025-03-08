@@ -23,6 +23,7 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 
 	routerGroup = routerGroup.Group("/transactions")
 	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByLoggedInUser)
+	routerGroup.Get("/:id", m.Authentication, TransactionHandler.Show)
 	routerGroup.Post("/", m.Authentication, TransactionHandler.Create)
 }
 
@@ -57,4 +58,18 @@ func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, fiber.Map{
 		"payment_url": paymentURL,
 	})
+}
+
+func (h *TransactionHandler) Show(ctx *fiber.Ctx) error {
+	transactionId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	transactionDetails, _err := h.TransactionUsecase.Show(transactionId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, transactionDetails)
 }

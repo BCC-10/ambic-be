@@ -75,7 +75,7 @@ const (
 
 // Product Domain
 const (
-	GetProductSuccess          = "Products retrieved successfully"
+	GetProductSuccess          = "Items retrieved successfully"
 	CreateProductSuccess       = "Product created successfully"
 	UpdateProductSuccess       = "Product updated successfully"
 	ProfileNotFilledCompletely = "Profile is not filled completely"
@@ -114,4 +114,8 @@ const (
 	InvalidQty               = "Quantity must be greater than 0"
 	MissingProductID         = "Product ID is missing"
 	MissingTransactionItems  = "Transaction items are missing"
+	TransactionNotFound      = "Transaction not found"
 )
+
+// Transaction Detail Domain
+const ()

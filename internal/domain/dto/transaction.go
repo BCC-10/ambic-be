@@ -15,6 +15,17 @@ type GetTransactionResponse struct {
 	Date    time.Time          `json:"date"`
 }
 
+type ShowTransactionResponse struct {
+	ID      string               `json:"id"`
+	Payment GetPaymentResponse   `json:"payment,omitempty"`
+	Invoice string               `json:"invoice"`
+	Total   float32              `json:"total"`
+	Status  string               `json:"status"`
+	Note    string               `json:"note"`
+	Date    time.Time            `json:"date"`
+	Items   []GetProductResponse `json:"items"`
+}
+
 type CreateTransactionRequest struct {
 	Note               string                           `json:"note"`
 	TransactionDetails []CreateTransactionDetailRequest `json:"items" validate:"required"`

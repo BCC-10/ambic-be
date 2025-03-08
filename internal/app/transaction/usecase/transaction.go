@@ -19,6 +19,7 @@ import (
 type TransactionUsecaseItf interface {
 	GetByUserID(userId uuid.UUID) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
+	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
 }
 
 type TransactionUsecase struct {
@@ -165,4 +166,25 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	tx.Commit()
 
 	return url, nil
+}
+
+func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err) {
+	transaction := new(entity.Transaction)
+
+	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return dto.ShowTransactionResponse{}, res.ErrBadRequest(res.TransactionNotFound)
+		}
+	}
+
+	//	get purchased products by transacrtion details
+	//	transactionDetails := transaction.TransactionDetails
+	//	for i, detail := range transactionDetails {
+	//		product := new(entity.Product)
+	//		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: detail.ProductID}); err != nil {
+	//			return dto.GetTransactionResponse{}, res.ErrInternalServer()
+	//		}
+	//	}
+
+	return transaction.ParseDTOShow(), nil
 }

@@ -8,7 +8,7 @@ type TransactionDetail struct {
 
 type GetTransactionDetailResponse struct {
 	ProductID string             `json:"product_id"`
-	Product   GetProductResponse `json:"-"`
+	Product   GetProductResponse `json:"product"`
 	Qty       uint               `json:"qty"`
 }
 

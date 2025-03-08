@@ -4,10 +4,12 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type TransactionMySQLItf interface {
 	Get(transaction *[]entity.Transaction, param dto.TransactionParam) error
+	Show(transaction *entity.Transaction, param dto.TransactionParam) error
 	Create(tx *gorm.DB, transaction *entity.Transaction) error
 	Update(transaction *entity.Transaction) error
 	CheckHasUserPurchasedProduct(param dto.TransactionParam) bool
@@ -42,4 +44,8 @@ func (r *TransactionMySQL) Update(transaction *entity.Transaction) error {
 
 func (r *TransactionMySQL) Create(tx *gorm.DB, transaction *entity.Transaction) error {
 	return tx.Debug().Create(transaction).Error
+}
+
+func (r *TransactionMySQL) Show(transaction *entity.Transaction, param dto.TransactionParam) error {
+	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").First(transaction, param).Error
 }

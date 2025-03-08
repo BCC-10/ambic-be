@@ -23,6 +23,7 @@ func (d *TransactionDetail) BeforeCreate(tx *gorm.DB) (err error) {
 func (d *TransactionDetail) ParseDTOGet() dto.GetTransactionDetailResponse {
 	return dto.GetTransactionDetailResponse{
 		ProductID: d.ProductID.String(),
+		Product:   d.Product.ParseDTOGet(),
 		Qty:       d.Qty,
 	}
 }
