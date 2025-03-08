@@ -84,6 +84,7 @@ const (
 	DeleteProductSuccess       = "Product deleted successfully"
 	ProductAlreadyExists       = "Product already exists"
 	InvalidDateTime            = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	ProductNotFound            = "The product with id %s does not exist"
 )
 
 // Rating Domain
@@ -108,5 +109,8 @@ const (
 const (
 	GetTransactionSuccess    = "Transactions retrieved successfully"
 	CreateTransactionSuccess = "Transaction created successfully"
-	InsufficientStock        = "Insufficient stock for "
+	InsufficientStock        = "Insufficient stock for %s"
+	InvalidQty               = "Quantity must be greater than 0"
+	MissingProductID         = "Product ID is missing"
+	MissingTransactionItems  = "Transaction items are missing"
 )
