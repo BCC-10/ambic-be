@@ -9,7 +9,9 @@ import (
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/helper"
 	"ambic/internal/infra/midtrans"
+	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -75,24 +77,41 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		Note:    req.Note,
 	}
 
+	if len(req.TransactionDetails) < 1 {
+		return "", res.ErrBadRequest(res.MissingTransactionItems)
+	}
+
 	var items []dto.TransactionDetail
 
 	for _, item := range req.TransactionDetails {
+		if item.Qty < 1 {
+			return "", res.ErrBadRequest(res.InvalidQty)
+		}
+
+		if item.ProductID == "" {
+			return "", res.ErrBadRequest(res.MissingProductID)
+		}
+
 		product := new(entity.Product)
 
 		productId, err := uuid.Parse(item.ProductID)
 		if err != nil {
 			tx.Rollback()
-			return "", res.ErrBadRequest()
+			return "", res.ErrBadRequest(res.InvalidUUID)
 		}
 
 		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
+			if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+				tx.Rollback()
+				return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotFound, item.ProductID))
+			}
+
 			tx.Rollback()
-			return "", res.ErrBadRequest()
+			return "", res.ErrInternalServer()
 		}
 
 		if product.Stock < uint(item.Qty) {
-			return "", res.ErrBadRequest(res.InsufficientStock + product.Name)
+			return "", res.ErrBadRequest(fmt.Sprintf(res.InsufficientStock, product.Name))
 		}
 
 		transactionDetail := entity.TransactionDetail{
