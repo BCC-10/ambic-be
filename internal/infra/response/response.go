@@ -97,7 +97,7 @@ const (
 	RatingDeleteSuccess     = "Rating deleted successfully"
 	RatingNotFound          = "Rating does not exist"
 	RatingNotExists         = "Rating does not exist"
-	UserNotPurchasedProduct = "User has not purchased the product"
+	UserNotPurchasedProduct = "User has not purchased the product or the transaction is not completed yet"
 )
 
 // Business Type Domain
