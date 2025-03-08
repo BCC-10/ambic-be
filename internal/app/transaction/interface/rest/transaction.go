@@ -22,11 +22,11 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 	}
 
 	routerGroup = routerGroup.Group("/transactions")
-	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByUser)
+	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByLoggedInUser)
 	routerGroup.Post("/", m.Authentication, TransactionHandler.Create)
 }
 
-func (h *TransactionHandler) GetByUser(ctx *fiber.Ctx) error {
+func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
 	userId := ctx.Locals("userId").(uuid.UUID)
 	transactions, err := h.TransactionUsecase.GetByUserID(userId)
 	if err != nil {
