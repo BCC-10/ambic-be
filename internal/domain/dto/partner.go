@@ -10,8 +10,7 @@ type RegisterPartnerRequest struct {
 	Address        string                `form:"address" validate:"required"`
 	City           string                `form:"city" validate:"required"`
 	Instagram      string                `form:"instagram" validate:"required"`
-	Longitude      float64               `form:"longitude" validate:"required,longitude"`
-	Latitude       float64               `form:"latitude" validate:"required,latitude"`
+	PlaceID        string                `form:"place_id" validate:"required"`
 	BusinessTypeID string                `form:"business_type_id" validate:"required,uuid"`
 	Photo          *multipart.FileHeader `form:"photo"`
 }
@@ -31,6 +30,7 @@ type GetPartnerProductsQuery struct {
 }
 
 type GetPartnerResponse struct {
+	PlaceID      string  `json:"place_id,omitempty"`
 	ID           string  `json:"id,omitempty"`
 	Name         string  `json:"name,omitempty"`
 	BusinessType string  `json:"business_type,omitempty"`
