@@ -6,14 +6,13 @@ import (
 )
 
 type GetTransactionResponse struct {
-	ID                 string                         `json:"id"`
-	Payment            GetPaymentResponse             `json:"payment,omitempty"`
-	Invoice            string                         `json:"invoice"`
-	Total              float32                        `json:"total"`
-	Status             string                         `json:"status"`
-	Note               string                         `json:"note"`
-	Date               time.Time                      `json:"date"`
-	TransactionDetails []GetTransactionDetailResponse `json:"items"`
+	ID      string             `json:"id"`
+	Payment GetPaymentResponse `json:"payment,omitempty"`
+	Invoice string             `json:"invoice"`
+	Total   float32            `json:"total"`
+	Status  string             `json:"status"`
+	Note    string             `json:"note"`
+	Date    time.Time          `json:"date"`
 }
 
 type CreateTransactionRequest struct {
@@ -30,6 +29,7 @@ type RequestSnap struct {
 }
 
 type TransactionParam struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	ProductID uuid.UUID
 }
