@@ -10,7 +10,8 @@ type TransactionDetail struct {
 	ID            uuid.UUID `gorm:"type:char(36);primaryKey"`
 	TransactionID uuid.UUID `gorm:"type:char(36);not null"`
 	ProductID     uuid.UUID `gorm:"type:char(36)"`
-	Qty           uint      `gorm:"type:int;not null"`
+	Product       Product
+	Qty           uint `gorm:"type:int;not null"`
 }
 
 func (d *TransactionDetail) BeforeCreate(tx *gorm.DB) (err error) {
