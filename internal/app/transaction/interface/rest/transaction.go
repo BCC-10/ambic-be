@@ -49,9 +49,12 @@ func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	if err := h.TransactionUsecase.Create(userId, req); err != nil {
+	paymentURL, err := h.TransactionUsecase.Create(userId, req)
+	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, nil)
+	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, fiber.Map{
+		"payment_url": paymentURL,
+	})
 }
