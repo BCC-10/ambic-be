@@ -41,7 +41,7 @@ func (h *TransactionHandler) GetByUser(ctx *fiber.Ctx) error {
 func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	req := new(dto.CreateTransactionRequest)
 	if err := ctx.BodyParser(req); err != nil {
-		return res.BadRequest(ctx)
+		return res.BadRequest(ctx, "err")
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
@@ -49,9 +49,12 @@ func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	if err := h.TransactionUsecase.Create(userId, req); err != nil {
+	paymentURL, err := h.TransactionUsecase.Create(userId, req)
+	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, nil)
+	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, fiber.Map{
+		"payment_url": paymentURL,
+	})
 }

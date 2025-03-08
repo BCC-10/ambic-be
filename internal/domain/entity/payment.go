@@ -9,12 +9,18 @@ import (
 
 type Payment struct {
 	ID                uuid.UUID `gorm:"type:char(36);primaryKey"`
-	TransactionID     uuid.UUID `gorm:"type:char(36);not null"`
-	ReferenceID       string    `gorm:"type:varchar(255);not null"`
-	TransactionStatus string    `gorm:"type:varchar(255);not null"`
-	StatusMessage     string    `gorm:"type:varchar(255);not null"`
-	PaymentType       string    `gorm:"type:varchar(255);not null"`
-	FraudStatus       string    `gorm:"type:varchar(255);not null"`
+	TransactionID     uuid.UUID `gorm:"type:char(36);uniqueIndex"`
+	OrderID           string    `gorm:"type:varchar(255)"`
+	ReferenceID       string    `gorm:"type:varchar(255)"`
+	MerchantID        string    `gorm:"type:varchar(255)"`
+	Issuer            string    `gorm:"type:varchar(255)"`
+	Currency          string    `gorm:"type:varchar(255)"`
+	GrossAmount       float32   `gorm:"type:float(24)"`
+	Acquirer          string    `gorm:"type:varchar(255)"`
+	TransactionStatus string    `gorm:"type:varchar(255)"`
+	StatusMessage     string    `gorm:"type:varchar(255)"`
+	PaymentType       string    `gorm:"type:varchar(255)"`
+	FraudStatus       string    `gorm:"type:varchar(255)"`
 	TransactionTime   time.Time `gorm:"type:timestamp"`
 	SettlementTime    time.Time `gorm:"type:timestamp"`
 	CreatedAt         time.Time `gorm:"type:timestamp;autoCreateTime"`
@@ -31,6 +37,7 @@ func (u *Payment) ParseDTOGet() dto.GetPaymentResponse {
 	return dto.GetPaymentResponse{
 		ID:                u.ID.String(),
 		TransactionID:     u.TransactionID.String(),
+		OrderID:           u.OrderID,
 		ReferenceID:       u.ReferenceID,
 		TransactionStatus: u.TransactionStatus,
 		StatusMessage:     u.StatusMessage,

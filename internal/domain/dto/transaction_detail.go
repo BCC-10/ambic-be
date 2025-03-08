@@ -1,8 +1,15 @@
 package dto
 
+type TransactionDetail struct {
+	ProductID string
+	Product   GetProductResponse
+	Qty       uint
+}
+
 type GetTransactionDetailResponse struct {
-	ProductID string `json:"product_id"`
-	Qty       uint   `json:"qty"`
+	ProductID string             `json:"product_id"`
+	Product   GetProductResponse `json:"-"`
+	Qty       uint               `json:"qty"`
 }
 
 type CreateTransactionDetailRequest struct {

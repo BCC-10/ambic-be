@@ -114,11 +114,11 @@ func Start() error {
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
 	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
-	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, h)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
-	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository, snap)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))

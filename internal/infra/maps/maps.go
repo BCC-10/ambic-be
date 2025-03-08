@@ -1,11 +1,11 @@
 package maps
 
 import (
+	"ambic/internal/domain/dto"
 	"ambic/internal/domain/env"
 	routespb "cloud.google.com/go/maps/routing/apiv2/routingpb"
 	"context"
 	"crypto/tls"
-	"github.com/gofiber/fiber/v2"
 	"google.golang.org/api/option"
 	"google.golang.org/api/places/v1"
 	"google.golang.org/genproto/googleapis/type/latlng"
@@ -22,7 +22,7 @@ type Place struct {
 }
 
 type MapsIf interface {
-	GetAutocomplete(query string) ([]fiber.Map, error)
+	GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error)
 	GetPlaceDetails(placeId string) (PlaceDetails, error)
 	GetDistance(from PlaceDetails, to PlaceDetails) any
 }
@@ -49,23 +49,42 @@ func NewMaps(env *env.Env) MapsIf {
 	}
 }
 
-func (m *Maps) GetAutocomplete(query string) ([]fiber.Map, error) {
+func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error) {
+	if req.Radius == 0 {
+		req.Radius = 20000
+	}
+
+	var suggestions []dto.LocationResponse
+
 	request := &places.GoogleMapsPlacesV1AutocompletePlacesRequest{
-		Input: query,
+		Input:        req.Query,
+		RegionCode:   "ID",
+		LocationBias: &places.GoogleMapsPlacesV1AutocompletePlacesRequestLocationBias{},
+	}
+	if req.Lat != 0 || req.Long != 0 {
+		req.Lat = -6.175110
+		req.Long = 106.865036
+
+		request.LocationBias.Circle = &places.GoogleMapsPlacesV1Circle{
+			Center: &places.GoogleTypeLatLng{
+				Latitude:  req.Lat,
+				Longitude: req.Long,
+			},
+			Radius: req.Radius,
+		}
 	}
 
 	response, err := m.PlacesService.Places.Autocomplete(request).Do()
 	if err != nil {
 		log.Println("Error fetching autocomplete:", err)
-		return []fiber.Map{}, err
+		return suggestions, err
 	}
 
-	suggestions := []fiber.Map{}
 	for _, suggestion := range response.Suggestions {
 		response, _ := m.PlacesService.Places.Get("places/" + suggestion.PlacePrediction.PlaceId).Fields("*").Do()
-		suggestions = append(suggestions, fiber.Map{
-			"name":     *response.DisplayName,
-			"place_id": suggestion.PlacePrediction.PlaceId,
+		suggestions = append(suggestions, dto.LocationResponse{
+			Name:    response.DisplayName.Text,
+			PlaceID: suggestion.PlacePrediction.PlaceId,
 		})
 	}
 

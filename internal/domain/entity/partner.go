@@ -9,9 +9,9 @@ import (
 
 type Partner struct {
 	ID             uuid.UUID `gorm:"type:char(36);primary_key"`
-	UserID         uuid.UUID `gorm:"type:char(36);not null;uniqueIndex"`
+	UserID         uuid.UUID `gorm:"type:char(36);uniqueIndex"`
 	BusinessTypeID uuid.UUID `gorm:"type:char(36);not null"`
-	Products       []Product
+	Products       []Product `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
 	BusinessType   BusinessType
 	Name           string    `gorm:"type:varchar(255);not null"`
 	Address        string    `gorm:"type:varchar(255);not null"`

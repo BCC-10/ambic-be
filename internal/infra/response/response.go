@@ -64,12 +64,13 @@ const (
 	NotPartner                 = "User is not a partner"
 	PartnerNotVerified         = "Partner is not verified"
 	PartnerRegisterSuccess     = "Partner registered successfully"
-	PartnerVerifySuccess       = "Partner verified successfully"
+	PartnerVerificationSuccess = "Partner verified successfully"
 	PartnerVerified            = "Partner is already verified"
 	PartnerNotExists           = "Partner does not exist"
 	GetPartnerSuccess          = "Partner retrieved successfully"
 	UpdatePartnerPhotoSuccess  = "Partner photo updated successfully"
 	InvalidBusinessType        = "Business type is invalid"
+	GetAutoCompleteSuccess     = "Auto complete suggestions retrieved successfully"
 )
 
 // Product Domain
@@ -83,6 +84,7 @@ const (
 	DeleteProductSuccess       = "Product deleted successfully"
 	ProductAlreadyExists       = "Product already exists"
 	InvalidDateTime            = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	ProductNotFound            = "The product with id %s does not exist"
 )
 
 // Rating Domain
@@ -107,5 +109,8 @@ const (
 const (
 	GetTransactionSuccess    = "Transactions retrieved successfully"
 	CreateTransactionSuccess = "Transaction created successfully"
-	InsufficentStock         = "Insufficient stock for "
+	InsufficientStock        = "Insufficient stock for %s"
+	InvalidQty               = "Quantity must be greater than 0"
+	MissingProductID         = "Product ID is missing"
+	MissingTransactionItems  = "Transaction items are missing"
 )

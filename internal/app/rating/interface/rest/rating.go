@@ -26,28 +26,41 @@ func NewRatingHandler(routerGroup fiber.Router, ratingUsecase RatingUsecase.Rati
 
 	routerGroup = routerGroup.Group("/ratings")
 	routerGroup.Get("/", m.Authentication, RatingHandler.Get)
-	routerGroup.Get("/:id", m.Authentication, RatingHandler.Show)
 	routerGroup.Post("/", m.Authentication, RatingHandler.Create)
-	routerGroup.Patch("/:id/update", m.Authentication, RatingHandler.Update)
+	routerGroup.Get("/:id", m.Authentication, RatingHandler.Show)
+	routerGroup.Patch("/:id", m.Authentication, RatingHandler.Update)
 	routerGroup.Delete("/:id", m.Authentication, RatingHandler.Delete)
 }
 
 func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
-	ratings, err := h.RatingUsecase.Get()
+	req := new(dto.GetRatingRequest)
+	if err := ctx.QueryParser(req); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	ratings, err := h.RatingUsecase.Get(*req)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetRatingSuccess, ratings)
+	return res.SuccessResponse(ctx, "asas", ratings)
 }
 
 func (h *RatingHandler) Show(ctx *fiber.Ctx) error {
-	ratingId, err := uuid.Parse(ctx.Params("id"))
-	if err != nil {
+	req := new(dto.ShowRatingRequest)
+	if err := ctx.ParamsParser(req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
-	rating, _err := h.RatingUsecase.Show(ratingId)
+	if err := h.validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	rating, _err := h.RatingUsecase.Show(*req)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
@@ -83,13 +96,14 @@ func (h *RatingHandler) Update(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	userId := ctx.Locals("userId").(uuid.UUID)
-	ratingId, err := uuid.Parse(ctx.Params("id"))
-	if err != nil {
-		return res.BadRequest(ctx)
+	param := new(dto.UpdateRatingParam)
+	if err := ctx.ParamsParser(param); err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	if err := h.RatingUsecase.Update(userId, ratingId, *req); err != nil {
+	userId := ctx.Locals("userId").(uuid.UUID)
+
+	if err := h.RatingUsecase.Update(userId, *param, *req); err != nil {
 		return res.Error(ctx, err)
 	}
 

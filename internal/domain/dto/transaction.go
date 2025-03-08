@@ -21,6 +21,14 @@ type CreateTransactionRequest struct {
 	TransactionDetails []CreateTransactionDetailRequest `json:"items" validate:"required"`
 }
 
+type RequestSnap struct {
+	TransactionID      string
+	OrderID            string
+	Amount             int64
+	User               GetUserResponse
+	TransactionDetails []TransactionDetail
+}
+
 type TransactionParam struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
