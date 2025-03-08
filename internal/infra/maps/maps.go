@@ -25,6 +25,7 @@ type MapsIf interface {
 	GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error)
 	GetPlaceDetails(placeId string) (PlaceDetails, error)
 	GetDistance(from PlaceDetails, to PlaceDetails) any
+	GenerateGoogleMapsURL(placeId string) string
 }
 
 type Maps struct {
@@ -105,7 +106,6 @@ func (m *Maps) GetPlaceDetails(placeId string) (PlaceDetails, error) {
 		return PlaceDetails{}, err
 	}
 
-	// Ambil latitude & longitude
 	latitude := response.Location.Latitude
 	longitude := response.Location.Longitude
 
@@ -174,4 +174,8 @@ func (m *Maps) GetDistance(from PlaceDetails, to PlaceDetails) any {
 	}
 
 	return resp
+}
+
+func (m *Maps) GenerateGoogleMapsURL(placeId string) string {
+	return "https://www.google.com/maps/place?q=" + placeId
 }
