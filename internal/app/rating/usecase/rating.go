@@ -3,6 +3,7 @@ package usecase
 import (
 	productRepo "ambic/internal/app/product/repository"
 	"ambic/internal/app/rating/repository"
+	transactionRepo "ambic/internal/app/transaction/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
@@ -24,20 +25,22 @@ type RatingUsecaseItf interface {
 }
 
 type RatingUsecase struct {
-	env               *env.Env
-	RatingRepository  repository.RatingMySQLItf
-	ProductRepository productRepo.ProductMySQLItf
-	Supabase          supabase.SupabaseIf
-	helper            helper.HelperIf
+	env                   *env.Env
+	RatingRepository      repository.RatingMySQLItf
+	ProductRepository     productRepo.ProductMySQLItf
+	TransactionRepository transactionRepo.TransactionMySQLItf
+	Supabase              supabase.SupabaseIf
+	helper                helper.HelperIf
 }
 
-func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
+func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, productRepository productRepo.ProductMySQLItf, transactionRepo transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
 	return &RatingUsecase{
-		env:               env,
-		RatingRepository:  ratingRepository,
-		ProductRepository: productRepository,
-		Supabase:          supabase,
-		helper:            helper,
+		env:                   env,
+		RatingRepository:      ratingRepository,
+		ProductRepository:     productRepository,
+		TransactionRepository: transactionRepo,
+		Supabase:              supabase,
+		helper:                helper,
 	}
 }
 
@@ -72,6 +75,10 @@ func (u *RatingUsecase) Create(userId uuid.UUID, request dto.CreateRatingRequest
 	productId, err := uuid.Parse(request.ProductID)
 	if err != nil {
 		return res.ErrBadRequest(res.InvalidUUID)
+	}
+
+	if isUserHasPurchasedTheProduct := u.TransactionRepository.CheckHasUserPurchasedProduct(dto.TransactionParam{UserID: userId, ProductID: productId}); !isUserHasPurchasedTheProduct {
+		return res.ErrForbidden(res.UserNotPurchasedProduct)
 	}
 
 	product := new(entity.Product)
