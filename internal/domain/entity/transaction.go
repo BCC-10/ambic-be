@@ -20,6 +20,7 @@ const (
 type Transaction struct {
 	ID                 uuid.UUID `gorm:"type:char(36);primaryKey"`
 	UserID             uuid.UUID `gorm:"type:char(36);not null"`
+	PartnerID          uuid.UUID `gorm:"type:char(36)"`
 	Payment            Payment
 	TransactionDetails []TransactionDetail
 	Invoice            string    `gorm:"type:varchar(255);not null;uniqueIndex"`
