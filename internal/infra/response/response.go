@@ -89,14 +89,15 @@ const (
 
 // Rating Domain
 const (
-	GetRatingSuccess      = "Ratings retrieved successfully"
-	RatingNotBelongToUser = "Rating does not belong to user"
-	CreateRatingSuccess   = "Rating created successfully"
-	UpdateRatingSuccess   = "Rating updated successfully"
-	UserAlreadyRated      = "User already rated"
-	RatingDeleteSuccess   = "Rating deleted successfully"
-	RatingNotFound        = "Rating does not exist"
-	RatingNotExists       = "Rating does not exist"
+	GetRatingSuccess        = "Ratings retrieved successfully"
+	RatingNotBelongToUser   = "Rating does not belong to user"
+	CreateRatingSuccess     = "Rating created successfully"
+	UpdateRatingSuccess     = "Rating updated successfully"
+	UserAlreadyRated        = "User already rated"
+	RatingDeleteSuccess     = "Rating deleted successfully"
+	RatingNotFound          = "Rating does not exist"
+	RatingNotExists         = "Rating does not exist"
+	UserNotPurchasedProduct = "User has not purchased the product"
 )
 
 // Business Type Domain
