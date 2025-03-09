@@ -109,13 +109,14 @@ const (
 
 // Transaction Domain
 const (
-	GetTransactionSuccess    = "Transactions retrieved successfully"
-	CreateTransactionSuccess = "Transaction created successfully"
-	InsufficientStock        = "Insufficient stock for %s"
-	InvalidQty               = "Quantity must be greater than 0"
-	MissingProductID         = "Product ID is missing"
-	MissingTransactionItems  = "Transaction items are missing"
-	TransactionNotFound      = "Transaction not found"
+	GetTransactionSuccess     = "Transactions retrieved successfully"
+	CreateTransactionSuccess  = "Transaction created successfully"
+	InsufficientStock         = "Insufficient stock for %s"
+	InvalidQty                = "Quantity must be greater than 0"
+	MissingProductID          = "Product ID is missing"
+	MissingTransactionItems   = "Transaction items are missing"
+	TransactionNotFound       = "Transaction not found"
+	ProductNotBelongToPartner = "%s does not belong to %s"
 )
 
 // Transaction Detail Domain
