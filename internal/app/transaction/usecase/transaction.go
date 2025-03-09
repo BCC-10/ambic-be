@@ -17,7 +17,7 @@ import (
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, pagination dto.Pagination) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
 	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
 }
@@ -44,10 +44,10 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID) (*[]dto.GetTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.Pagination) (*[]dto.GetTransactionResponse, *res.Err) {
 	transactions := new([]entity.Transaction)
 
-	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}); err != nil {
+	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}, pagination); err != nil {
 		return nil, nil
 	}
 
@@ -189,15 +189,6 @@ func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *r
 			return dto.ShowTransactionResponse{}, res.ErrBadRequest(res.TransactionNotFound)
 		}
 	}
-
-	//	get purchased products by transacrtion details
-	//	transactionDetails := transaction.TransactionDetails
-	//	for i, detail := range transactionDetails {
-	//		product := new(entity.Product)
-	//		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: detail.ProductID}); err != nil {
-	//			return dto.GetTransactionResponse{}, res.ErrInternalServer()
-	//		}
-	//	}
 
 	return transaction.ParseDTOShow(), nil
 }

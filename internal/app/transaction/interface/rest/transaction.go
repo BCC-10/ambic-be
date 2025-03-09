@@ -28,8 +28,13 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
+	pagination := new(dto.Pagination)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
 	userId := ctx.Locals("userId").(uuid.UUID)
-	transactions, err := h.TransactionUsecase.GetByUserID(userId)
+	transactions, err := h.TransactionUsecase.GetByUserID(userId, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
