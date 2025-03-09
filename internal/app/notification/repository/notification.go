@@ -7,7 +7,7 @@ import (
 )
 
 type NotificationMySQLItf interface {
-	GetByUserId(notif *[]entity.Notification, param dto.NotificationParam) error
+	GetByUserId(notif *[]entity.Notification, param dto.NotificationParam, pagination dto.PaginationRequest) error
 	Create(notif *entity.Notification) error
 }
 
@@ -19,8 +19,8 @@ func NewNotificationMySQL(db *gorm.DB) NotificationMySQLItf {
 	return &NotificationMySQL{db}
 }
 
-func (r *NotificationMySQL) GetByUserId(notif *[]entity.Notification, param dto.NotificationParam) error {
-	return r.db.Debug().Find(notif, param).Error
+func (r *NotificationMySQL) GetByUserId(notif *[]entity.Notification, param dto.NotificationParam, pagination dto.PaginationRequest) error {
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(notif, param).Error
 }
 
 func (r *NotificationMySQL) Create(notif *entity.Notification) error {
