@@ -10,9 +10,10 @@ import (
 type Notification struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	UserID    uuid.UUID `gorm:"type:char(36)"`
-	Title     string    `gorm:"type:varchar(255)"`
-	Content   string    `gorm:"type:varchar(255)"`
+	Title     string    `gorm:"type:varchar(255); not null"`
+	Content   string    `gorm:"type:varchar(255);not null"`
 	Link      string    `gorm:"type:varchar(255)"`
+	PhotoURL  string    `gorm:"type:varchar(255)"`
 	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
@@ -28,6 +29,7 @@ func (n *Notification) ParseDTOGet() dto.GetNotificationResponse {
 		Title:    n.Title,
 		Content:  n.Content,
 		Link:     n.Link,
+		Photo:    n.PhotoURL,
 		Datetime: n.CreatedAt.String(),
 	}
 }
