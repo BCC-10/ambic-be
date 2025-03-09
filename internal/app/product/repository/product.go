@@ -14,7 +14,6 @@ type ProductMySQLItf interface {
 	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, limit int, offset int) error
 	Update(tx *gorm.DB, product *entity.Product) error
 	GetTotalProductsByPartnerId(id uuid.UUID) (int64, error)
-	GetTotalRatingsByPartnerId(id uuid.UUID) (int64, error)
 }
 
 type ProductMySQL struct {
@@ -46,12 +45,6 @@ func (r *ProductMySQL) Update(tx *gorm.DB, product *entity.Product) error {
 }
 
 func (r *ProductMySQL) GetTotalProductsByPartnerId(id uuid.UUID) (int64, error) {
-	var total int64
-	err := r.db.Debug().Model(&entity.Product{}).Where("partner_id = ?", id).Count(&total).Error
-	return total, err
-}
-
-func (r *ProductMySQL) GetTotalRatingsByPartnerId(id uuid.UUID) (int64, error) {
 	var total int64
 	err := r.db.Debug().Model(&entity.Product{}).Where("partner_id = ?", id).Count(&total).Error
 	return total, err
