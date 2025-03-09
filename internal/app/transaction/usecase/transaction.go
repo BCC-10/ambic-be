@@ -69,13 +69,20 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 
 	transactionId, _ := uuid.NewV7()
 
+	partnerId, err := uuid.Parse(req.PartnerID)
+	if err != nil {
+		tx.Rollback()
+		return "", res.ErrBadRequest(res.InvalidUUID)
+	}
+
 	transaction := &entity.Transaction{
-		ID:      transactionId,
-		UserID:  userId,
-		Invoice: u.helper.GenerateInvoiceNumber(),
-		Total:   0,
-		Status:  entity.WaitingForPayment,
-		Note:    req.Note,
+		ID:        transactionId,
+		UserID:    userId,
+		PartnerID: partnerId,
+		Invoice:   u.helper.GenerateInvoiceNumber(),
+		Total:     0,
+		Status:    entity.WaitingForPayment,
+		Note:      req.Note,
 	}
 
 	if len(req.TransactionDetails) < 1 {
@@ -111,7 +118,13 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 			return "", res.ErrInternalServer()
 		}
 
+		if product.PartnerID != partnerId {
+			tx.Rollback()
+			return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotBelongToPartner, product.Name, product.Partner.Name))
+		}
+
 		if product.Stock < uint(item.Qty) {
+			tx.Rollback()
 			return "", res.ErrBadRequest(fmt.Sprintf(res.InsufficientStock, product.Name))
 		}
 
