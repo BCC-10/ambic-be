@@ -8,7 +8,7 @@ import (
 )
 
 type TransactionMySQLItf interface {
-	Get(transaction *[]entity.Transaction, param dto.TransactionParam) error
+	Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.Pagination) error
 	Show(transaction *entity.Transaction, param dto.TransactionParam) error
 	Create(tx *gorm.DB, transaction *entity.Transaction) error
 	Update(transaction *entity.Transaction) error
@@ -23,8 +23,8 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 	return &TransactionMySQL{db}
 }
 
-func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam) error {
-	return r.db.Debug().Find(transaction, param).Error
+func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.Pagination) error {
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(transaction, param).Error
 }
 
 func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionParam) bool {
