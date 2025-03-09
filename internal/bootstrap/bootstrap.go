@@ -6,6 +6,9 @@ import (
 	BusinessTypeHandler "ambic/internal/app/business_type/interface/rest"
 	BusinessTypeRepo "ambic/internal/app/business_type/repository"
 	BusinessTypeUsecase "ambic/internal/app/business_type/usecase"
+	NotificationHandler "ambic/internal/app/notification/interface/rest"
+	NotificationRepo "ambic/internal/app/notification/repository"
+	NotificationUsecase "ambic/internal/app/notification/usecase"
 	PartnerHandler "ambic/internal/app/partner/interface/rest"
 	PartnerRepo "ambic/internal/app/partner/repository"
 	PartnerUsecase "ambic/internal/app/partner/usecase"
@@ -97,11 +100,15 @@ func Start() error {
 	ratingRepository := RatingRepo.NewRatingMySQL(db)
 	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
 	userRepository := UserRepo.NewUserMySQL(db)
+	notificationRepository := NotificationRepo.NewNotificationMySQL(db)
+
+	notificationUsecase := NotificationUsecase.NewNotificationUsecase(config, notificationRepository)
+	NotificationHandler.NewNotificationHandler(v1, notificationUsecase, m)
 
 	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s, h)
 	UserHandler.NewUserHandler(v1, userUsecase, v, m, h)
 
-	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
+	authUsecase := AuthUsecase.NewAuthUsecase(config, db, userRepository, notificationRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
 
 	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
@@ -116,7 +123,7 @@ func Start() error {
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
-	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, h, snap)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)

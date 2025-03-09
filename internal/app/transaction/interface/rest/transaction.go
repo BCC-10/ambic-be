@@ -29,13 +29,17 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
-	pagination := new(dto.PaginationRequest)
-	if err := ctx.QueryParser(pagination); err != nil {
+	req := new(dto.GetTransactionByUserIdAndByStatusRequest)
+	if err := ctx.QueryParser(req); err != nil {
 		return res.BadRequest(ctx)
 	}
 
+	if err := h.Validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
 	userId := ctx.Locals("userId").(uuid.UUID)
-	transactions, err := h.TransactionUsecase.GetByUserID(userId, *pagination)
+	transactions, err := h.TransactionUsecase.GetByUserID(userId, *req)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
@@ -77,7 +81,9 @@ func (h *TransactionHandler) Show(ctx *fiber.Ctx) error {
 		return res.Error(ctx, _err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetTransactionSuccess, transactionDetails)
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
+		"transaction_details": transactionDetails,
+	})
 }
 
 func (h *TransactionHandler) UpdateStatus(ctx *fiber.Ctx) error {

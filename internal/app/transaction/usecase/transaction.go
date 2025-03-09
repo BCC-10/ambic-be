@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	NotificationRepo "ambic/internal/app/notification/repository"
 	productRepo "ambic/internal/app/product/repository"
 	"ambic/internal/app/transaction/repository"
 	userRepo "ambic/internal/app/user/repository"
@@ -17,39 +18,62 @@ import (
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
-	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
+	Show(id uuid.UUID) (dto.GetTransactionResponse, *res.Err)
 	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
 }
 
 type TransactionUsecase struct {
-	db                    *gorm.DB
-	env                   *env.Env
-	TransactionRepository repository.TransactionMySQLItf
-	ProductRepository     productRepo.ProductMySQLItf
-	UserRepository        userRepo.UserMySQLItf
-	helper                helper.HelperIf
-	Snap                  midtrans.MidtransIf
+	db                     *gorm.DB
+	env                    *env.Env
+	TransactionRepository  repository.TransactionMySQLItf
+	ProductRepository      productRepo.ProductMySQLItf
+	UserRepository         userRepo.UserMySQLItf
+	NotificationRepository NotificationRepo.NotificationMySQLItf
+	helper                 helper.HelperIf
+	Snap                   midtrans.MidtransIf
 }
 
-func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
+func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, notificationRepository NotificationRepo.NotificationMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
 	return &TransactionUsecase{
-		db:                    db,
-		env:                   env,
-		TransactionRepository: transactionRepository,
-		ProductRepository:     productRepository,
-		UserRepository:        userRepository,
-		helper:                helper,
-		Snap:                  snap,
+		db:                     db,
+		env:                    env,
+		TransactionRepository:  transactionRepository,
+		ProductRepository:      productRepository,
+		UserRepository:         userRepository,
+		NotificationRepository: notificationRepository,
+		helper:                 helper,
+		Snap:                   snap,
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err) {
-	transactions := new([]entity.Transaction)
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err) {
+	param := dto.TransactionParam{
+		UserID: userId,
+	}
 
-	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}, pagination); err != nil {
-		return nil, nil
+	if req.Status != "" {
+		param.Status = req.Status
+	}
+
+	if req.Limit < 1 {
+		req.Limit = u.env.DefaultPaginationLimit
+	}
+
+	if req.Page < 1 {
+		req.Page = u.env.DefaultPaginationPage
+	}
+
+	pagination := dto.PaginationRequest{
+		Limit:  req.Limit,
+		Page:   req.Page,
+		Offset: (req.Page - 1) * req.Limit,
+	}
+
+	transactions := new([]entity.Transaction)
+	if err := u.TransactionRepository.Get(transactions, param, pagination); err != nil {
+		return nil, res.ErrInternalServer()
 	}
 
 	resp := make([]dto.GetTransactionResponse, len(*transactions))
@@ -112,7 +136,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
 			if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 				tx.Rollback()
-				return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotFound, item.ProductID))
+				return "", res.ErrNotFound(fmt.Sprintf(res.ProductNotFound, item.ProductID))
 			}
 
 			tx.Rollback()
@@ -182,26 +206,37 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	return url, nil
 }
 
-func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) Show(id uuid.UUID) (dto.GetTransactionResponse, *res.Err) {
 	transaction := new(entity.Transaction)
 
 	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return dto.ShowTransactionResponse{}, res.ErrBadRequest(res.TransactionNotFound)
+			return dto.GetTransactionResponse{}, res.ErrNotFound(res.TransactionNotFound)
 		}
 	}
 
-	return transaction.ParseDTOShow(), nil
+	return transaction.ParseDTOGet(), nil
 }
 
 func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {
-	status := new(entity.Status)
-	if req.Status != "" {
-		s := entity.Status(req.Status)
-		status = &s
+	transaction := new(entity.Transaction)
+	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.TransactionNotFound)
+		}
+
+		return res.ErrInternalServer()
 	}
 
-	transaction := &entity.Transaction{
+	if transaction.Status == entity.WaitingForPayment || transaction.Status == entity.CancelledBySystem {
+		return res.ErrForbidden(res.NotAllowedToChangeStatus)
+	}
+
+	status := new(entity.Status)
+	s := entity.Status(req.Status)
+	status = &s
+
+	transaction = &entity.Transaction{
 		ID:     id,
 		Status: *status,
 	}

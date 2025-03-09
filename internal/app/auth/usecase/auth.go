@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	notificationRepo "ambic/internal/app/notification/repository"
 	"ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -12,6 +13,7 @@ import (
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
 	res "ambic/internal/infra/response"
+	"fmt"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -29,28 +31,39 @@ type AuthUsecaseItf interface {
 }
 
 type AuthUsecase struct {
-	UserRepository repository.UserMySQLItf
-	jwt            jwt.JWTIf
-	code           code.CodeIf
-	email          email.EmailIf
-	redis          redis.RedisIf
-	env            *env.Env
-	OAuth          oauth.OAuthIf
+	UserRepository         repository.UserMySQLItf
+	NotificationRepository notificationRepo.NotificationMySQLItf
+	jwt                    jwt.JWTIf
+	db                     *gorm.DB
+	code                   code.CodeIf
+	email                  email.EmailIf
+	redis                  redis.RedisIf
+	env                    *env.Env
+	OAuth                  oauth.OAuthIf
 }
 
-func NewAuthUsecase(env *env.Env, userRepository repository.UserMySQLItf, jwt jwt.JWTIf, code code.CodeIf, email email.EmailIf, redis redis.RedisIf, oauth oauth.OAuthIf) AuthUsecaseItf {
+func NewAuthUsecase(env *env.Env, db *gorm.DB, userRepository repository.UserMySQLItf, notificationRepository notificationRepo.NotificationMySQLItf, jwt jwt.JWTIf, code code.CodeIf, email email.EmailIf, redis redis.RedisIf, oauth oauth.OAuthIf) AuthUsecaseItf {
 	return &AuthUsecase{
-		UserRepository: userRepository,
-		jwt:            jwt,
-		code:           code,
-		email:          email,
-		redis:          redis,
-		env:            env,
-		OAuth:          oauth,
+		UserRepository:         userRepository,
+		NotificationRepository: notificationRepository,
+		jwt:                    jwt,
+		code:                   code,
+		email:                  email,
+		db:                     db,
+		redis:                  redis,
+		env:                    env,
+		OAuth:                  oauth,
 	}
 }
 
 func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
+	tx := u.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
@@ -78,9 +91,25 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 		return res.ErrValidationError(nil, errors)
 	}
 
-	if err := u.UserRepository.Create(&user); err != nil {
+	if err := u.UserRepository.Create(tx, &user); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
+
+	notification := &entity.Notification{
+		UserID:   user.ID,
+		Title:    fmt.Sprintf(res.WelcomeTitle, user.Name),
+		Content:  res.WelcomeContent,
+		Link:     res.WelcomeLink,
+		PhotoURL: "https://google.com/",
+	}
+
+	if err := u.NotificationRepository.Create(tx, notification); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
+	tx.Commit()
 
 	return nil
 }
@@ -301,7 +330,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 	var dbUser entity.User
 	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			if err := u.UserRepository.Create(user); err != nil {
+			if err := u.UserRepository.Create(u.db, user); err != nil {
 				return "", res.ErrInternalServer()
 			}
 		} else {

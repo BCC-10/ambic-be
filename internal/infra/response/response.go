@@ -84,7 +84,7 @@ const (
 	RatingNotBelongToPartner = "Product does not belong to partner"
 	DeleteProductSuccess     = "Product deleted successfully"
 	ProductAlreadyExists     = "Product already exists"
-	InvalidDateTime          = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	InvalidDateTime          = "Datetime time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
 	ProductNotFound          = "The product with id %s does not exist"
 )
 
@@ -118,7 +118,21 @@ const (
 	TransactionNotFound       = "Transaction not found"
 	ProductNotBelongToPartner = "%s does not belong to %s"
 	UpdateTransactionSuccess  = "Transaction updated successfully"
+	NotAllowedToChangeStatus  = "Status cannot be changed"
 )
 
 // Transaction Detail Domain
 const ()
+
+// Notification Domain
+const (
+	GetNotificationSuccess = "Notifications retrieved successfully"
+)
+
+// Notification Message
+const (
+	WelcomeTitle     = "Yuk Lengkapi Datamu, Kak %s"
+	WelcomeContent   = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran dari Ambic"
+	WelcomeLink      = "/profiles"
+	WelcomeImageText = "Isi Data Kamu"
+)

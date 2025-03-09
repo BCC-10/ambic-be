@@ -14,8 +14,10 @@ type Env struct {
 	DefaultPaginationLimit int    `env:"DEFAULT_PAGINATION_LIMIT"`
 	DefaultPaginationPage  int    `env:"DEFAULT_PAGINATION_PAGE"`
 
-	DefaultProfilePhotoPath string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
-	DefaultProfilePhotoURL  string
+	DefaultProfilePhotoPath        string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
+	DefaultProfilePhotoURL         string
+	DefaultPartnerProfilePhotoPath string `env:"DEFAULT_PARTNER_PROFILE_PHOTO_PATH"`
+	DefaultPartnerProfilePhotoURL  string
 
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
@@ -66,6 +68,8 @@ func New() (*Env, error) {
 	}
 
 	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
+
+	_env.DefaultPartnerProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultPartnerProfilePhotoPath)
 
 	return _env, nil
 }

@@ -256,12 +256,14 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		return res.ErrInternalServer()
 	}
 
-	oldPhotoURL := partnerDB.PhotoURL
-	index := strings.Index(oldPhotoURL, bucket)
-	oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
+	if partnerDB.PhotoURL != u.env.DefaultPartnerProfilePhotoURL {
+		oldPhotoURL := partnerDB.PhotoURL
+		index := strings.Index(oldPhotoURL, bucket)
+		oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
-	if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
-		return res.ErrInternalServer()
+		if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+			return res.ErrInternalServer()
+		}
 	}
 
 	return nil
@@ -320,11 +322,11 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 }
 
 func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err) {
-	if pagination.Limit == 0 {
+	if pagination.Limit < 1 {
 		pagination.Limit = u.env.DefaultPaginationLimit
 	}
 
-	if pagination.Page == 0 {
+	if pagination.Page < 1 {
 		pagination.Page = u.env.DefaultPaginationPage
 	}
 

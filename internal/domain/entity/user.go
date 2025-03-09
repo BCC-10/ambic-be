@@ -15,22 +15,23 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
-	Partner      Partner   `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
-	Ratings      []Rating  `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
-	Transactions []Transaction
-	Name         string    `gorm:"type:varchar(255);default:null"`
-	Username     string    `gorm:"type:varchar(255);unique;not null"`
-	Email        string    `gorm:"type:varchar(255);unique;not null"`
-	Phone        string    `gorm:"type:varchar(15);uniqueIndex;default:null"`
-	Address      string    `gorm:"type:text;default:null"`
-	BornDate     time.Time `gorm:"type:date;default:null"`
-	Gender       *Gender   `gorm:"type:ENUM('male','female');default:null"`
-	Password     string    `gorm:"type:varchar(255)"`
-	IsVerified   bool      `gorm:"type:boolean;default:false"`
-	PhotoURL     string    `gorm:"type:varchar(255);not null"`
-	CreatedAt    time.Time `gorm:"type:timestamp;autoCreateTime"`
-	UpdatedAt    time.Time `gorm:"type:timestamp;autoUpdateTime"`
+	ID            uuid.UUID      `gorm:"type:char(36);primaryKey"`
+	Partner       Partner        `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Ratings       []Rating       `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Transactions  []Transaction  `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Notifications []Notification `gorm:"constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
+	Name          string         `gorm:"type:varchar(255);default:null"`
+	Username      string         `gorm:"type:varchar(255);unique;not null"`
+	Email         string         `gorm:"type:varchar(255);unique;not null"`
+	Phone         string         `gorm:"type:varchar(15);uniqueIndex;default:null"`
+	Address       string         `gorm:"type:text;default:null"`
+	BornDate      time.Time      `gorm:"type:date;default:null"`
+	Gender        *Gender        `gorm:"type:ENUM('male','female');default:null"`
+	Password      string         `gorm:"type:varchar(255)"`
+	IsVerified    bool           `gorm:"type:boolean;default:false"`
+	PhotoURL      string         `gorm:"type:varchar(255);not null"`
+	CreatedAt     time.Time      `gorm:"type:timestamp;autoCreateTime"`
+	UpdatedAt     time.Time      `gorm:"type:timestamp;autoUpdateTime"`
 }
 
 func (t *User) BeforeCreate(tx *gorm.DB) (err error) {

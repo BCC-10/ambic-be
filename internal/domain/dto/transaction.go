@@ -5,27 +5,22 @@ import (
 	"time"
 )
 
-type GetTransactionResponse struct {
-	ID      string             `json:"id"`
-	UserID  string             `json:"user_id"`
-	Payment GetPaymentResponse `json:"payment,omitempty"`
-	Invoice string             `json:"invoice"`
-	Total   float32            `json:"total"`
-	Status  string             `json:"status"`
-	Note    string             `json:"note"`
-	Date    time.Time          `json:"date"`
+type GetTransactionByUserIdAndByStatusRequest struct {
+	Status string `query:"status" validate:"omitempty,oneof='waiting for payment' 'process' 'finish' 'cancelled by system'"`
+	Limit  int    `query:"limit"`
+	Page   int    `query:"page"`
 }
 
-type ShowTransactionResponse struct {
-	ID      string               `json:"id"`
-	UserID  string               `json:"user_id"`
-	Payment GetPaymentResponse   `json:"payment,omitempty"`
-	Invoice string               `json:"invoice"`
-	Total   float32              `json:"total"`
-	Status  string               `json:"status"`
-	Note    string               `json:"note"`
-	Date    time.Time            `json:"date"`
-	Items   []GetProductResponse `json:"items"`
+type GetTransactionResponse struct {
+	ID       string               `json:"id"`
+	UserID   string               `json:"user_id"`
+	Payment  GetPaymentResponse   `json:"payment,omitempty"`
+	Invoice  string               `json:"invoice"`
+	Total    float32              `json:"total"`
+	Status   string               `json:"status"`
+	Note     string               `json:"note"`
+	Datetime time.Time            `json:"datetime"`
+	Items    []GetProductResponse `json:"items"`
 }
 
 type CreateTransactionRequest struct {
@@ -35,7 +30,7 @@ type CreateTransactionRequest struct {
 }
 
 type UpdateTransactionStatusRequest struct {
-	Status string `json:"status" validate:"required,oneof='finish' 'cancelled by system' 'cancelled by user' 'cancelled by partner'"`
+	Status string `json:"status" validate:"required,oneof='finish' 'cancelled by system'"`
 }
 
 type RequestSnap struct {
@@ -51,4 +46,5 @@ type TransactionParam struct {
 	UserID    uuid.UUID
 	PartnerID uuid.UUID
 	ProductID uuid.UUID
+	Status    string
 }
