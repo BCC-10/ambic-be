@@ -17,7 +17,7 @@ import (
 )
 
 type RatingUsecaseItf interface {
-	Get(req dto.GetRatingRequest) (*[]dto.GetRatingResponse, *res.Err)
+	Get(req dto.GetRatingRequest, pagination dto.Pagination) (*[]dto.GetRatingResponse, *res.Err)
 	Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err)
 	Create(userId uuid.UUID, request dto.CreateRatingRequest) *res.Err
 	Update(userId uuid.UUID, param dto.UpdateRatingParam, request dto.UpdateRatingRequest) *res.Err
@@ -44,9 +44,19 @@ func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, 
 	}
 }
 
-func (u *RatingUsecase) Get(req dto.GetRatingRequest) (*[]dto.GetRatingResponse, *res.Err) {
+func (u *RatingUsecase) Get(req dto.GetRatingRequest, pagination dto.Pagination) (*[]dto.GetRatingResponse, *res.Err) {
+	if pagination.Limit < 1 {
+		pagination.Limit = 10
+	}
+
+	if pagination.Page < 1 {
+		pagination.Page = 1
+	}
+
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+
 	ratings := new([]entity.Rating)
-	if err := u.RatingRepository.Get(ratings, req.ParseParam()); err != nil {
+	if err := u.RatingRepository.Get(ratings, req.ParseParam(), pagination); err != nil {
 		return nil, res.ErrInternalServer()
 	}
 

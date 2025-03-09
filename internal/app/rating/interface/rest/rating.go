@@ -33,6 +33,11 @@ func NewRatingHandler(routerGroup fiber.Router, ratingUsecase RatingUsecase.Rati
 }
 
 func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
+	pagination := new(dto.Pagination)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
 	req := new(dto.GetRatingRequest)
 	if err := ctx.QueryParser(req); err != nil {
 		return res.BadRequest(ctx)
@@ -42,7 +47,7 @@ func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	ratings, err := h.RatingUsecase.Get(*req)
+	ratings, err := h.RatingUsecase.Get(*req, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
