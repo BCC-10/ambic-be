@@ -3,6 +3,7 @@ package repository
 import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -12,6 +13,7 @@ type RatingMySQLItf interface {
 	Create(rating *entity.Rating) error
 	Update(rating *entity.Rating) error
 	Delete(rating *entity.Rating) error
+	GetTotalRatingsByPartnerId(partnerId uuid.UUID) (int64, error)
 }
 
 type RatingMySQL struct {
@@ -40,4 +42,14 @@ func (r *RatingMySQL) Update(rating *entity.Rating) error {
 
 func (r *RatingMySQL) Delete(rating *entity.Rating) error {
 	return r.db.Debug().Delete(rating).Error
+}
+
+func (r *RatingMySQL) GetTotalRatingsByPartnerId(partnerId uuid.UUID) (int64, error) {
+	var count int64
+	err := r.db.Table("ratings").
+		Joins("JOIN products ON ratings.product_id = products.id").
+		Where("products.partner_id = ?", partnerId).
+		Count(&count).Error
+
+	return count, err
 }
