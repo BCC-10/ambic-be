@@ -32,6 +32,6 @@ func (r *Rating) ParseDTOGet() dto.GetRatingResponse {
 		Star:      r.Star,
 		Feedback:  r.Feedback,
 		Photo:     r.PhotoURL,
-		Date:      r.UpdatedAt,
+		Datetime:  r.UpdatedAt,
 	}
 }
