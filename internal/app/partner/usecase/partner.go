@@ -27,6 +27,7 @@ type PartnerUsecaseItf interface {
 	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
+	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -267,4 +268,30 @@ func (u *PartnerUsecase) AutocompleteLocation(req dto.LocationRequest) ([]dto.Lo
 	}
 
 	return suggestions, nil
+}
+
+func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err) {
+	partner := new(entity.Partner)
+	if err := u.PartnerRepository.Show(partner, dto.PartnerParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return dto.GetPartnerStatisticResponse{}, res.ErrNotFound(res.PartnerNotExists)
+		}
+
+		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+	}
+
+	totalRatings, err := u.ProductRepository.GetTotalRatingsByPartnerId(id)
+	if err != nil {
+		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+	}
+
+	totalProducts, err := u.ProductRepository.GetTotalProductsByPartnerId(id)
+	if err != nil {
+		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+	}
+
+	return dto.GetPartnerStatisticResponse{
+		TotalRatings:  int(totalRatings),
+		TotalProducts: int(totalProducts),
+	}, nil
 }
