@@ -123,7 +123,7 @@ func Start() error {
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
-	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, h, snap)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
 	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)

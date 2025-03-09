@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	NotificationRepo "ambic/internal/app/notification/repository"
 	productRepo "ambic/internal/app/product/repository"
 	"ambic/internal/app/transaction/repository"
 	userRepo "ambic/internal/app/user/repository"
@@ -25,24 +26,26 @@ type TransactionUsecaseItf interface {
 }
 
 type TransactionUsecase struct {
-	db                    *gorm.DB
-	env                   *env.Env
-	TransactionRepository repository.TransactionMySQLItf
-	ProductRepository     productRepo.ProductMySQLItf
-	UserRepository        userRepo.UserMySQLItf
-	helper                helper.HelperIf
-	Snap                  midtrans.MidtransIf
+	db                     *gorm.DB
+	env                    *env.Env
+	TransactionRepository  repository.TransactionMySQLItf
+	ProductRepository      productRepo.ProductMySQLItf
+	UserRepository         userRepo.UserMySQLItf
+	NotificationRepository NotificationRepo.NotificationMySQLItf
+	helper                 helper.HelperIf
+	Snap                   midtrans.MidtransIf
 }
 
-func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
+func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, notificationRepository NotificationRepo.NotificationMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
 	return &TransactionUsecase{
-		db:                    db,
-		env:                   env,
-		TransactionRepository: transactionRepository,
-		ProductRepository:     productRepository,
-		UserRepository:        userRepository,
-		helper:                helper,
-		Snap:                  snap,
+		db:                     db,
+		env:                    env,
+		TransactionRepository:  transactionRepository,
+		ProductRepository:      productRepository,
+		UserRepository:         userRepository,
+		NotificationRepository: notificationRepository,
+		helper:                 helper,
+		Snap:                   snap,
 	}
 }
 
