@@ -20,6 +20,7 @@ type TransactionUsecaseItf interface {
 	GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
 	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
+	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
 }
 
 type TransactionUsecase struct {
@@ -191,4 +192,23 @@ func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *r
 	}
 
 	return transaction.ParseDTOShow(), nil
+}
+
+func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {
+	status := new(entity.Status)
+	if req.Status != "" {
+		s := entity.Status(req.Status)
+		status = &s
+	}
+
+	transaction := &entity.Transaction{
+		ID:     id,
+		Status: *status,
+	}
+
+	if err := u.TransactionRepository.Update(transaction); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
 }
