@@ -10,7 +10,7 @@ import (
 )
 
 type NotificationUsecaseItf interface {
-	GetByUserId(userId uuid.UUID) ([]dto.GetNotificationResponse, *res.Err)
+	GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *res.Err)
 }
 
 type NotificationUsecase struct {
@@ -25,9 +25,19 @@ func NewNotificationUsecase(env *env.Env, notificationRepository repository.Noti
 	}
 }
 
-func (u *NotificationUsecase) GetByUserId(userId uuid.UUID) ([]dto.GetNotificationResponse, *res.Err) {
+func (u *NotificationUsecase) GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *res.Err) {
+	if pagination.Limit < 1 {
+		pagination.Limit = 10
+	}
+
+	if pagination.Page < 1 {
+		pagination.Page = 1
+	}
+
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+
 	notifications := new([]entity.Notification)
-	if err := u.NotificationRepository.GetByUserId(notifications, dto.NotificationParam{UserID: userId}); err != nil {
+	if err := u.NotificationRepository.GetByUserId(notifications, dto.NotificationParam{UserID: userId}, pagination); err != nil {
 		return nil, res.ErrInternalServer()
 	}
 
