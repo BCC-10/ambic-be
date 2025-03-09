@@ -28,6 +28,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 
 	routerGroup.Use(m.EnsurePartner)
 	routerGroup.Post("/", m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
+	routerGroup.Get("/:id", ProductHandler.ShowProduct)
 	routerGroup.Delete("/:id", m.EnsureVerifiedPartner, ProductHandler.DeleteProduct)
 	routerGroup.Patch("/:id", m.EnsureVerifiedPartner, ProductHandler.UpdateProduct)
 }
@@ -86,4 +87,20 @@ func (h ProductHandler) DeleteProduct(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.DeleteProductSuccess, nil)
+}
+
+func (h ProductHandler) ShowProduct(ctx *fiber.Ctx) error {
+	productId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	product, _err := h.ProductUsecase.ShowProduct(productId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
+		"product": product,
+	})
 }

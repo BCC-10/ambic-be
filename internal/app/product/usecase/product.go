@@ -17,6 +17,7 @@ import (
 )
 
 type ProductUsecaseItf interface {
+	ShowProduct(productId uuid.UUID) (dto.GetProductResponse, *res.Err)
 	CreateProduct(userId uuid.UUID, request dto.CreateProductRequest) *res.Err
 	UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err
 	DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) *res.Err
@@ -211,4 +212,17 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 	}
 
 	return nil
+}
+
+func (u ProductUsecase) ShowProduct(productId uuid.UUID) (dto.GetProductResponse, *res.Err) {
+	product := new(entity.Product)
+	if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return dto.GetProductResponse{}, res.ErrNotFound(res.ProductNotExists)
+		}
+
+		return dto.GetProductResponse{}, res.ErrInternalServer()
+	}
+
+	return product.ParseDTOGet(), nil
 }
