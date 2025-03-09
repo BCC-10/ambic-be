@@ -46,11 +46,11 @@ func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, 
 
 func (u *RatingUsecase) Get(req dto.GetRatingRequest, pagination dto.PaginationRequest) (*[]dto.GetRatingResponse, *res.Err) {
 	if pagination.Limit < 1 {
-		pagination.Limit = 10
+		pagination.Limit = u.env.DefaultPaginationLimit
 	}
 
 	if pagination.Page < 1 {
-		pagination.Page = 1
+		pagination.Page = u.env.DefaultPaginationPage
 	}
 
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit

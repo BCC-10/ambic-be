@@ -182,11 +182,11 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err) {
 	if pagination.Limit < 1 {
-		pagination.Limit = 10
+		pagination.Limit = u.env.DefaultPaginationLimit
 	}
 
 	if pagination.Page < 1 {
-		pagination.Page = 1
+		pagination.Page = u.env.DefaultPaginationPage
 	}
 
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
@@ -321,11 +321,11 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 
 func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err) {
 	if pagination.Limit == 0 {
-		pagination.Limit = 10
+		pagination.Limit = u.env.DefaultPaginationLimit
 	}
 
 	if pagination.Page == 0 {
-		pagination.Page = 1
+		pagination.Page = u.env.DefaultPaginationPage
 	}
 
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
