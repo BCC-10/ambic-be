@@ -83,14 +83,20 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		return "", res.ErrInternalServer()
 	}
 
+	placeDetails, err := u.Maps.GetPlaceDetails(data.PlaceID)
+	if err != nil {
+		return "", res.ErrInternalServer(err.Error())
+	}
+
 	partner := entity.Partner{
 		UserID:         id,
 		Name:           data.Name,
 		Address:        data.Address,
 		City:           data.City,
 		Instagram:      data.Instagram,
-		Longitude:      data.Longitude,
-		Latitude:       data.Latitude,
+		PlaceID:        data.PlaceID,
+		Latitude:       placeDetails.Lat,
+		Longitude:      placeDetails.Long,
 		BusinessTypeID: businessTypeId,
 	}
 
