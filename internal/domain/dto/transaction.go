@@ -6,7 +6,7 @@ import (
 )
 
 type GetTransactionByUserIdAndByStatusRequest struct {
-	Status string `query:"status" validate:"omitempty,oneof='waiting for payment' 'waiting for confirmation' 'process' 'finish' 'cancelled by system' 'cancelled by user' 'cancelled by partner'"`
+	Status string `query:"status" validate:"omitempty,oneof='waiting for payment' 'process' 'finish' 'cancelled by system'"`
 	Limit  int    `query:"limit"`
 	Page   int    `query:"page"`
 }
@@ -30,7 +30,7 @@ type CreateTransactionRequest struct {
 }
 
 type UpdateTransactionStatusRequest struct {
-	Status string `json:"status" validate:"required,oneof='finish' 'cancelled by system' 'cancelled by user' 'cancelled by partner'"`
+	Status string `json:"status" validate:"required,oneof='finish' 'cancelled by system'"`
 }
 
 type RequestSnap struct {
