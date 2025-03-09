@@ -26,5 +26,7 @@ func (h BusinessTypeHandler) GetBusinessTypes(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetBusinessTypeSuccess, resp)
+	return res.SuccessResponse(ctx, res.GetBusinessTypeSuccess, fiber.Map{
+		"business_types": resp,
+	})
 }

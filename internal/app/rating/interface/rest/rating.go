@@ -72,7 +72,9 @@ func (h *RatingHandler) Show(ctx *fiber.Ctx) error {
 		return res.Error(ctx, _err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetRatingSuccess, rating)
+	return res.SuccessResponse(ctx, res.GetRatingSuccess, fiber.Map{
+		"rating": rating,
+	})
 }
 
 func (h *RatingHandler) Create(ctx *fiber.Ctx) error {

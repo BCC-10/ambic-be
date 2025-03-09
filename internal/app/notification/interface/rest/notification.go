@@ -34,5 +34,7 @@ func (h *NotificationHandler) GetByUserId(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetNotificationSuccess, notifications)
+	return res.SuccessResponse(ctx, res.GetNotificationSuccess, fiber.Map{
+		"notifications": notifications,
+	})
 }

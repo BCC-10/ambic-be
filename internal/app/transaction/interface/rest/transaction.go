@@ -81,7 +81,9 @@ func (h *TransactionHandler) Show(ctx *fiber.Ctx) error {
 		return res.Error(ctx, _err)
 	}
 
-	return res.SuccessResponse(ctx, res.GetTransactionSuccess, transactionDetails)
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
+		"transaction_details": transactionDetails,
+	})
 }
 
 func (h *TransactionHandler) UpdateStatus(ctx *fiber.Ctx) error {
