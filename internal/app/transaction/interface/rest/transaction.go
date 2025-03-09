@@ -24,7 +24,7 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 	routerGroup = routerGroup.Group("/transactions")
 	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByLoggedInUser)
 	routerGroup.Get("/:id", m.Authentication, TransactionHandler.Show)
-	routerGroup.Post("/", m.Authentication, TransactionHandler.Create)
+	routerGroup.Post("/", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, TransactionHandler.Create)
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
@@ -42,7 +42,7 @@ func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
 func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	req := new(dto.CreateTransactionRequest)
 	if err := ctx.BodyParser(req); err != nil {
-		return res.BadRequest(ctx, "err")
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
