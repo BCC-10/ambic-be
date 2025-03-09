@@ -5,6 +5,7 @@ import (
 	"ambic/internal/app/partner/repository"
 	productRepo "ambic/internal/app/product/repository"
 	ratingRepo "ambic/internal/app/rating/repository"
+	transactionRepo "ambic/internal/app/transaction/repository"
 	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -25,10 +26,11 @@ type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
 	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
-	GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err)
+	GetProducts(id uuid.UUID, pagination dto.Pagination) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
+	GetTransactions(id uuid.UUID, pagination dto.Pagination) ([]dto.GetTransactionResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -37,6 +39,7 @@ type PartnerUsecase struct {
 	UserRepository         userRepo.UserMySQLItf
 	BusinessTypeRepository businessTypeRepo.BusinessTypeMySQLItf
 	ProductRepository      productRepo.ProductMySQLItf
+	TransactionRepository  transactionRepo.TransactionMySQLItf
 	RatingRepository       ratingRepo.RatingMySQLItf
 	Maps                   maps.MapsIf
 	Supabase               supabase.SupabaseIf
@@ -44,7 +47,7 @@ type PartnerUsecase struct {
 	jwt                    jwt.JWTIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
@@ -53,6 +56,7 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 		RatingRepository:       ratingRepository,
 		UserRepository:         userRepository,
 		BusinessTypeRepository: businessTypeRepository,
+		TransactionRepository:  transactionRepository,
 		Supabase:               supabase,
 		helper:                 helper,
 		jwt:                    jwt,
@@ -176,20 +180,19 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 	return token, nil
 }
 
-func (u *PartnerUsecase) GetProducts(id uuid.UUID, query dto.GetPartnerProductsQuery) ([]dto.GetProductResponse, *res.Err) {
-	if query.Limit < 1 {
-		query.Limit = 1
+func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.Pagination) ([]dto.GetProductResponse, *res.Err) {
+	if pagination.Limit < 1 {
+		pagination.Limit = 10
 	}
 
-	if query.Page < 1 {
-		query.Page = 1
+	if pagination.Page < 1 {
+		pagination.Page = 1
 	}
 
-	limit := query.Limit
-	offset := (query.Page - 1) * query.Limit
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
 
 	products := new([]entity.Product)
-	if err := u.ProductRepository.GetByPartnerId(products, dto.ProductParam{PartnerId: id}, limit, offset); err != nil {
+	if err := u.ProductRepository.GetByPartnerId(products, dto.ProductParam{PartnerId: id}, pagination); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return nil, res.ErrNotFound(res.PartnerNotExists)
 		}
@@ -299,17 +302,47 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 		return *resp, res.ErrInternalServer()
 	}
 
+	var totalTransactions int64
 	var totalRevenue float32
 	for _, transaction := range partner.Transactions {
 		if transaction.Status == entity.Finish {
+			totalTransactions++
 			totalRevenue += transaction.Total
 		}
 	}
 
 	resp.TotalRatings = totalRatings
 	resp.TotalProducts = totalProducts
-	resp.TotalTransactions = int64(len(partner.Transactions))
+	resp.TotalTransactions = totalTransactions
 	resp.TotalRevenue = totalRevenue
 
 	return *resp, nil
+}
+
+func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.Pagination) ([]dto.GetTransactionResponse, *res.Err) {
+	if pagination.Limit == 0 {
+		pagination.Limit = 10
+	}
+
+	if pagination.Page == 0 {
+		pagination.Page = 1
+	}
+
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+
+	transactions := new([]entity.Transaction)
+	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{PartnerID: id}, pagination); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return nil, res.ErrNotFound(res.PartnerNotExists)
+		}
+
+		return nil, res.ErrInternalServer()
+	}
+
+	transactionsResponse := make([]dto.GetTransactionResponse, 0)
+	for _, transaction := range *transactions {
+		transactionsResponse = append(transactionsResponse, transaction.ParseDTOGet())
+	}
+
+	return transactionsResponse, nil
 }
