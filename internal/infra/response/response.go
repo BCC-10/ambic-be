@@ -84,7 +84,7 @@ const (
 	RatingNotBelongToPartner = "Product does not belong to partner"
 	DeleteProductSuccess     = "Product deleted successfully"
 	ProductAlreadyExists     = "Product already exists"
-	InvalidDateTime          = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	InvalidDateTime          = "Datetime time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
 	ProductNotFound          = "The product with id %s does not exist"
 )
 
