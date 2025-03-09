@@ -108,7 +108,7 @@ func Start() error {
 	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s, h)
 	UserHandler.NewUserHandler(v1, userUsecase, v, m, h)
 
-	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
+	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, notificationRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
 
 	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
