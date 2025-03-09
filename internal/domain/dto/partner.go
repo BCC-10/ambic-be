@@ -28,6 +28,12 @@ type GetPartnerProductsQuery struct {
 	Page  int `query:"page"`
 	Limit int `query:"limit"`
 }
+type GetPartnerStatisticResponse struct {
+	TotalRatings      int `json:"total_ratings"`
+	TotalProducts     int `json:"total_products"`
+	TotalTransactions int `json:"total_transactions"`
+	TotalRevenue      int `json:"total_revenue"`
+}
 
 type GetPartnerResponse struct {
 	PlaceID      string  `json:"place_id,omitempty"`
