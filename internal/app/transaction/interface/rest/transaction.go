@@ -21,10 +21,10 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 		Validator:          validator,
 	}
 
-	routerGroup = routerGroup.Group("/transactions")
-	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByLoggedInUser)
-	routerGroup.Get("/:id", m.Authentication, TransactionHandler.Show)
-	routerGroup.Post("/", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, TransactionHandler.Create)
+	routerGroup = routerGroup.Group("/transactions", m.Authentication)
+	routerGroup.Get("/", TransactionHandler.GetByLoggedInUser)
+	routerGroup.Get("/:id", TransactionHandler.Show)
+	routerGroup.Post("/", m.EnsurePartner, m.EnsureVerifiedPartner, TransactionHandler.Create)
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {

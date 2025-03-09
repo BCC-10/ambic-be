@@ -25,15 +25,15 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 		helper:         helper,
 	}
 
-	routerGroup = routerGroup.Group("/partners")
-	routerGroup.Get("/location", m.Authentication, PartnerHandler.AutocompleteLocation)
-	routerGroup.Get("/:id/products", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
-	routerGroup.Get("/:id/transactions", PartnerHandler.GetTransactions)
-	routerGroup.Get("/:id/statistics", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetStatistics)
-	routerGroup.Get("/:id", m.Authentication, m.EnsurePartner, PartnerHandler.ShowPartner)
-	routerGroup.Post("/", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
-	routerGroup.Post("/verification", m.Authentication, PartnerHandler.VerifyPartner)
-	routerGroup.Patch("/", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
+	routerGroup = routerGroup.Group("/partners", m.Authentication)
+	routerGroup.Get("/location", PartnerHandler.AutocompleteLocation)
+	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
+	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
+	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
+	routerGroup.Get("/:id", m.EnsurePartner, PartnerHandler.ShowPartner)
+	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
+	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
+	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
