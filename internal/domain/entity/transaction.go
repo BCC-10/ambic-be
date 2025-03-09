@@ -9,13 +9,12 @@ import (
 type Status string
 
 const (
-	WaitingForConfirmation Status = "waiting for confirmation"
-	WaitingForPayment      Status = "waiting for payment"
-	Finish                 Status = "finish"
-	Process                Status = "process"
-	CancelledBySystem      Status = "cancelled by system"
-	CancelledByUser        Status = "cancelled by user"
-	CancelledByPartner     Status = "cancelled by partner"
+	WaitingForPayment  Status = "waiting for payment"
+	Finish             Status = "finish"
+	Process            Status = "process"
+	CancelledBySystem  Status = "cancelled by system"
+	CancelledByUser    Status = "cancelled by user"
+	CancelledByPartner Status = "cancelled by partner"
 )
 
 type Transaction struct {
