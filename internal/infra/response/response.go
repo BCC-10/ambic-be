@@ -118,6 +118,7 @@ const (
 	TransactionNotFound       = "Transaction not found"
 	ProductNotBelongToPartner = "%s does not belong to %s"
 	UpdateTransactionSuccess  = "Transaction updated successfully"
+	NotAllowedToChangeStatus  = "Status cannot be changed"
 )
 
 // Transaction Detail Domain
