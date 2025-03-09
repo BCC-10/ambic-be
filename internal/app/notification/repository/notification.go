@@ -8,7 +8,7 @@ import (
 
 type NotificationMySQLItf interface {
 	GetByUserId(notif *[]entity.Notification, param dto.NotificationParam, pagination dto.PaginationRequest) error
-	Create(notif *entity.Notification) error
+	Create(tx *gorm.DB, notif *entity.Notification) error
 }
 
 type NotificationMySQL struct {
@@ -23,6 +23,6 @@ func (r *NotificationMySQL) GetByUserId(notif *[]entity.Notification, param dto.
 	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(notif, param).Error
 }
 
-func (r *NotificationMySQL) Create(notif *entity.Notification) error {
-	return r.db.Debug().Create(notif).Error
+func (r *NotificationMySQL) Create(tx *gorm.DB, notif *entity.Notification) error {
+	return tx.Debug().Create(notif).Error
 }

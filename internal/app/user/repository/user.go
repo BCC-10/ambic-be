@@ -9,7 +9,7 @@ import (
 type UserMySQLItf interface {
 	Login(user *entity.User, param dto.LoginRequest) error
 	Show(user *entity.User, param dto.UserParam) error
-	Create(user *entity.User) error
+	Create(tx *gorm.DB, user *entity.User) error
 	Verify(user *entity.User) error
 	Update(user *entity.User) error
 }
@@ -30,8 +30,8 @@ func (r UserMySQL) Show(user *entity.User, param dto.UserParam) error {
 	return r.db.Debug().Preload("Partner").First(&user, param).Error
 }
 
-func (r UserMySQL) Create(user *entity.User) error {
-	return r.db.Debug().Create(user).Error
+func (r UserMySQL) Create(tx *gorm.DB, user *entity.User) error {
+	return tx.Debug().Create(user).Error
 }
 
 func (r UserMySQL) Update(user *entity.User) error {
