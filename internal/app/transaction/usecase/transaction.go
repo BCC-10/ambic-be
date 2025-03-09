@@ -14,10 +14,11 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"log"
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
 	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
 	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
@@ -45,11 +46,34 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err) {
-	transactions := new([]entity.Transaction)
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err) {
+	param := dto.TransactionParam{
+		UserID: userId,
+	}
 
-	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}, pagination); err != nil {
-		return nil, nil
+	log.Println(req)
+
+	if req.Status != "" {
+		param.Status = req.Status
+	}
+
+	if req.Limit < 1 {
+		req.Limit = 10
+	}
+
+	if req.Page < 1 {
+		req.Page = 1
+	}
+
+	pagination := dto.PaginationRequest{
+		Limit:  req.Limit,
+		Page:   req.Page,
+		Offset: (req.Page - 1) * req.Limit,
+	}
+
+	transactions := new([]entity.Transaction)
+	if err := u.TransactionRepository.Get(transactions, param, pagination); err != nil {
+		return nil, res.ErrInternalServer()
 	}
 
 	resp := make([]dto.GetTransactionResponse, len(*transactions))
