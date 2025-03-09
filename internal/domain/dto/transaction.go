@@ -34,6 +34,10 @@ type CreateTransactionRequest struct {
 	TransactionDetails []CreateTransactionDetailRequest `json:"items" validate:"required"`
 }
 
+type UpdateTransactionStatusRequest struct {
+	Status string `json:"status" validate:"required,oneof='finish' 'cancelled by system' 'cancelled by user' 'cancelled by partner'"`
+}
+
 type RequestSnap struct {
 	TransactionID      string
 	OrderID            string
