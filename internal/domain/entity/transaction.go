@@ -17,7 +17,7 @@ const (
 
 type Transaction struct {
 	ID                 uuid.UUID `gorm:"type:char(36);primaryKey"`
-	UserID             uuid.UUID `gorm:"type:char(36);not null"`
+	UserID             uuid.UUID `gorm:"type:char(36)"`
 	PartnerID          uuid.UUID `gorm:"type:char(36)"`
 	Payment            Payment
 	TransactionDetails []TransactionDetail
