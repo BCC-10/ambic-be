@@ -4,6 +4,7 @@ import (
 	businessTypeRepo "ambic/internal/app/business_type/repository"
 	"ambic/internal/app/partner/repository"
 	productRepo "ambic/internal/app/product/repository"
+	ratingRepo "ambic/internal/app/rating/repository"
 	userRepo "ambic/internal/app/user/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -36,18 +37,20 @@ type PartnerUsecase struct {
 	UserRepository         userRepo.UserMySQLItf
 	BusinessTypeRepository businessTypeRepo.BusinessTypeMySQLItf
 	ProductRepository      productRepo.ProductMySQLItf
+	RatingRepository       ratingRepo.RatingMySQLItf
 	Maps                   maps.MapsIf
 	Supabase               supabase.SupabaseIf
 	helper                 helper.HelperIf
 	jwt                    jwt.JWTIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
 		ProductRepository:      productRepository,
 		Maps:                   maps,
+		RatingRepository:       ratingRepository,
 		UserRepository:         userRepository,
 		BusinessTypeRepository: businessTypeRepository,
 		Supabase:               supabase,
@@ -271,27 +274,42 @@ func (u *PartnerUsecase) AutocompleteLocation(req dto.LocationRequest) ([]dto.Lo
 }
 
 func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err) {
+	resp := new(dto.GetPartnerStatisticResponse)
+
 	partner := new(entity.Partner)
 	if err := u.PartnerRepository.Show(partner, dto.PartnerParam{ID: id}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return dto.GetPartnerStatisticResponse{}, res.ErrNotFound(res.PartnerNotExists)
+			return *resp, res.ErrNotFound(res.PartnerNotExists)
 		}
 
-		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+		return *resp, res.ErrInternalServer()
 	}
 
-	totalRatings, err := u.ProductRepository.GetTotalRatingsByPartnerId(id)
+	totalRatings, err := u.RatingRepository.GetTotalRatingsByPartnerId(id)
 	if err != nil {
-		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+		return *resp, res.ErrInternalServer()
 	}
 
 	totalProducts, err := u.ProductRepository.GetTotalProductsByPartnerId(id)
 	if err != nil {
-		return dto.GetPartnerStatisticResponse{}, res.ErrInternalServer()
+		return *resp, res.ErrInternalServer()
 	}
 
-	return dto.GetPartnerStatisticResponse{
-		TotalRatings:  int(totalRatings),
-		TotalProducts: int(totalProducts),
-	}, nil
+	if err := u.PartnerRepository.ShowWithTransactions(partner, dto.PartnerParam{ID: id}); err != nil {
+		return *resp, res.ErrInternalServer()
+	}
+
+	var totalRevenue float32
+	for _, transaction := range partner.Transactions {
+		if transaction.Status == entity.Finish {
+			totalRevenue += transaction.Total
+		}
+	}
+
+	resp.TotalRatings = totalRatings
+	resp.TotalProducts = totalProducts
+	resp.TotalTransactions = int64(len(partner.Transactions))
+	resp.TotalRevenue = totalRevenue
+
+	return *resp, nil
 }
