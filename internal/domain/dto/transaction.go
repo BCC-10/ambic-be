@@ -28,6 +28,7 @@ type ShowTransactionResponse struct {
 
 type CreateTransactionRequest struct {
 	Note               string                           `json:"note"`
+	PartnerID          string                           `json:"partner_id" validate:"required,uuid"`
 	TransactionDetails []CreateTransactionDetailRequest `json:"items" validate:"required"`
 }
 
