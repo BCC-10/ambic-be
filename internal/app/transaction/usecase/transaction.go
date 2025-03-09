@@ -58,11 +58,11 @@ func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactio
 	}
 
 	if req.Limit < 1 {
-		req.Limit = 10
+		req.Limit = u.env.DefaultPaginationLimit
 	}
 
 	if req.Page < 1 {
-		req.Page = 1
+		req.Page = u.env.DefaultPaginationPage
 	}
 
 	pagination := dto.PaginationRequest{

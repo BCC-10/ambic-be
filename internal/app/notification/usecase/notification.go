@@ -27,11 +27,11 @@ func NewNotificationUsecase(env *env.Env, notificationRepository repository.Noti
 
 func (u *NotificationUsecase) GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *res.Err) {
 	if pagination.Limit < 1 {
-		pagination.Limit = 10
+		pagination.Limit = u.env.DefaultPaginationLimit
 	}
 
 	if pagination.Page < 1 {
-		pagination.Page = 1
+		pagination.Page = u.env.DefaultPaginationPage
 	}
 
 	pagination.Offset = (pagination.Page - 1) * pagination.Limit
