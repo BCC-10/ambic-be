@@ -29,10 +29,10 @@ type GetPartnerProductsQuery struct {
 	Limit int `query:"limit"`
 }
 type GetPartnerStatisticResponse struct {
-	TotalRatings      int `json:"total_ratings"`
-	TotalProducts     int `json:"total_products"`
-	TotalTransactions int `json:"total_transactions"`
-	TotalRevenue      int `json:"total_revenue"`
+	TotalRatings      int64   `json:"total_ratings"`
+	TotalProducts     int64   `json:"total_products"`
+	TotalTransactions int64   `json:"total_transactions"`
+	TotalRevenue      float32 `json:"total_revenue"`
 }
 
 type GetPartnerResponse struct {
