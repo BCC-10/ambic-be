@@ -123,3 +123,8 @@ const (
 
 // Transaction Detail Domain
 const ()
+
+// Notification Domain
+const (
+	GetNotificationSuccess = "Notifications retrieved successfully"
+)
