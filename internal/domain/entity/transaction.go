@@ -33,13 +33,13 @@ type Transaction struct {
 
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	res := dto.GetTransactionResponse{
-		ID:      t.ID.String(),
-		UserID:  t.UserID.String(),
-		Invoice: t.Invoice,
-		Total:   t.Total,
-		Status:  string(t.Status),
-		Note:    t.Note,
-		Date:    t.UpdatedAt,
+		ID:       t.ID.String(),
+		UserID:   t.UserID.String(),
+		Invoice:  t.Invoice,
+		Total:    t.Total,
+		Status:   string(t.Status),
+		Note:     t.Note,
+		Datetime: t.UpdatedAt,
 	}
 
 	if t.Payment.ID != uuid.Nil {
@@ -56,14 +56,14 @@ func (t *Transaction) ParseDTOShow() dto.ShowTransactionResponse {
 	}
 
 	res := dto.ShowTransactionResponse{
-		ID:      t.ID.String(),
-		UserID:  t.UserID.String(),
-		Invoice: t.Invoice,
-		Total:   t.Total,
-		Status:  string(t.Status),
-		Note:    t.Note,
-		Date:    t.UpdatedAt,
-		Items:   products,
+		ID:       t.ID.String(),
+		UserID:   t.UserID.String(),
+		Invoice:  t.Invoice,
+		Total:    t.Total,
+		Status:   string(t.Status),
+		Note:     t.Note,
+		Datetime: t.UpdatedAt,
+		Items:    products,
 	}
 
 	if t.Payment.ID != uuid.Nil {
