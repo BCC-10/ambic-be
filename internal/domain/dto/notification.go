@@ -7,6 +7,7 @@ type GetNotificationResponse struct {
 	Title    string `json:"title"`
 	Content  string `json:"content"`
 	Link     string `json:"link"`
+	Photo    string `json:"photo"`
 	Datetime string `json:"datetime"`
 }
 
