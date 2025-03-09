@@ -32,30 +32,12 @@ type Transaction struct {
 }
 
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
-	res := dto.GetTransactionResponse{
-		ID:       t.ID.String(),
-		UserID:   t.UserID.String(),
-		Invoice:  t.Invoice,
-		Total:    t.Total,
-		Status:   string(t.Status),
-		Note:     t.Note,
-		Datetime: t.UpdatedAt,
-	}
-
-	if t.Payment.ID != uuid.Nil {
-		res.Payment = t.Payment.ParseDTOGet()
-	}
-
-	return res
-}
-
-func (t *Transaction) ParseDTOShow() dto.ShowTransactionResponse {
 	products := make([]dto.GetProductResponse, len(t.TransactionDetails))
 	for i, detail := range t.TransactionDetails {
 		products[i] = detail.Product.ParseDTOGet()
 	}
 
-	res := dto.ShowTransactionResponse{
+	res := dto.GetTransactionResponse{
 		ID:       t.ID.String(),
 		UserID:   t.UserID.String(),
 		Invoice:  t.Invoice,

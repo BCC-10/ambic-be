@@ -15,13 +15,12 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"log"
 )
 
 type TransactionUsecaseItf interface {
 	GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
-	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
+	Show(id uuid.UUID) (dto.GetTransactionResponse, *res.Err)
 	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
 }
 
@@ -53,8 +52,6 @@ func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactio
 	param := dto.TransactionParam{
 		UserID: userId,
 	}
-
-	log.Println(req)
 
 	if req.Status != "" {
 		param.Status = req.Status
@@ -209,16 +206,16 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	return url, nil
 }
 
-func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) Show(id uuid.UUID) (dto.GetTransactionResponse, *res.Err) {
 	transaction := new(entity.Transaction)
 
 	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return dto.ShowTransactionResponse{}, res.ErrNotFound(res.TransactionNotFound)
+			return dto.GetTransactionResponse{}, res.ErrNotFound(res.TransactionNotFound)
 		}
 	}
 
-	return transaction.ParseDTOShow(), nil
+	return transaction.ParseDTOGet(), nil
 }
 
 func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {

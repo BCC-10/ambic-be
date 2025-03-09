@@ -12,17 +12,6 @@ type GetTransactionByUserIdAndByStatusRequest struct {
 }
 
 type GetTransactionResponse struct {
-	ID       string             `json:"id"`
-	UserID   string             `json:"user_id"`
-	Payment  GetPaymentResponse `json:"payment,omitempty"`
-	Invoice  string             `json:"invoice"`
-	Total    float32            `json:"total"`
-	Status   string             `json:"status"`
-	Note     string             `json:"note"`
-	Datetime time.Time          `json:"datetime"`
-}
-
-type ShowTransactionResponse struct {
 	ID       string               `json:"id"`
 	UserID   string               `json:"user_id"`
 	Payment  GetPaymentResponse   `json:"payment,omitempty"`
