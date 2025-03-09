@@ -4,12 +4,15 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type TransactionMySQLItf interface {
-	Get(transaction *[]entity.Transaction, param dto.TransactionParam) error
+	Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) error
+	Show(transaction *entity.Transaction, param dto.TransactionParam) error
 	Create(tx *gorm.DB, transaction *entity.Transaction) error
 	Update(transaction *entity.Transaction) error
+	CheckHasUserPurchasedProduct(param dto.TransactionParam) bool
 }
 
 type TransactionMySQL struct {
@@ -20,8 +23,19 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 	return &TransactionMySQL{db}
 }
 
-func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam) error {
-	return r.db.Debug().Preload("TransactionDetails").Find(transaction, param).Error
+func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) error {
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(transaction, param).Error
+}
+
+func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionParam) bool {
+	var count int64
+	r.db.Table("transactions").
+		Select("COUNT(*)").
+		Joins("JOIN transaction_details ON transactions.id = transaction_details.transaction_id").
+		Where("transactions.user_id = ? AND transaction_details.product_id = ? AND transactions.status = ?", param.UserID, param.ProductID, entity.Finish).
+		Count(&count)
+
+	return count > 0
 }
 
 func (r *TransactionMySQL) Update(transaction *entity.Transaction) error {
@@ -30,4 +44,8 @@ func (r *TransactionMySQL) Update(transaction *entity.Transaction) error {
 
 func (r *TransactionMySQL) Create(tx *gorm.DB, transaction *entity.Transaction) error {
 	return tx.Debug().Create(transaction).Error
+}
+
+func (r *TransactionMySQL) Show(transaction *entity.Transaction, param dto.TransactionParam) error {
+	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").First(transaction, param).Error
 }

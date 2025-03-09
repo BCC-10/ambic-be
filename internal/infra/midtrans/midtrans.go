@@ -5,6 +5,7 @@ import (
 	"ambic/internal/domain/env"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
+	"time"
 )
 
 type MidtransIf interface {
@@ -42,6 +43,11 @@ func (m *Midtrans) GeneratePaymentLink(req dto.RequestSnap) (string, error) {
 			Email:    req.User.Email,
 			Phone:    req.User.Phone,
 			BillAddr: custAddress,
+		},
+		Expiry: &snap.ExpiryDetails{
+			StartTime: time.Now().Format("2006-01-02 15:04:05 -0700"),
+			Unit:      "minutes",
+			Duration:  15,
 		},
 		CustomField1: req.TransactionID,
 	}

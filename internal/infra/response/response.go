@@ -60,43 +60,45 @@ const (
 
 // Partner Domain
 const (
-	AlreadyRegisteredAsPartner = "Partner is already registered"
-	NotPartner                 = "User is not a partner"
-	PartnerNotVerified         = "Partner is not verified"
-	PartnerRegisterSuccess     = "Partner registered successfully"
-	PartnerVerificationSuccess = "Partner verified successfully"
-	PartnerVerified            = "Partner is already verified"
-	PartnerNotExists           = "Partner does not exist"
-	GetPartnerSuccess          = "Partner retrieved successfully"
-	UpdatePartnerPhotoSuccess  = "Partner photo updated successfully"
-	InvalidBusinessType        = "Business type is invalid"
-	GetAutoCompleteSuccess     = "Auto complete suggestions retrieved successfully"
+	AlreadyRegisteredAsPartner  = "Partner is already registered"
+	NotPartner                  = "User is not a partner"
+	PartnerNotVerified          = "Partner is not verified"
+	PartnerRegisterSuccess      = "Partner registered successfully"
+	PartnerVerificationSuccess  = "Partner verified successfully"
+	PartnerVerified             = "Partner is already verified"
+	ProfileNotFilledCompletely  = "Profile is not filled completely"
+	PartnerNotExists            = "Partner does not exist"
+	GetPartnerSuccess           = "Partner retrieved successfully"
+	UpdatePartnerPhotoSuccess   = "Partner photo updated successfully"
+	InvalidBusinessType         = "Business type is invalid"
+	GetAutoCompleteSuccess      = "Auto complete suggestions retrieved successfully"
+	GetPartnerStatisticsSuccess = "Partner statistics retrieved successfully"
 )
 
 // Product Domain
 const (
-	GetProductSuccess          = "Products retrieved successfully"
-	CreateProductSuccess       = "Product created successfully"
-	UpdateProductSuccess       = "Product updated successfully"
-	ProfileNotFilledCompletely = "Profile is not filled completely"
-	ProductNotExists           = "Product does not exist"
-	RatingNotBelongToPartner   = "Product does not belong to partner"
-	DeleteProductSuccess       = "Product deleted successfully"
-	ProductAlreadyExists       = "Product already exists"
-	InvalidDateTime            = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
-	ProductNotFound            = "The product with id %s does not exist"
+	GetProductSuccess        = "Products retrieved successfully"
+	CreateProductSuccess     = "Product created successfully"
+	UpdateProductSuccess     = "Product updated successfully"
+	ProductNotExists         = "Product does not exist"
+	RatingNotBelongToPartner = "Product does not belong to partner"
+	DeleteProductSuccess     = "Product deleted successfully"
+	ProductAlreadyExists     = "Product already exists"
+	InvalidDateTime          = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	ProductNotFound          = "The product with id %s does not exist"
 )
 
 // Rating Domain
 const (
-	GetRatingSuccess      = "Ratings retrieved successfully"
-	RatingNotBelongToUser = "Rating does not belong to user"
-	CreateRatingSuccess   = "Rating created successfully"
-	UpdateRatingSuccess   = "Rating updated successfully"
-	UserAlreadyRated      = "User already rated"
-	RatingDeleteSuccess   = "Rating deleted successfully"
-	RatingNotFound        = "Rating does not exist"
-	RatingNotExists       = "Rating does not exist"
+	GetRatingSuccess        = "Ratings retrieved successfully"
+	RatingNotBelongToUser   = "Rating does not belong to user"
+	CreateRatingSuccess     = "Rating created successfully"
+	UpdateRatingSuccess     = "Rating updated successfully"
+	UserAlreadyRated        = "User already rated"
+	RatingDeleteSuccess     = "Rating deleted successfully"
+	RatingNotFound          = "Rating does not exist"
+	RatingNotExists         = "Rating does not exist"
+	UserNotPurchasedProduct = "User has not purchased the product or the transaction is not completed yet"
 )
 
 // Business Type Domain
@@ -107,10 +109,16 @@ const (
 
 // Transaction Domain
 const (
-	GetTransactionSuccess    = "Transactions retrieved successfully"
-	CreateTransactionSuccess = "Transaction created successfully"
-	InsufficientStock        = "Insufficient stock for %s"
-	InvalidQty               = "Quantity must be greater than 0"
-	MissingProductID         = "Product ID is missing"
-	MissingTransactionItems  = "Transaction items are missing"
+	GetTransactionSuccess     = "Transactions retrieved successfully"
+	CreateTransactionSuccess  = "Transaction created successfully"
+	InsufficientStock         = "Insufficient stock for %s"
+	InvalidQty                = "Quantity must be greater than 0"
+	MissingProductID          = "Product ID is missing"
+	MissingTransactionItems   = "Transaction items are missing"
+	TransactionNotFound       = "Transaction not found"
+	ProductNotBelongToPartner = "%s does not belong to %s"
+	UpdateTransactionSuccess  = "Transaction updated successfully"
 )
+
+// Transaction Detail Domain
+const ()

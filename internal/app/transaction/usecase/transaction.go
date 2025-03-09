@@ -17,8 +17,10 @@ import (
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
+	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
+	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
 }
 
 type TransactionUsecase struct {
@@ -43,10 +45,10 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID) (*[]dto.GetTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err) {
 	transactions := new([]entity.Transaction)
 
-	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}); err != nil {
+	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}, pagination); err != nil {
 		return nil, nil
 	}
 
@@ -68,13 +70,20 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 
 	transactionId, _ := uuid.NewV7()
 
+	partnerId, err := uuid.Parse(req.PartnerID)
+	if err != nil {
+		tx.Rollback()
+		return "", res.ErrBadRequest(res.InvalidUUID)
+	}
+
 	transaction := &entity.Transaction{
-		ID:      transactionId,
-		UserID:  userId,
-		Invoice: u.helper.GenerateInvoiceNumber(),
-		Total:   0,
-		Status:  entity.WaitingForPayment,
-		Note:    req.Note,
+		ID:        transactionId,
+		UserID:    userId,
+		PartnerID: partnerId,
+		Invoice:   u.helper.GenerateInvoiceNumber(),
+		Total:     0,
+		Status:    entity.WaitingForPayment,
+		Note:      req.Note,
 	}
 
 	if len(req.TransactionDetails) < 1 {
@@ -110,7 +119,13 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 			return "", res.ErrInternalServer()
 		}
 
+		if product.PartnerID != partnerId {
+			tx.Rollback()
+			return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotBelongToPartner, product.Name, product.Partner.Name))
+		}
+
 		if product.Stock < uint(item.Qty) {
+			tx.Rollback()
 			return "", res.ErrBadRequest(fmt.Sprintf(res.InsufficientStock, product.Name))
 		}
 
@@ -165,4 +180,35 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	tx.Commit()
 
 	return url, nil
+}
+
+func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err) {
+	transaction := new(entity.Transaction)
+
+	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return dto.ShowTransactionResponse{}, res.ErrBadRequest(res.TransactionNotFound)
+		}
+	}
+
+	return transaction.ParseDTOShow(), nil
+}
+
+func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {
+	status := new(entity.Status)
+	if req.Status != "" {
+		s := entity.Status(req.Status)
+		status = &s
+	}
+
+	transaction := &entity.Transaction{
+		ID:     id,
+		Status: *status,
+	}
+
+	if err := u.TransactionRepository.Update(transaction); err != nil {
+		return res.ErrInternalServer()
+	}
+
+	return nil
 }

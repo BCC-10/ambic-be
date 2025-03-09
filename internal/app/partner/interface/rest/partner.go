@@ -9,6 +9,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"log"
 )
 
 type PartnerHandler struct {
@@ -24,13 +25,15 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 		helper:         helper,
 	}
 
-	routerGroup = routerGroup.Group("/partners")
-	routerGroup.Get("/location", m.Authentication, PartnerHandler.AutocompleteLocation)
-	routerGroup.Get("/:id", m.Authentication, m.EnsurePartner, PartnerHandler.ShowPartner)
-	routerGroup.Get("/:id/products", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
-	routerGroup.Post("/", m.Authentication, m.EnsureNotPartner, PartnerHandler.RegisterPartner)
-	routerGroup.Post("/verification", m.Authentication, PartnerHandler.VerifyPartner)
-	routerGroup.Patch("/", m.Authentication, m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
+	routerGroup = routerGroup.Group("/partners", m.Authentication)
+	routerGroup.Get("/location", PartnerHandler.AutocompleteLocation)
+	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
+	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
+	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
+	routerGroup.Get("/:id", m.EnsurePartner, PartnerHandler.ShowPartner)
+	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
+	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
+	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
@@ -75,17 +78,19 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 }
 
 func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
-	query := new(dto.GetPartnerProductsQuery)
-	if err := ctx.QueryParser(query); err != nil {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
 		return res.BadRequest(ctx)
 	}
+
+	log.Println(pagination)
 
 	partnerId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	products, _err := h.PartnerUsecase.GetProducts(partnerId, *query)
+	products, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
@@ -147,5 +152,42 @@ func (h *PartnerHandler) AutocompleteLocation(ctx *fiber.Ctx) error {
 
 	return res.SuccessResponse(ctx, res.GetAutoCompleteSuccess, fiber.Map{
 		"locations": data,
+	})
+}
+
+func (h *PartnerHandler) GetStatistics(ctx *fiber.Ctx) error {
+	partnerId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	statistic, _err := h.PartnerUsecase.GetStatistics(partnerId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetPartnerStatisticsSuccess, fiber.Map{
+		"statistic": statistic,
+	})
+}
+
+func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	partnerId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *pagination)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
+		"transactions": transactions,
 	})
 }

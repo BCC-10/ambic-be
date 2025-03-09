@@ -90,34 +90,35 @@ func Start() error {
 
 	l := limiter.NewLimiter(r)
 
+	businessTypeRepository := BusinessTypeRepo.NewBusinessTypeMySQL(db)
+	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
+	productRepository := ProductRepo.NewProductMySQL(db)
+	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
+	ratingRepository := RatingRepo.NewRatingMySQL(db)
+	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
 	userRepository := UserRepo.NewUserMySQL(db)
+
 	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s, h)
 	UserHandler.NewUserHandler(v1, userUsecase, v, m, h)
 
 	authUsecase := AuthUsecase.NewAuthUsecase(config, userRepository, j, c, e, r, o)
 	AuthHandler.NewAuthHandler(v1, authUsecase, v, l)
 
-	businessTypeRepository := BusinessTypeRepo.NewBusinessTypeMySQL(db)
 	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
 	BusinessTypeHandler.NewBusinessTypeHandler(v1, businessTypeUsecase, m)
 
-	productRepository := ProductRepo.NewProductMySQL(db)
 	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, s, h)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
-	partnerRepository := PartnerRepo.NewPartnerMySQL(db)
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, s, h, ma, j)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h)
 
-	ratingRepository := RatingRepo.NewRatingMySQL(db)
-	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, s, h)
+	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
-	transactionRepository := TransactionRepo.NewTransactionMySQL(db)
 	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
-	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
 	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
 

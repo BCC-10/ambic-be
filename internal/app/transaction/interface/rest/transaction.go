@@ -21,14 +21,21 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 		Validator:          validator,
 	}
 
-	routerGroup = routerGroup.Group("/transactions")
-	routerGroup.Get("/", m.Authentication, TransactionHandler.GetByUser)
-	routerGroup.Post("/", m.Authentication, TransactionHandler.Create)
+	routerGroup = routerGroup.Group("/transactions", m.Authentication)
+	routerGroup.Get("/", TransactionHandler.GetByLoggedInUser)
+	routerGroup.Get("/:id", TransactionHandler.Show)
+	routerGroup.Post("/", m.EnsurePartner, m.EnsureVerifiedPartner, TransactionHandler.Create)
+	routerGroup.Patch("/:id", TransactionHandler.UpdateStatus)
 }
 
-func (h *TransactionHandler) GetByUser(ctx *fiber.Ctx) error {
+func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
 	userId := ctx.Locals("userId").(uuid.UUID)
-	transactions, err := h.TransactionUsecase.GetByUserID(userId)
+	transactions, err := h.TransactionUsecase.GetByUserID(userId, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
@@ -41,7 +48,7 @@ func (h *TransactionHandler) GetByUser(ctx *fiber.Ctx) error {
 func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	req := new(dto.CreateTransactionRequest)
 	if err := ctx.BodyParser(req); err != nil {
-		return res.BadRequest(ctx, "err")
+		return res.BadRequest(ctx)
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
@@ -57,4 +64,40 @@ func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	return res.SuccessResponse(ctx, res.CreateTransactionSuccess, fiber.Map{
 		"payment_url": paymentURL,
 	})
+}
+
+func (h *TransactionHandler) Show(ctx *fiber.Ctx) error {
+	transactionId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	transactionDetails, _err := h.TransactionUsecase.Show(transactionId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, transactionDetails)
+}
+
+func (h *TransactionHandler) UpdateStatus(ctx *fiber.Ctx) error {
+	transactionId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	req := new(dto.UpdateTransactionStatusRequest)
+	if err := ctx.BodyParser(req); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	if err := h.TransactionUsecase.UpdateStatus(transactionId, *req); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.UpdateTransactionSuccess, nil)
 }

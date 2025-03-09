@@ -8,6 +8,7 @@ import (
 
 type PartnerMySQLItf interface {
 	Show(partner *entity.Partner, param dto.PartnerParam) error
+	ShowWithTransactions(partner *entity.Partner, param dto.PartnerParam) error
 	Create(partner *entity.Partner) error
 	Update(partner *entity.Partner) error
 }
@@ -30,4 +31,8 @@ func (r *PartnerMySQL) Update(partner *entity.Partner) error {
 
 func (r *PartnerMySQL) Show(partner *entity.Partner, param dto.PartnerParam) error {
 	return r.db.Debug().First(partner, param).Error
+}
+
+func (r *PartnerMySQL) ShowWithTransactions(partner *entity.Partner, param dto.PartnerParam) error {
+	return r.db.Debug().Preload("Transactions").First(partner, param).Error
 }

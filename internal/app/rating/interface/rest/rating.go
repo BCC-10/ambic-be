@@ -24,15 +24,20 @@ func NewRatingHandler(routerGroup fiber.Router, ratingUsecase RatingUsecase.Rati
 		helper:        helper,
 	}
 
-	routerGroup = routerGroup.Group("/ratings")
-	routerGroup.Get("/", m.Authentication, RatingHandler.Get)
-	routerGroup.Post("/", m.Authentication, RatingHandler.Create)
-	routerGroup.Get("/:id", m.Authentication, RatingHandler.Show)
-	routerGroup.Patch("/:id", m.Authentication, RatingHandler.Update)
-	routerGroup.Delete("/:id", m.Authentication, RatingHandler.Delete)
+	routerGroup = routerGroup.Group("/ratings", m.Authentication)
+	routerGroup.Get("/", RatingHandler.Get)
+	routerGroup.Post("/", RatingHandler.Create)
+	routerGroup.Get("/:id", RatingHandler.Show)
+	routerGroup.Patch("/:id", RatingHandler.Update)
+	routerGroup.Delete("/:id", RatingHandler.Delete)
 }
 
 func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
 	req := new(dto.GetRatingRequest)
 	if err := ctx.QueryParser(req); err != nil {
 		return res.BadRequest(ctx)
@@ -42,12 +47,14 @@ func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, nil, err)
 	}
 
-	ratings, err := h.RatingUsecase.Get(*req)
+	ratings, err := h.RatingUsecase.Get(*req, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
 
-	return res.SuccessResponse(ctx, "asas", ratings)
+	return res.SuccessResponse(ctx, res.GetRatingSuccess, fiber.Map{
+		"ratings": ratings,
+	})
 }
 
 func (h *RatingHandler) Show(ctx *fiber.Ctx) error {
