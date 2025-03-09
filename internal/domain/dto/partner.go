@@ -24,10 +24,6 @@ type UpdatePhotoRequest struct {
 	Photo *multipart.FileHeader `form:"photo" validate:"required"`
 }
 
-type GetPartnerProductsQuery struct {
-	Page  int `query:"page"`
-	Limit int `query:"limit"`
-}
 type GetPartnerStatisticResponse struct {
 	TotalRatings      int64   `json:"total_ratings"`
 	TotalProducts     int64   `json:"total_products"`
@@ -54,6 +50,7 @@ type LocationRequest struct {
 	Long   float64 `json:"long" validate:"required"`
 	Radius float64 `json:"radius"`
 }
+
 type LocationResponse struct {
 	Name    string `json:"name"`
 	PlaceID string `json:"place_id"`
