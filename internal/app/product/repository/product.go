@@ -11,7 +11,7 @@ type ProductMySQLItf interface {
 	Create(product *entity.Product) error
 	Show(product *entity.Product, param dto.ProductParam) error
 	Delete(product *entity.Product) error
-	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, limit int, offset int) error
+	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, pagination dto.Pagination) error
 	Update(tx *gorm.DB, product *entity.Product) error
 	GetTotalProductsByPartnerId(id uuid.UUID) (int64, error)
 }
@@ -36,8 +36,8 @@ func (r *ProductMySQL) Delete(product *entity.Product) error {
 	return r.db.Debug().Delete(product).Error
 }
 
-func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, param dto.ProductParam, limit int, offset int) error {
-	return r.db.Debug().Find(product, param).Limit(limit).Offset(offset).Error
+func (r *ProductMySQL) GetByPartnerId(product *[]entity.Product, param dto.ProductParam, pagination dto.Pagination) error {
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(product, param).Error
 }
 
 func (r *ProductMySQL) Update(tx *gorm.DB, product *entity.Product) error {
