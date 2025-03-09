@@ -112,7 +112,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
 			if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 				tx.Rollback()
-				return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotFound, item.ProductID))
+				return "", res.ErrNotFound(fmt.Sprintf(res.ProductNotFound, item.ProductID))
 			}
 
 			tx.Rollback()
@@ -187,7 +187,7 @@ func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *r
 
 	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return dto.ShowTransactionResponse{}, res.ErrBadRequest(res.TransactionNotFound)
+			return dto.ShowTransactionResponse{}, res.ErrNotFound(res.TransactionNotFound)
 		}
 	}
 
@@ -195,13 +195,24 @@ func (u *TransactionUsecase) Show(id uuid.UUID) (dto.ShowTransactionResponse, *r
 }
 
 func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {
-	status := new(entity.Status)
-	if req.Status != "" {
-		s := entity.Status(req.Status)
-		status = &s
+	transaction := new(entity.Transaction)
+	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
+		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
+			return res.ErrNotFound(res.TransactionNotFound)
+		}
+
+		return res.ErrInternalServer()
 	}
 
-	transaction := &entity.Transaction{
+	if transaction.Status == entity.WaitingForPayment || transaction.Status == entity.CancelledBySystem {
+		return res.ErrForbidden(res.NotAllowedToChangeStatus)
+	}
+
+	status := new(entity.Status)
+	s := entity.Status(req.Status)
+	status = &s
+
+	transaction = &entity.Transaction{
 		ID:     id,
 		Status: *status,
 	}
