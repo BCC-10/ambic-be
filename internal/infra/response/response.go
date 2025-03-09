@@ -128,3 +128,11 @@ const ()
 const (
 	GetNotificationSuccess = "Notifications retrieved successfully"
 )
+
+// Notification Message
+const (
+	WelcomeTitle     = "Yuk Lengkapi Datamu, Kak %s"
+	WelcomeContent   = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran dari Ambic"
+	WelcomeLink      = "/profiles"
+	WelcomeImageText = "Isi Data Kamu"
+)
