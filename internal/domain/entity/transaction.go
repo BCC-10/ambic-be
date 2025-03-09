@@ -34,6 +34,7 @@ type Transaction struct {
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	res := dto.GetTransactionResponse{
 		ID:      t.ID.String(),
+		UserID:  t.UserID.String(),
 		Invoice: t.Invoice,
 		Total:   t.Total,
 		Status:  string(t.Status),
@@ -56,6 +57,7 @@ func (t *Transaction) ParseDTOShow() dto.ShowTransactionResponse {
 
 	res := dto.ShowTransactionResponse{
 		ID:      t.ID.String(),
+		UserID:  t.UserID.String(),
 		Invoice: t.Invoice,
 		Total:   t.Total,
 		Status:  string(t.Status),

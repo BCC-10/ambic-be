@@ -7,6 +7,7 @@ import (
 
 type GetTransactionResponse struct {
 	ID      string             `json:"id"`
+	UserID  string             `json:"user_id"`
 	Payment GetPaymentResponse `json:"payment,omitempty"`
 	Invoice string             `json:"invoice"`
 	Total   float32            `json:"total"`
@@ -17,6 +18,7 @@ type GetTransactionResponse struct {
 
 type ShowTransactionResponse struct {
 	ID      string               `json:"id"`
+	UserID  string               `json:"user_id"`
 	Payment GetPaymentResponse   `json:"payment,omitempty"`
 	Invoice string               `json:"invoice"`
 	Total   float32              `json:"total"`
@@ -43,5 +45,6 @@ type RequestSnap struct {
 type TransactionParam struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID
+	PartnerID uuid.UUID
 	ProductID uuid.UUID
 }
