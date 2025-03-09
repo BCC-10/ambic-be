@@ -2,6 +2,7 @@ package rest
 
 import (
 	"ambic/internal/app/notification/usecase"
+	"ambic/internal/domain/dto"
 	res "ambic/internal/infra/response"
 	"ambic/internal/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -22,8 +23,13 @@ func NewNotificationHandler(routerGroup fiber.Router, notificationUsecase usecas
 }
 
 func (h *NotificationHandler) GetByUserId(ctx *fiber.Ctx) error {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
 	userId := ctx.Locals("userId").(uuid.UUID)
-	notifications, err := h.NotificationUsecase.GetByUserId(userId)
+	notifications, err := h.NotificationUsecase.GetByUserId(userId, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
