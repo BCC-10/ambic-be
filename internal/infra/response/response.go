@@ -66,6 +66,7 @@ const (
 	PartnerRegisterSuccess      = "Partner registered successfully"
 	PartnerVerificationSuccess  = "Partner verified successfully"
 	PartnerVerified             = "Partner is already verified"
+	ProfileNotFilledCompletely  = "Profile is not filled completely"
 	PartnerNotExists            = "Partner does not exist"
 	GetPartnerSuccess           = "Partner retrieved successfully"
 	UpdatePartnerPhotoSuccess   = "Partner photo updated successfully"
@@ -76,16 +77,15 @@ const (
 
 // Product Domain
 const (
-	GetProductSuccess          = "Items retrieved successfully"
-	CreateProductSuccess       = "Product created successfully"
-	UpdateProductSuccess       = "Product updated successfully"
-	ProfileNotFilledCompletely = "Profile is not filled completely"
-	ProductNotExists           = "Product does not exist"
-	RatingNotBelongToPartner   = "Product does not belong to partner"
-	DeleteProductSuccess       = "Product deleted successfully"
-	ProductAlreadyExists       = "Product already exists"
-	InvalidDateTime            = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
-	ProductNotFound            = "The product with id %s does not exist"
+	GetProductSuccess        = "Products retrieved successfully"
+	CreateProductSuccess     = "Product created successfully"
+	UpdateProductSuccess     = "Product updated successfully"
+	ProductNotExists         = "Product does not exist"
+	RatingNotBelongToPartner = "Product does not belong to partner"
+	DeleteProductSuccess     = "Product deleted successfully"
+	ProductAlreadyExists     = "Product already exists"
+	InvalidDateTime          = "Date time format is invalid, format should be YYYY-MM-DD HH:MM:SS"
+	ProductNotFound          = "The product with id %s does not exist"
 )
 
 // Rating Domain
