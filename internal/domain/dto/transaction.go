@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+type GetTransactionByUserIdAndByStatusRequest struct {
+	Status string `query:"status" validate:"omitempty,oneof='waiting for payment' 'waiting for confirmation' 'process' 'finish' 'cancelled by system' 'cancelled by user' 'cancelled by partner'"`
+	Limit  int    `query:"limit"`
+	Page   int    `query:"page"`
+}
+
 type GetTransactionResponse struct {
 	ID      string             `json:"id"`
 	UserID  string             `json:"user_id"`
@@ -51,4 +57,5 @@ type TransactionParam struct {
 	UserID    uuid.UUID
 	PartnerID uuid.UUID
 	ProductID uuid.UUID
+	Status    string
 }
