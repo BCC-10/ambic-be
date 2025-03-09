@@ -25,6 +25,7 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 	routerGroup.Get("/", TransactionHandler.GetByLoggedInUser)
 	routerGroup.Get("/:id", TransactionHandler.Show)
 	routerGroup.Post("/", m.EnsurePartner, m.EnsureVerifiedPartner, TransactionHandler.Create)
+	routerGroup.Patch("/:id", TransactionHandler.UpdateStatus)
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
@@ -77,4 +78,26 @@ func (h *TransactionHandler) Show(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.GetTransactionSuccess, transactionDetails)
+}
+
+func (h *TransactionHandler) UpdateStatus(ctx *fiber.Ctx) error {
+	transactionId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return res.BadRequest(ctx, res.InvalidUUID)
+	}
+
+	req := new(dto.UpdateTransactionStatusRequest)
+	if err := ctx.BodyParser(req); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	if err := h.TransactionUsecase.UpdateStatus(transactionId, *req); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.UpdateTransactionSuccess, nil)
 }
