@@ -17,7 +17,7 @@ import (
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID, pagination dto.Pagination) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
 	Show(id uuid.UUID) (dto.ShowTransactionResponse, *res.Err)
 }
@@ -44,7 +44,7 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.Pagination) (*[]dto.GetTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, pagination dto.PaginationRequest) (*[]dto.GetTransactionResponse, *res.Err) {
 	transactions := new([]entity.Transaction)
 
 	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{UserID: userId}, pagination); err != nil {

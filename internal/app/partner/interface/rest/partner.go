@@ -78,7 +78,7 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 }
 
 func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
-	pagination := new(dto.Pagination)
+	pagination := new(dto.PaginationRequest)
 	if err := ctx.QueryParser(pagination); err != nil {
 		return res.BadRequest(ctx)
 	}
@@ -172,7 +172,7 @@ func (h *PartnerHandler) GetStatistics(ctx *fiber.Ctx) error {
 }
 
 func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
-	pagination := new(dto.Pagination)
+	pagination := new(dto.PaginationRequest)
 	if err := ctx.QueryParser(pagination); err != nil {
 		return res.BadRequest(ctx)
 	}

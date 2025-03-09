@@ -26,11 +26,11 @@ type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
 	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
-	GetProducts(id uuid.UUID, pagination dto.Pagination) ([]dto.GetProductResponse, *res.Err)
+	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
-	GetTransactions(id uuid.UUID, pagination dto.Pagination) ([]dto.GetTransactionResponse, *res.Err)
+	GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -180,7 +180,7 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 	return token, nil
 }
 
-func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.Pagination) ([]dto.GetProductResponse, *res.Err) {
+func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err) {
 	if pagination.Limit < 1 {
 		pagination.Limit = 10
 	}
@@ -319,7 +319,7 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 	return *resp, nil
 }
 
-func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.Pagination) ([]dto.GetTransactionResponse, *res.Err) {
+func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err) {
 	if pagination.Limit == 0 {
 		pagination.Limit = 10
 	}

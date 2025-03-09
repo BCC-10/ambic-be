@@ -28,7 +28,7 @@ func NewTransactionHandler(routerGroup fiber.Router, transactionUsecase usecase.
 }
 
 func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
-	pagination := new(dto.Pagination)
+	pagination := new(dto.PaginationRequest)
 	if err := ctx.QueryParser(pagination); err != nil {
 		return res.BadRequest(ctx)
 	}

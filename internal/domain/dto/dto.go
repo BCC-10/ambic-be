@@ -1,6 +1,6 @@
 package dto
 
-type Pagination struct {
+type PaginationRequest struct {
 	Page   int `query:"page"`
 	Limit  int `query:"limit"`
 	Offset int
