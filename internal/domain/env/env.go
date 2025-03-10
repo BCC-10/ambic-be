@@ -8,6 +8,7 @@ import (
 )
 
 type Env struct {
+	AppName                string  `env:"APP_NAME"`
 	AppPort                int     `env:"APP_PORT"`
 	AppURL                 string  `env:"APP_URL"`
 	MaxUploadSize          int64   `env:"MAX_UPLOAD_SIZE"`
@@ -57,7 +58,8 @@ type Env struct {
 	SupabaseURL    string `env:"SUPABASE_URL"`
 	SupabaseSecret string `env:"SUPABASE_SECRET"`
 
-	MidtransServerKey string `env:"MIDTRANS_SERVER_KEY"`
+	MidtransServerKey          string `env:"MIDTRANS_SERVER_KEY"`
+	MidtransMaxPaymentDuration int64  `env:"MIDTRANS_MAX_PAYMENT_DURATION"`
 }
 
 func New() (*Env, error) {

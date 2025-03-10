@@ -251,7 +251,7 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		Status: *status,
 	}
 
-	if err := u.TransactionRepository.Update(transaction); err != nil {
+	if err := u.TransactionRepository.Update(u.db, transaction); err != nil {
 		return res.ErrInternalServer()
 	}
 
