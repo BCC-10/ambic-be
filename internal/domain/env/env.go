@@ -8,11 +8,14 @@ import (
 )
 
 type Env struct {
-	AppPort                int    `env:"APP_PORT"`
-	AppURL                 string `env:"APP_URL"`
-	MaxUploadSize          int64  `env:"MAX_UPLOAD_SIZE"`
-	DefaultPaginationLimit int    `env:"DEFAULT_PAGINATION_LIMIT"`
-	DefaultPaginationPage  int    `env:"DEFAULT_PAGINATION_PAGE"`
+	AppPort                int     `env:"APP_PORT"`
+	AppURL                 string  `env:"APP_URL"`
+	MaxUploadSize          int64   `env:"MAX_UPLOAD_SIZE"`
+	DefaultPaginationLimit int     `env:"DEFAULT_PAGINATION_LIMIT"`
+	DefaultPaginationPage  int     `env:"DEFAULT_PAGINATION_PAGE"`
+	DefaultUserLatitude    float64 `env:"DEFAULT_USER_LATITUDE"`
+	DefaultUserLongitude   float64 `env:"DEFAULT_USER_LONGITUDE"`
+	DefaultUserRadius      float64 `env:"DEFAULT_USER_RADIUS"`
 
 	DefaultProfilePhotoPath        string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
 	DefaultProfilePhotoURL         string
