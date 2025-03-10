@@ -44,6 +44,13 @@ type GetPartnerResponse struct {
 	Photo        string  `json:"photo,omitempty"`
 }
 
+type GetPartnerTransactionRequest struct {
+	Page   int    `query:"page"`
+	Limit  int    `query:"limit"`
+	Status string `query:"status" validate:"omitempty,oneof='waiting for payment' 'process' 'finish' 'cancelled by system'"`
+	Offset int
+}
+
 type PartnerParam struct {
 	ID         uuid.UUID
 	IsVerified bool
