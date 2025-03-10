@@ -7,7 +7,7 @@ import (
 )
 
 type PaymentMySQLItf interface {
-	Create(payment *entity.Payment) error
+	Create(tx *gorm.DB, payment *entity.Payment) error
 	Show(payment *entity.Payment, param dto.PaymentParam) error
 }
 
@@ -19,8 +19,8 @@ func NewPaymentMySQL(db *gorm.DB) PaymentMySQLItf {
 	return &PaymentMySQL{db}
 }
 
-func (r *PaymentMySQL) Create(payment *entity.Payment) error {
-	return r.db.Debug().Create(payment).Error
+func (r *PaymentMySQL) Create(tx *gorm.DB, payment *entity.Payment) error {
+	return tx.Debug().Create(payment).Error
 }
 
 func (r *PaymentMySQL) Show(payment *entity.Payment, param dto.PaymentParam) error {

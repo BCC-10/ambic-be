@@ -17,7 +17,7 @@ const (
 
 type Transaction struct {
 	ID                 uuid.UUID `gorm:"type:char(36);primaryKey"`
-	UserID             uuid.UUID `gorm:"type:char(36);not null"`
+	UserID             uuid.UUID `gorm:"type:char(36)"`
 	PartnerID          uuid.UUID `gorm:"type:char(36)"`
 	Payment            Payment
 	TransactionDetails []TransactionDetail
@@ -32,7 +32,7 @@ type Transaction struct {
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	products := make([]dto.GetProductResponse, len(t.TransactionDetails))
 	for i, detail := range t.TransactionDetails {
-		products[i] = detail.Product.ParseDTOGet()
+		products[i] = detail.Product.ParseDTOGet(nil)
 	}
 
 	res := dto.GetTransactionResponse{

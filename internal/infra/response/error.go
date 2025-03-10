@@ -28,11 +28,8 @@ func ErrBadRequest(message ...string) *Err {
 	return newError(fiber.ErrBadRequest.Code, fiber.ErrBadRequest.Message, message...)
 }
 
-func ErrValidationError(val interface{}, err interface{}) *Err {
+func ErrValidationError(err interface{}) *Err {
 	payload := map[string]interface{}{"errors": err}
-	if val != nil {
-		payload["old"] = val
-	}
 	return &Err{Code: fiber.ErrBadRequest.Code, Message: fiber.ErrBadRequest.Message, Payload: payload}
 }
 
@@ -72,7 +69,7 @@ func BadRequest(ctx *fiber.Ctx, message ...string) error {
 	return respondWithError(ctx, fiber.ErrBadRequest.Code, fiber.ErrBadRequest.Message, message...)
 }
 
-func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
+func ValidationError(ctx *fiber.Ctx, err error) error {
 	errorsMap := make(map[string]string)
 	for _, err := range err.(validator.ValidationErrors) {
 		field := strings.ToLower(err.Field())
@@ -80,9 +77,6 @@ func ValidationError(ctx *fiber.Ctx, val interface{}, err error) error {
 	}
 
 	payload := map[string]interface{}{"errors": errorsMap}
-	if val != nil {
-		payload["old"] = val
-	}
 
 	return ctx.Status(fiber.ErrBadRequest.Code).JSON(Res{
 		StatusCode: fiber.ErrBadRequest.Code,

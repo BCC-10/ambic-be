@@ -1,9 +1,10 @@
 package dto
 
 type TransactionDetail struct {
-	ProductID string
-	Product   GetProductResponse
-	Qty       uint
+	MerchantName string
+	ProductID    string
+	Product      GetProductResponse
+	Qty          uint
 }
 
 type GetTransactionDetailResponse struct {

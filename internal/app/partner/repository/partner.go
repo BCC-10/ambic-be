@@ -7,6 +7,7 @@ import (
 )
 
 type PartnerMySQLItf interface {
+	Get(partner *[]entity.Partner, param dto.PartnerParam) error
 	Show(partner *entity.Partner, param dto.PartnerParam) error
 	ShowWithTransactions(partner *entity.Partner, param dto.PartnerParam) error
 	Create(partner *entity.Partner) error
@@ -19,6 +20,10 @@ type PartnerMySQL struct {
 
 func NewPartnerMySQL(db *gorm.DB) PartnerMySQLItf {
 	return &PartnerMySQL{db}
+}
+
+func (r *PartnerMySQL) Get(partner *[]entity.Partner, param dto.PartnerParam) error {
+	return r.db.Debug().Find(partner, param).Error
 }
 
 func (r *PartnerMySQL) Create(partner *entity.Partner) error {

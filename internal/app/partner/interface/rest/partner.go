@@ -26,7 +26,6 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup = routerGroup.Group("/partners", m.Authentication)
-	routerGroup.Get("/location", PartnerHandler.AutocompleteLocation)
 	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
 	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
 	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
@@ -43,7 +42,7 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -64,7 +63,7 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	token, err := h.PartnerUsecase.VerifyPartner(*data)
@@ -123,7 +122,7 @@ func (h *PartnerHandler) UpdatePhoto(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
@@ -133,26 +132,6 @@ func (h *PartnerHandler) UpdatePhoto(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.UpdatePartnerPhotoSuccess, nil)
-}
-
-func (h *PartnerHandler) AutocompleteLocation(ctx *fiber.Ctx) error {
-	req := new(dto.LocationRequest)
-	if err := ctx.QueryParser(req); err != nil {
-		return res.BadRequest(ctx)
-	}
-
-	if err := h.Validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
-	}
-
-	data, err := h.PartnerUsecase.AutocompleteLocation(*req)
-	if err != nil {
-		return res.Error(ctx, err)
-	}
-
-	return res.SuccessResponse(ctx, res.GetAutoCompleteSuccess, fiber.Map{
-		"locations": data,
-	})
 }
 
 func (h *PartnerHandler) GetStatistics(ctx *fiber.Ctx) error {

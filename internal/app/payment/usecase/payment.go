@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	notificationRepo "ambic/internal/app/notification/repository"
 	"ambic/internal/app/payment/repository"
+	ProductRepo "ambic/internal/app/product/repository"
 	transactionRepo "ambic/internal/app/transaction/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
@@ -11,10 +13,8 @@ import (
 	"strconv"
 	"time"
 
-	//"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	res "ambic/internal/infra/response"
-	//"time"
 )
 
 type PaymentUsecaseItf interface {
@@ -22,20 +22,34 @@ type PaymentUsecaseItf interface {
 }
 
 type PaymentUsecase struct {
-	env                   *env.Env
-	PaymentRepository     repository.PaymentMySQLItf
-	TransactionRepository transactionRepo.TransactionMySQLItf
+	env                    *env.Env
+	db                     *gorm.DB
+	PaymentRepository      repository.PaymentMySQLItf
+	TransactionRepository  transactionRepo.TransactionMySQLItf
+	ProductRepository      ProductRepo.ProductMySQLItf
+	NotificationRepository notificationRepo.NotificationMySQLItf
 }
 
-func NewPaymentUsecase(env *env.Env, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf) PaymentUsecaseItf {
+func NewPaymentUsecase(env *env.Env, db *gorm.DB, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, productRepository ProductRepo.ProductMySQLItf, notificationRepository notificationRepo.NotificationMySQLItf) PaymentUsecaseItf {
 	return &PaymentUsecase{
-		env:                   env,
-		PaymentRepository:     paymentRepository,
-		TransactionRepository: transactionRepository,
+		env:                    env,
+		db:                     db,
+		PaymentRepository:      paymentRepository,
+		TransactionRepository:  transactionRepository,
+		ProductRepository:      productRepository,
+		NotificationRepository: notificationRepository,
 	}
 }
 
 func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	transactionStatusResp := req.TransactionStatus
 	fraudStatus := req.FraudStatus
 
@@ -81,10 +95,12 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		paymentDB := new(entity.Payment)
 		if err := u.PaymentRepository.Show(paymentDB, dto.PaymentParam{TransactionID: transactionId}); err != nil {
 			if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-				if err := u.PaymentRepository.Create(payment); err != nil {
+				if err := u.PaymentRepository.Create(tx, payment); err != nil {
+					tx.Rollback()
 					return res.ErrInternalServer()
 				}
 			} else {
+				tx.Rollback()
 				return res.ErrInternalServer()
 			}
 		}
@@ -92,16 +108,65 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		transaction.Status = entity.Process
 		transaction.Payment = *payment
 
-		if err := u.TransactionRepository.Update(transaction); err != nil {
+		if err := u.TransactionRepository.Update(tx, transaction); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+
+		transactionDB := new(entity.Transaction)
+		if err := u.TransactionRepository.Show(transactionDB, dto.TransactionParam{ID: transactionId}); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+
+		notification := &entity.Notification{
+			UserID:   transactionDB.UserID,
+			Title:    res.PaymentSuccessTitle,
+			Content:  res.PaymentSuccessContent,
+			Link:     res.PaymentSuccessLink,
+			Button:   res.PaymentSuccessButton,
+			PhotoURL: res.PaymentSuccessImageURL,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	} else if status == "cancelled" {
 		transaction.Status = entity.CancelledBySystem
 
-		if err := u.TransactionRepository.Update(transaction); err != nil {
+		if err := u.TransactionRepository.Update(tx, transaction); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
+
+		transactionDB := new(entity.Transaction)
+		if err := u.TransactionRepository.Show(transactionDB, dto.TransactionParam{ID: transactionId}); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+
+		for _, details := range transactionDB.TransactionDetails {
+			product := new(entity.Product)
+
+			if err := u.ProductRepository.Show(product, dto.ProductParam{ID: details.ProductID}); err != nil {
+				tx.Rollback()
+				return res.ErrInternalServer()
+			}
+
+			product = &entity.Product{
+				ID:    details.ProductID,
+				Stock: product.Stock + details.Qty,
+			}
+
+			if err := u.ProductRepository.Update(tx, product); err != nil {
+				tx.Rollback()
+				return res.ErrInternalServer()
+			}
+		}
 	}
+
+	tx.Commit()
 
 	return nil
 }

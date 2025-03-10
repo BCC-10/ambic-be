@@ -44,19 +44,8 @@ type GetPartnerResponse struct {
 	Photo        string  `json:"photo,omitempty"`
 }
 
-type LocationRequest struct {
-	Query  string  `json:"query" validate:"required"`
-	Lat    float64 `json:"lat" validate:"required"`
-	Long   float64 `json:"long" validate:"required"`
-	Radius float64 `json:"radius"`
-}
-
-type LocationResponse struct {
-	Name    string `json:"name"`
-	PlaceID string `json:"place_id"`
-}
-
 type PartnerParam struct {
-	ID    uuid.UUID
-	Email string
+	ID         uuid.UUID
+	IsVerified bool
+	Email      string
 }

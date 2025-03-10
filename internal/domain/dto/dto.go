@@ -5,3 +5,8 @@ type PaginationRequest struct {
 	Limit  int `query:"limit"`
 	Offset int
 }
+
+type Location struct {
+	Lat  float64
+	Long float64
+}

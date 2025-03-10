@@ -14,6 +14,7 @@ type MidtransIf interface {
 
 type Midtrans struct {
 	Snap snap.Client
+	env  *env.Env
 }
 
 func New(env *env.Env) *Midtrans {
@@ -22,6 +23,7 @@ func New(env *env.Env) *Midtrans {
 
 	return &Midtrans{
 		Snap: s,
+		env:  env,
 	}
 }
 
@@ -47,7 +49,7 @@ func (m *Midtrans) GeneratePaymentLink(req dto.RequestSnap) (string, error) {
 		Expiry: &snap.ExpiryDetails{
 			StartTime: time.Now().Format("2006-01-02 15:04:05 -0700"),
 			Unit:      "minutes",
-			Duration:  15,
+			Duration:  m.env.MidtransMaxPaymentDuration,
 		},
 		CustomField1: req.TransactionID,
 	}
@@ -55,12 +57,15 @@ func (m *Midtrans) GeneratePaymentLink(req dto.RequestSnap) (string, error) {
 	var items []midtrans.ItemDetails
 	for _, p := range req.TransactionDetails {
 		items = append(items, midtrans.ItemDetails{
-			ID:    p.ProductID,
-			Price: int64(p.Product.FinalPrice),
-			Qty:   int32(p.Qty),
-			Name:  p.Product.Name,
+			ID:           p.ProductID,
+			Price:        int64(p.Product.FinalPrice),
+			Qty:          int32(p.Qty),
+			Name:         p.Product.Name,
+			MerchantName: p.MerchantName,
 		})
 	}
+
+	snapReq.Items = &items
 
 	url, err := m.Snap.CreateTransactionUrl(snapReq)
 	if err != nil {

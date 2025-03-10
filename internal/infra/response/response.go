@@ -132,7 +132,55 @@ const (
 // Notification Message
 const (
 	WelcomeTitle     = "Yuk Lengkapi Datamu, Kak %s"
-	WelcomeContent   = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran dari Ambic"
+	WelcomeContent   = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran menarik dari AMBIC"
 	WelcomeLink      = "/profiles"
 	WelcomeImageText = "Isi Data Kamu"
+	WelcomeButton    = "Lengkapi Sekarang"
+	WelcomeImageURL  = "https://picsum.photos/200/300"
+
+	FeedbackTitle   = "Saran dari %s Sangat Berharga"
+	FeedbackContent = "Hi, %s! Kami ingin mendengar pendapatmu. Bantu kami meningkatkan layanan dengan mengisi survei singkat."
+	FeedbackLink    = "/feedbacks"
+	FeedbackImage   = ""
+	FeedbackButton  = "Isi Survei"
+
+	TransactionProcessTitle     = "Pesanan Kamu Sedang Diproses"
+	TransactionProcessContent   = "Pesananmu sedang diproses oleh mitra kami. Kami akan segera menginformasikan saat pesanan siap diambil"
+	TransactionProcessLink      = "/transactions"
+	TransactionProcessImageText = ""
+	TransactionProcessButton    = "Lihat Pesanan"
+	TransactionProcessImageURL  = "https://picsum.photos/200/300"
+
+	PaymentSuccessTitle     = "Pembayaran Berhasil"
+	PaymentSuccessContent   = "Yeay! pembayaran untuk pesanan %s telah berhasil. Pesananmu akan segera diproses!"
+	PaymentSuccessLink      = "/transactions"
+	PaymentSuccessImageText = ""
+	PaymentSuccessButton    = "Lihat Pesanan"
+	PaymentSuccessImageURL  = "https://picsum.photos/200/300"
+
+	WaitingPaymentTitle     = "Menunggu Pembayaran"
+	WaitingPaymentContent   = "Pesananmu %s sedang menunggu pembayaran. Segera lakukan pembayaran agar pesananmu segera diproses."
+	WaitingPaymentLink      = "/transactions"
+	WaitingPaymentImageText = ""
+	WaitingPaymentButton    = "Bayar Sekarang"
+	WaitingPaymentImageURL  = "https://picsum.photos/200/300"
+
+	TransactionFailedTitle     = "Pembayaran Gagal"
+	TransactionFailedContent   = "Maaf, pembayaran untuk pesanan %s gagal. Waktu pembayaran telah habis. Silahkan lakukan pemesanan ulang."
+	TransactionFailedLink      = "/transactions"
+	TransactionFailedImageText = ""
+	TransactionFailedButton    = "Pesan Ulang"
+	TransactionFailedImageURL  = "https://picsum.photos/200/300"
+
+	TransactionFinishTitle     = "Pesanan Selesai"
+	TransactionFinishContent   = "Pesanan %s telah berhasil diselesaikan! Terima kasih telah berbelanja di AMBIC dan membantu mengurangi food waste. Jangan lupa untuk mengisi ulasan produk membagikan pengalamanmu!"
+	TransactionFinishLink      = "/transactions"
+	TransactionFinishImageText = ""
+	TransactionFinishButton    = "Beri Ulasan"
+	TransactionFinishImageURL  = "https://picsum.photos/200/300"
+)
+
+// Location Domain
+const (
+	GetLocationSuccess = "Location retrieved successfully"
 )

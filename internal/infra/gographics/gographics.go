@@ -3,8 +3,6 @@ package gographics
 import (
 	"bytes"
 	"fmt"
-	"github.com/fogleman/gg"
-	"github.com/golang/freetype/truetype"
 	"image/color"
 	"image/png"
 	"io"
@@ -12,18 +10,10 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/fogleman/gg"
+	"github.com/golang/freetype/truetype"
 )
-
-type GoGraphicsIf interface {
-	GenerateBratImage(width, height int, text string, bgColorOpt, textColorOpt *string) (*multipart.FileHeader, error)
-}
-
-type GoGraphics struct {
-}
-
-func NewGoGraphics() GoGraphicsIf {
-	return &GoGraphics{}
-}
 
 const fontURL = "https://uqrnpvnydqwyreivieki.supabase.co/storage/v1/object/public/uploads/fonts/Poppins-Medium.ttf"
 
@@ -62,10 +52,9 @@ func parseColor(hex string, defaultColor color.Color) color.Color {
 	return defaultColor
 }
 
-func (g *GoGraphics) GenerateBratImage(width, height int, text string, bgColorOpt, textColorOpt *string) (*multipart.FileHeader, error) {
+func generateBratImage(width, height int, text string, bgColorOpt, textColorOpt *string) (*multipart.FileHeader, io.Reader, error) {
 	dc := gg.NewContext(width, height)
 
-	// Parse background color (default: RGB(62, 151, 149))
 	bgColor := "#3E9795"
 	if bgColorOpt != nil {
 		bgColor = *bgColorOpt
@@ -74,18 +63,11 @@ func (g *GoGraphics) GenerateBratImage(width, height int, text string, bgColorOp
 	dc.SetColor(bg)
 	dc.Clear()
 
-	// Download font
 	font, err := downloadFont(fontURL)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	// Calculate font size based on image size
-	fontSize := float64(height) * 0.2
-	face := truetype.NewFace(font, &truetype.Options{Size: fontSize})
-	dc.SetFontFace(face)
-
-	// Parse text color (default: white)
 	textColor := "#FFFFFF"
 	if textColorOpt != nil {
 		textColor = *textColorOpt
@@ -93,20 +75,52 @@ func (g *GoGraphics) GenerateBratImage(width, height int, text string, bgColorOp
 	txtColor := parseColor(textColor, color.RGBA{R: 255, G: 255, B: 255, A: 255})
 	dc.SetColor(txtColor)
 
-	// Draw the text centered
-	dc.DrawStringAnchored(text, float64(width)/2, float64(height)/2, 0.5, 0.5)
+	maxWidth := float64(width) * 0.9
+	maxHeight := float64(height) * 0.9
+	fontSize := float64(height) * 0.2
 
-	// Encode to buffer
-	var buf bytes.Buffer
-	if err := png.Encode(&buf, dc.Image()); err != nil {
-		return nil, fmt.Errorf("failed to encode image: %v", err)
+	var lines []string
+	for fontSize > 10 {
+		face := truetype.NewFace(font, &truetype.Options{Size: fontSize})
+		dc.SetFontFace(face)
+		lines = dc.WordWrap(text, maxWidth)
+
+		totalTextHeight := float64(len(lines)) * (fontSize * 1.2)
+
+		if totalTextHeight <= maxHeight {
+			break
+		}
+		fontSize -= 2
 	}
 
-	// Convert buffer to multipart.FileHeader
+	totalTextHeight := float64(len(lines)) * (fontSize * 1.2)
+
+	startY := (float64(height)-totalTextHeight)/2 + fontSize/3
+
+	for i, line := range lines {
+		y := startY + float64(i)*(fontSize*1.2)
+		dc.DrawStringAnchored(line, float64(width)/2, y, 0.5, 0.5)
+	}
+
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, dc.Image()); err != nil {
+		return nil, nil, fmt.Errorf("failed to encode image: %v", err)
+	}
+
 	fileHeader := &multipart.FileHeader{
 		Filename: "brat.png",
 		Size:     int64(buf.Len()),
 	}
 
-	return fileHeader, nil
+	return fileHeader, bytes.NewReader(buf.Bytes()), nil
+}
+
+func NewImage(width, height int, text string) (*multipart.FileHeader, io.Reader) {
+	fileHeader, fileReader, err := generateBratImage(width, height, text, nil, nil)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return nil, nil
+	}
+
+	return fileHeader, fileReader
 }

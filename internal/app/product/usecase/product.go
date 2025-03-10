@@ -1,11 +1,13 @@
 package usecase
 
 import (
+	partnerRepo "ambic/internal/app/partner/repository"
 	"ambic/internal/app/product/repository"
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
 	"ambic/internal/infra/helper"
+	"ambic/internal/infra/maps"
 	"ambic/internal/infra/mysql"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
@@ -17,6 +19,7 @@ import (
 )
 
 type ProductUsecaseItf interface {
+	FilterProducts(request dto.FilterProductRequest) (*[]dto.GetProductResponse, *res.Err)
 	ShowProduct(productId uuid.UUID) (dto.GetProductResponse, *res.Err)
 	CreateProduct(userId uuid.UUID, request dto.CreateProductRequest) *res.Err
 	UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err
@@ -27,17 +30,21 @@ type ProductUsecase struct {
 	env               *env.Env
 	db                *gorm.DB
 	ProductRepository repository.ProductMySQLItf
+	PartnerRepository partnerRepo.PartnerMySQLItf
 	Supabase          supabase.SupabaseIf
+	Maps              maps.MapsIf
 	helper            helper.HelperIf
 }
 
-func NewProductUsecase(env *env.Env, db *gorm.DB, productRepository repository.ProductMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) ProductUsecaseItf {
+func NewProductUsecase(env *env.Env, db *gorm.DB, productRepository repository.ProductMySQLItf, partnerRepository partnerRepo.PartnerMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf) ProductUsecaseItf {
 	return &ProductUsecase{
 		env:               env,
 		db:                db,
 		ProductRepository: productRepository,
+		PartnerRepository: partnerRepository,
 		Supabase:          supabase,
 		helper:            helper,
+		Maps:              maps,
 	}
 }
 
@@ -224,5 +231,68 @@ func (u ProductUsecase) ShowProduct(productId uuid.UUID) (dto.GetProductResponse
 		return dto.GetProductResponse{}, res.ErrInternalServer()
 	}
 
-	return product.ParseDTOGet(), nil
+	return product.ParseDTOGet(nil), nil
+}
+
+func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.GetProductResponse, *res.Err) {
+	if req.Limit == 0 {
+		req.Limit = u.env.DefaultPaginationLimit
+	}
+
+	if req.Page == 0 {
+		req.Page = u.env.DefaultPaginationPage
+	}
+
+	req.Offset = (req.Page - 1) * req.Limit
+
+	resp := new([]dto.GetProductResponse)
+
+	partners := new([]entity.Partner)
+	if err := u.PartnerRepository.Get(partners, dto.PartnerParam{IsVerified: true}); err != nil {
+		return resp, res.ErrInternalServer()
+	}
+
+	partnerDistanceMap := make(map[uuid.UUID]float64)
+
+	var withinRadiusPartnerIds []uuid.UUID
+	for _, partner := range *partners {
+		origin := dto.Location{Lat: req.Lat, Long: req.Long}
+		destination := dto.Location{Lat: partner.Latitude, Long: partner.Longitude}
+
+		distance, err := u.Maps.GetDistance(origin, destination)
+		if err != nil {
+			return nil, res.ErrInternalServer()
+		}
+
+		if float64(*distance) <= req.Radius {
+			withinRadiusPartnerIds = append(withinRadiusPartnerIds, partner.ID)
+			partnerDistanceMap[partner.ID] = float64(*distance)
+		}
+	}
+
+	products := new([]entity.Product)
+	for _, withinRadiusPartnerId := range withinRadiusPartnerIds {
+		param := dto.ProductParam{
+			PartnerId: withinRadiusPartnerId,
+			Name:      req.Name,
+		}
+
+		pagination := dto.PaginationRequest{
+			Limit:  req.Limit,
+			Offset: req.Offset,
+		}
+
+		if err := u.ProductRepository.Filter(products, param, pagination); err != nil {
+			return nil, res.ErrInternalServer()
+		}
+	}
+
+	var response []dto.GetProductResponse
+	for _, product := range *products {
+		distance := partnerDistanceMap[product.PartnerID]
+
+		response = append(response, product.ParseDTOGet(&distance))
+	}
+
+	return &response, nil
 }

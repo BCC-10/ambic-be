@@ -11,7 +11,7 @@ type TransactionMySQLItf interface {
 	Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) error
 	Show(transaction *entity.Transaction, param dto.TransactionParam) error
 	Create(tx *gorm.DB, transaction *entity.Transaction) error
-	Update(transaction *entity.Transaction) error
+	Update(tx *gorm.DB, transaction *entity.Transaction) error
 	CheckHasUserPurchasedProduct(param dto.TransactionParam) bool
 }
 
@@ -24,7 +24,7 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 }
 
 func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) error {
-	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").Limit(pagination.Limit).Offset(pagination.Offset).Find(transaction, param).Error
+	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(transaction, param).Error
 }
 
 func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionParam) bool {
@@ -38,8 +38,8 @@ func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionPar
 	return count > 0
 }
 
-func (r *TransactionMySQL) Update(transaction *entity.Transaction) error {
-	return r.db.Debug().Updates(transaction).Error
+func (r *TransactionMySQL) Update(tx *gorm.DB, transaction *entity.Transaction) error {
+	return tx.Debug().Preload("TransactionDetails").Updates(transaction).Error
 }
 
 func (r *TransactionMySQL) Create(tx *gorm.DB, transaction *entity.Transaction) error {

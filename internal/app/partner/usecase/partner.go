@@ -28,7 +28,6 @@ type PartnerUsecaseItf interface {
 	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
 	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
-	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
 	GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err)
 }
@@ -202,7 +201,7 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequ
 
 	productsResponse := make([]dto.GetProductResponse, 0)
 	for _, product := range *products {
-		productsResponse = append(productsResponse, product.ParseDTOGet())
+		productsResponse = append(productsResponse, product.ParseDTOGet(nil))
 	}
 
 	return productsResponse, nil
@@ -267,15 +266,6 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 	}
 
 	return nil
-}
-
-func (u *PartnerUsecase) AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err) {
-	suggestions, err := u.Maps.GetAutocomplete(req)
-	if err != nil {
-		return nil, res.ErrInternalServer()
-	}
-
-	return suggestions, nil
 }
 
 func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err) {

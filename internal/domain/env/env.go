@@ -8,11 +8,15 @@ import (
 )
 
 type Env struct {
-	AppPort                int    `env:"APP_PORT"`
-	AppURL                 string `env:"APP_URL"`
-	MaxUploadSize          int64  `env:"MAX_UPLOAD_SIZE"`
-	DefaultPaginationLimit int    `env:"DEFAULT_PAGINATION_LIMIT"`
-	DefaultPaginationPage  int    `env:"DEFAULT_PAGINATION_PAGE"`
+	AppName                string  `env:"APP_NAME"`
+	AppPort                int     `env:"APP_PORT"`
+	AppURL                 string  `env:"APP_URL"`
+	MaxUploadSize          int64   `env:"MAX_UPLOAD_SIZE"`
+	DefaultPaginationLimit int     `env:"DEFAULT_PAGINATION_LIMIT"`
+	DefaultPaginationPage  int     `env:"DEFAULT_PAGINATION_PAGE"`
+	DefaultUserLatitude    float64 `env:"DEFAULT_USER_LATITUDE"`
+	DefaultUserLongitude   float64 `env:"DEFAULT_USER_LONGITUDE"`
+	DefaultUserRadius      float64 `env:"DEFAULT_USER_RADIUS"`
 
 	DefaultProfilePhotoPath        string `env:"DEFAULT_PROFILE_PHOTO_PATH"`
 	DefaultProfilePhotoURL         string
@@ -54,7 +58,8 @@ type Env struct {
 	SupabaseURL    string `env:"SUPABASE_URL"`
 	SupabaseSecret string `env:"SUPABASE_SECRET"`
 
-	MidtransServerKey string `env:"MIDTRANS_SERVER_KEY"`
+	MidtransServerKey          string `env:"MIDTRANS_SERVER_KEY"`
+	MidtransMaxPaymentDuration int64  `env:"MIDTRANS_MAX_PAYMENT_DURATION"`
 }
 
 func New() (*Env, error) {

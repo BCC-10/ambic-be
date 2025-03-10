@@ -6,6 +6,8 @@ import (
 	BusinessTypeHandler "ambic/internal/app/business_type/interface/rest"
 	BusinessTypeRepo "ambic/internal/app/business_type/repository"
 	BusinessTypeUsecase "ambic/internal/app/business_type/usecase"
+	LocationHandler "ambic/internal/app/location/interface/rest"
+	LocationUsecase "ambic/internal/app/location/usecase"
 	NotificationHandler "ambic/internal/app/notification/interface/rest"
 	NotificationRepo "ambic/internal/app/notification/repository"
 	NotificationUsecase "ambic/internal/app/notification/usecase"
@@ -87,11 +89,11 @@ func Start() error {
 
 	snap := midtrans.New(config)
 
+	l := limiter.NewLimiter(r)
+
 	app := fiber.New(config)
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
-
-	l := limiter.NewLimiter(r)
 
 	businessTypeRepository := BusinessTypeRepo.NewBusinessTypeMySQL(db)
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
@@ -114,7 +116,7 @@ func Start() error {
 	businessTypeUsecase := BusinessTypeUsecase.NewBusinessTypeUsecase(config, businessTypeRepository)
 	BusinessTypeHandler.NewBusinessTypeHandler(v1, businessTypeUsecase, m)
 
-	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, s, h)
+	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, partnerRepository, s, h, ma)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
 	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j)
@@ -123,11 +125,14 @@ func Start() error {
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
-	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, h, snap)
+	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, partnerRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
-	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, db, paymentRepository, transactionRepository, productRepository, notificationRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
+
+	locationUsecase := LocationUsecase.NewLocationUsecase(ma)
+	LocationHandler.NewLocationHandler(v1, locationUsecase, m, v)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }

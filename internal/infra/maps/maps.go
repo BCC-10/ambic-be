@@ -16,19 +16,15 @@ import (
 	"time"
 )
 
-type Place struct {
-	lat  float64
-	long float64
-}
-
 type MapsIf interface {
 	GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error)
-	GetPlaceDetails(placeId string) (PlaceDetails, error)
-	GetDistance(from PlaceDetails, to PlaceDetails) any
+	GetPlaceDetails(placeId string) (dto.PlaceDetails, error)
+	GetDistance(from dto.Location, to dto.Location) (*int32, error)
 	GenerateGoogleMapsURL(placeId string) string
 }
 
 type Maps struct {
+	env           *env.Env
 	PlacesService *places.Service
 	fieldMask     string
 	apiKey        string
@@ -44,6 +40,7 @@ func NewMaps(env *env.Env) MapsIf {
 
 	return &Maps{
 		PlacesService: placesService,
+		env:           env,
 		fieldMask:     "routes.legs.distanceMeters",
 		apiKey:        env.GoogleMapsApiKey,
 		serverAddr:    "routes.googleapis.com:443",
@@ -51,8 +48,16 @@ func NewMaps(env *env.Env) MapsIf {
 }
 
 func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error) {
+	if req.Lat == 0 {
+		req.Lat = m.env.DefaultUserLatitude
+	}
+
+	if req.Long == 0 {
+		req.Long = m.env.DefaultUserLongitude
+	}
+
 	if req.Radius == 0 {
-		req.Radius = 20000
+		req.Radius = m.env.DefaultUserRadius
 	}
 
 	var suggestions []dto.LocationResponse
@@ -62,17 +67,13 @@ func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse,
 		RegionCode:   "ID",
 		LocationBias: &places.GoogleMapsPlacesV1AutocompletePlacesRequestLocationBias{},
 	}
-	if req.Lat != 0 || req.Long != 0 {
-		req.Lat = -6.175110
-		req.Long = 106.865036
 
-		request.LocationBias.Circle = &places.GoogleMapsPlacesV1Circle{
-			Center: &places.GoogleTypeLatLng{
-				Latitude:  req.Lat,
-				Longitude: req.Long,
-			},
-			Radius: req.Radius,
-		}
+	request.LocationBias.Circle = &places.GoogleMapsPlacesV1Circle{
+		Center: &places.GoogleTypeLatLng{
+			Latitude:  req.Lat,
+			Longitude: req.Long,
+		},
+		Radius: req.Radius,
 	}
 
 	response, err := m.PlacesService.Places.Autocomplete(request).Do()
@@ -92,24 +93,17 @@ func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse,
 	return suggestions, nil
 }
 
-type PlaceDetails struct {
-	Name    string
-	PlaceId string
-	Lat     float64
-	Long    float64
-}
-
-func (m *Maps) GetPlaceDetails(placeId string) (PlaceDetails, error) {
+func (m *Maps) GetPlaceDetails(placeId string) (dto.PlaceDetails, error) {
 	response, err := m.PlacesService.Places.Get("places/" + placeId).Fields("*").Do()
 	if err != nil {
 		log.Println("Error fetching place details:", err)
-		return PlaceDetails{}, err
+		return dto.PlaceDetails{}, err
 	}
 
 	latitude := response.Location.Latitude
 	longitude := response.Location.Longitude
 
-	return PlaceDetails{
+	return dto.PlaceDetails{
 		Name:    response.DisplayName.Text,
 		PlaceId: placeId,
 		Lat:     latitude,
@@ -117,7 +111,7 @@ func (m *Maps) GetPlaceDetails(placeId string) (PlaceDetails, error) {
 	}, nil
 }
 
-func (m *Maps) GetDistance(from PlaceDetails, to PlaceDetails) any {
+func (m *Maps) GetDistance(from dto.Location, to dto.Location) (*int32, error) {
 	config := tls.Config{}
 	conn, err := grpc.NewClient(m.serverAddr,
 		grpc.WithTransportCredentials(credentials.NewTLS(&config)))
@@ -161,19 +155,20 @@ func (m *Maps) GetDistance(from PlaceDetails, to PlaceDetails) any {
 		RouteModifiers: &routespb.RouteModifiers{
 			AvoidTolls:    true,
 			AvoidHighways: false,
-			AvoidFerries:  false,
+			AvoidFerries:  true,
 		},
+		TravelMode: routespb.RouteTravelMode_TWO_WHEELER,
 	}
 
 	resp, err := client.ComputeRoutes(ctx, req)
 
 	if err != nil {
-		// "rpc error: code = InvalidArgument desc = Request contains an invalid
-		// argument" may indicate that your project lacks access to Routes
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return resp
+	distance := resp.GetRoutes()[0].GetLegs()[0].GetDistanceMeters()
+
+	return &distance, nil
 }
 
 func (m *Maps) GenerateGoogleMapsURL(placeId string) string {

@@ -57,13 +57,6 @@ func NewAuthUsecase(env *env.Env, db *gorm.DB, userRepository repository.UserMyS
 }
 
 func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
-	tx := u.db.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return res.ErrInternalServer()
@@ -88,28 +81,12 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	if len(errors) > 0 {
-		return res.ErrValidationError(nil, errors)
+		return res.ErrValidationError(errors)
 	}
 
-	if err := u.UserRepository.Create(tx, &user); err != nil {
-		tx.Rollback()
+	if err := u.UserRepository.Create(u.db, &user); err != nil {
 		return res.ErrInternalServer()
 	}
-
-	notification := &entity.Notification{
-		UserID:   user.ID,
-		Title:    fmt.Sprintf(res.WelcomeTitle, user.Name),
-		Content:  res.WelcomeContent,
-		Link:     res.WelcomeLink,
-		PhotoURL: "https://google.com/",
-	}
-
-	if err := u.NotificationRepository.Create(tx, notification); err != nil {
-		tx.Rollback()
-		return res.ErrInternalServer()
-	}
-
-	tx.Commit()
 
 	return nil
 }
@@ -172,8 +149,17 @@ func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res
 }
 
 func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.UserNotExists)
 		}
@@ -182,23 +168,42 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	}
 
 	if user.IsVerified {
+		tx.Rollback()
 		return res.ErrForbidden(res.UserVerified)
 	}
 
 	savedToken, err := u.redis.Get(data.Email)
 	if err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 
 	if string(savedToken) != data.Token {
+		tx.Rollback()
 		return res.ErrBadRequest(res.InvalidToken)
 	}
 
 	if err := u.UserRepository.Verify(user); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 
 	if err := u.redis.Delete(data.Email); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
+	notification := &entity.Notification{
+		UserID:   user.ID,
+		Title:    fmt.Sprintf(res.WelcomeTitle, user.Name),
+		Content:  res.WelcomeContent,
+		Link:     res.WelcomeLink,
+		Button:   res.WelcomeButton,
+		PhotoURL: res.WelcomeImageURL,
+	}
+
+	if err := u.NotificationRepository.Create(tx, notification); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 

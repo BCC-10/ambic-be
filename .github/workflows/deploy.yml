@@ -29,6 +29,7 @@ jobs:
           set -e
           git config --global --add safe.directory /var/www/ambic
           cd /var/www/ambic
+          git restore .
           git pull origin main
           go mod tidy
           cd /var/www/ambic/cmd/api
