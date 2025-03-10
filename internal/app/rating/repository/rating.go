@@ -25,7 +25,7 @@ func NewRatingMySQL(db *gorm.DB) RatingMySQLItf {
 }
 
 func (r *RatingMySQL) Get(rating *[]entity.Rating, param dto.RatingParam, pagination dto.PaginationRequest) error {
-	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(rating, param).Error
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(rating, param).Error
 }
 
 func (r *RatingMySQL) Show(rating *entity.Rating, param dto.RatingParam) error {

@@ -24,7 +24,7 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 }
 
 func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) error {
-	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").Limit(pagination.Limit).Offset(pagination.Offset).Find(transaction, param).Error
+	return r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(transaction, param).Error
 }
 
 func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionParam) bool {
