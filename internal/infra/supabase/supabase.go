@@ -5,11 +5,13 @@ import (
 	"ambic/internal/infra/response"
 	"fmt"
 	storageGo "github.com/nedpals/supabase-go"
+	"io"
 	"mime/multipart"
 )
 
 type SupabaseIf interface {
 	UploadFile(bucket string, filePath string, contentType string, file multipart.File) (string, error)
+	UploadFileFromIOReader(bucket string, filePath string, contentType string, file io.Reader) (string, error)
 	DeleteFile(bucket string, filePath string) error
 }
 
@@ -26,6 +28,20 @@ func New(env *env.Env) SupabaseIf {
 }
 
 func (s *Supabase) UploadFile(bucket string, filePath string, contentType string, file multipart.File) (string, error) {
+	wrapper := safeWrapper(func() error {
+		s.Client.Storage.From(bucket).Upload(filePath, file, &storageGo.FileUploadOptions{ContentType: contentType})
+		return nil
+	})
+
+	if wrapper != nil {
+		return "", wrapper
+	}
+
+	publicURL := s.Client.Storage.From(bucket).GetPublicUrl(filePath).SignedUrl
+	return publicURL, nil
+}
+
+func (s *Supabase) UploadFileFromIOReader(bucket string, filePath string, contentType string, file io.Reader) (string, error) {
 	wrapper := safeWrapper(func() error {
 		s.Client.Storage.From(bucket).Upload(filePath, file, &storageGo.FileUploadOptions{ContentType: contentType})
 		return nil
