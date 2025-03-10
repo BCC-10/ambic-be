@@ -6,6 +6,8 @@ import (
 	BusinessTypeHandler "ambic/internal/app/business_type/interface/rest"
 	BusinessTypeRepo "ambic/internal/app/business_type/repository"
 	BusinessTypeUsecase "ambic/internal/app/business_type/usecase"
+	LocationHandler "ambic/internal/app/location/interface/rest"
+	LocationUsecase "ambic/internal/app/location/usecase"
 	NotificationHandler "ambic/internal/app/notification/interface/rest"
 	NotificationRepo "ambic/internal/app/notification/repository"
 	NotificationUsecase "ambic/internal/app/notification/usecase"
@@ -128,6 +130,9 @@ func Start() error {
 
 	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, paymentRepository, transactionRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
+
+	locationUsecase := LocationUsecase.NewLocationUsecase(ma)
+	LocationHandler.NewLocationHandler(v1, locationUsecase, m, v)
 
 	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
 }
