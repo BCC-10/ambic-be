@@ -11,3 +11,10 @@ type LocationResponse struct {
 	Name    string `json:"name"`
 	PlaceID string `json:"place_id"`
 }
+
+type PlaceDetails struct {
+	Name    string
+	PlaceId string
+	Lat     float64
+	Long    float64
+}

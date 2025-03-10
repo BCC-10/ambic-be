@@ -8,6 +8,7 @@ import (
 
 type LocationUsecaseItf interface {
 	AutocompleteLocation(req dto.LocationRequest) ([]dto.LocationResponse, *res.Err)
+	ShowLocation(id string) (dto.PlaceDetails, *res.Err)
 }
 
 type LocationUsecase struct {
@@ -27,4 +28,13 @@ func (u *LocationUsecase) AutocompleteLocation(req dto.LocationRequest) ([]dto.L
 	}
 
 	return suggestions, nil
+}
+
+func (u *LocationUsecase) ShowLocation(id string) (dto.PlaceDetails, *res.Err) {
+	location, err := u.Maps.GetPlaceDetails(id)
+	if err != nil {
+		return dto.PlaceDetails{}, res.ErrNotFound()
+	}
+
+	return location, nil
 }

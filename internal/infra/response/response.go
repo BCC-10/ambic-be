@@ -136,3 +136,8 @@ const (
 	WelcomeLink      = "/profiles"
 	WelcomeImageText = "Isi Data Kamu"
 )
+
+// Location Domain
+const (
+	GetLocationSuccess = "Location retrieved successfully"
+)

@@ -18,7 +18,7 @@ import (
 
 type MapsIf interface {
 	GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse, error)
-	GetPlaceDetails(placeId string) (PlaceDetails, error)
+	GetPlaceDetails(placeId string) (dto.PlaceDetails, error)
 	GetDistance(from dto.Location, to dto.Location) (*int32, error)
 	GenerateGoogleMapsURL(placeId string) string
 }
@@ -93,24 +93,17 @@ func (m *Maps) GetAutocomplete(req dto.LocationRequest) ([]dto.LocationResponse,
 	return suggestions, nil
 }
 
-type PlaceDetails struct {
-	Name    string
-	PlaceId string
-	Lat     float64
-	Long    float64
-}
-
-func (m *Maps) GetPlaceDetails(placeId string) (PlaceDetails, error) {
+func (m *Maps) GetPlaceDetails(placeId string) (dto.PlaceDetails, error) {
 	response, err := m.PlacesService.Places.Get("places/" + placeId).Fields("*").Do()
 	if err != nil {
 		log.Println("Error fetching place details:", err)
-		return PlaceDetails{}, err
+		return dto.PlaceDetails{}, err
 	}
 
 	latitude := response.Location.Latitude
 	longitude := response.Location.Longitude
 
-	return PlaceDetails{
+	return dto.PlaceDetails{
 		Name:    response.DisplayName.Text,
 		PlaceId: placeId,
 		Lat:     latitude,

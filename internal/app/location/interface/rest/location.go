@@ -22,6 +22,7 @@ func NewLocationHandler(routerGroup fiber.Router, locationUsecase usecase.Locati
 
 	routerGroup = routerGroup.Group("/locations", m.Authentication)
 	routerGroup.Get("/", LocationHandler.AutocompleteLocation)
+	routerGroup.Get("/:id", LocationHandler.ShowLocation)
 }
 
 func (h *LocationHandler) AutocompleteLocation(ctx *fiber.Ctx) error {
@@ -41,5 +42,21 @@ func (h *LocationHandler) AutocompleteLocation(ctx *fiber.Ctx) error {
 
 	return res.SuccessResponse(ctx, res.GetAutoCompleteSuccess, fiber.Map{
 		"locations": data,
+	})
+}
+
+func (h *LocationHandler) ShowLocation(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	if id == "" {
+		return res.BadRequest(ctx)
+	}
+
+	data, err := h.LocationUsecase.ShowLocation(id)
+	if err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetLocationSuccess, fiber.Map{
+		"location": data,
 	})
 }
