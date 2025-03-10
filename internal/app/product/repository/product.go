@@ -55,7 +55,7 @@ func (r *ProductMySQL) GetTotalProductsByPartnerId(id uuid.UUID) (int64, error) 
 func (r *ProductMySQL) Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) error {
 	now := time.Now()
 
-	query := r.db.Debug().Preload("Ratings").Where("partner_id = ? AND stock > 0 AND end_pickup_time >= ?", param.PartnerId, now)
+	query := r.db.Debug().Preload("Ratings").Where("partner_id = ? AND stock > 0 AND pickup_time >= ?", param.PartnerId, now)
 
 	if param.Name != "" {
 		query = query.Where("name LIKE ?", "%"+param.Name+"%")
