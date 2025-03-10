@@ -89,11 +89,11 @@ func Start() error {
 
 	snap := midtrans.New(config)
 
+	l := limiter.NewLimiter(r)
+
 	app := fiber.New(config)
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
-
-	l := limiter.NewLimiter(r)
 
 	businessTypeRepository := BusinessTypeRepo.NewBusinessTypeMySQL(db)
 	paymentRepository := PaymentRepo.NewPaymentMySQL(db)
