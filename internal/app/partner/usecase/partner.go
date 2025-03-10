@@ -68,7 +68,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		return "", res.ErrInternalServer()
 	}
 
-	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil || user.BornDate.IsZero() {
+	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil {
 		return "", res.ErrForbidden(res.ProfileNotFilledCompletely)
 	}
 

@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 type UserUsecaseItf interface {
@@ -66,15 +65,6 @@ func (u *UserUsecase) UpdateUser(id uuid.UUID, data dto.UpdateUserRequest) *res.
 		Phone:   data.Phone,
 		Address: data.Address,
 		Gender:  gender,
-	}
-
-	if data.BornDate != "" {
-		bornDate, err := time.Parse("2006-01-02", data.BornDate)
-		if err != nil {
-			return res.ErrBadRequest(res.InvalidDateFormat)
-		}
-
-		user.BornDate = bornDate
 	}
 
 	if data.NewPassword != "" {
