@@ -1,7 +1,8 @@
 package usecase
 
 import (
-	NotificationRepo "ambic/internal/app/notification/repository"
+	notificationRepo "ambic/internal/app/notification/repository"
+	PartnerRepo "ambic/internal/app/partner/repository"
 	productRepo "ambic/internal/app/product/repository"
 	"ambic/internal/app/transaction/repository"
 	userRepo "ambic/internal/app/user/repository"
@@ -30,12 +31,13 @@ type TransactionUsecase struct {
 	TransactionRepository  repository.TransactionMySQLItf
 	ProductRepository      productRepo.ProductMySQLItf
 	UserRepository         userRepo.UserMySQLItf
-	NotificationRepository NotificationRepo.NotificationMySQLItf
+	NotificationRepository notificationRepo.NotificationMySQLItf
+	PartnerRepository      PartnerRepo.PartnerMySQLItf
 	helper                 helper.HelperIf
 	Snap                   midtrans.MidtransIf
 }
 
-func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, notificationRepository NotificationRepo.NotificationMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
+func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repository.TransactionMySQLItf, productRepository productRepo.ProductMySQLItf, userRepository userRepo.UserMySQLItf, notificationRepository notificationRepo.NotificationMySQLItf, partnerRepository PartnerRepo.PartnerMySQLItf, helper helper.HelperIf, snap midtrans.MidtransIf) TransactionUsecaseItf {
 	return &TransactionUsecase{
 		db:                     db,
 		env:                    env,
@@ -43,6 +45,7 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 		ProductRepository:      productRepository,
 		UserRepository:         userRepository,
 		NotificationRepository: notificationRepository,
+		PartnerRepository:      partnerRepository,
 		helper:                 helper,
 		Snap:                   snap,
 	}
@@ -159,13 +162,20 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 			Qty:           uint(item.Qty),
 		}
 
+		partner := new(entity.Partner)
+		if err := u.PartnerRepository.Show(partner, dto.PartnerParam{ID: partnerId}); err != nil {
+			tx.Rollback()
+			return "", res.ErrInternalServer()
+		}
+
 		transaction.Total += product.FinalPrice * float32(uint(item.Qty))
 		transaction.TransactionDetails = append(transaction.TransactionDetails, transactionDetail)
 
 		items = append(items, dto.TransactionDetail{
-			ProductID: item.ProductID,
-			Product:   product.ParseDTOGet(),
-			Qty:       uint(item.Qty),
+			MerchantName: partner.Name,
+			ProductID:    item.ProductID,
+			Product:      product.ParseDTOGet(),
+			Qty:          uint(item.Qty),
 		})
 
 		product = &entity.Product{ID: productId, Stock: product.Stock - uint(item.Qty)}

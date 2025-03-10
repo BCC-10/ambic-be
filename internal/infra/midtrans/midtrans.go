@@ -55,12 +55,15 @@ func (m *Midtrans) GeneratePaymentLink(req dto.RequestSnap) (string, error) {
 	var items []midtrans.ItemDetails
 	for _, p := range req.TransactionDetails {
 		items = append(items, midtrans.ItemDetails{
-			ID:    p.ProductID,
-			Price: int64(p.Product.FinalPrice),
-			Qty:   int32(p.Qty),
-			Name:  p.Product.Name,
+			ID:           p.ProductID,
+			Price:        int64(p.Product.FinalPrice),
+			Qty:          int32(p.Qty),
+			Name:         p.Product.Name,
+			MerchantName: p.MerchantName,
 		})
 	}
+
+	snapReq.Items = &items
 
 	url, err := m.Snap.CreateTransactionUrl(snapReq)
 	if err != nil {
