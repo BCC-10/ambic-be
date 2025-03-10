@@ -35,7 +35,7 @@ func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -56,7 +56,7 @@ func (h *TransactionHandler) Create(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -98,7 +98,7 @@ func (h *TransactionHandler) UpdateStatus(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.TransactionUsecase.UpdateStatus(transactionId, *req); err != nil {

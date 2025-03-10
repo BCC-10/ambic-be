@@ -43,7 +43,7 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -64,7 +64,7 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	token, err := h.PartnerUsecase.VerifyPartner(*data)
@@ -123,7 +123,7 @@ func (h *PartnerHandler) UpdatePhoto(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(data); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
@@ -142,7 +142,7 @@ func (h *PartnerHandler) AutocompleteLocation(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.Validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	data, err := h.PartnerUsecase.AutocompleteLocation(*req)

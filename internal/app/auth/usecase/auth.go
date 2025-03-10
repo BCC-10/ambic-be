@@ -88,7 +88,7 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	if len(errors) > 0 {
-		return res.ErrValidationError(nil, errors)
+		return res.ErrValidationError(errors)
 	}
 
 	if err := u.UserRepository.Create(tx, &user); err != nil {

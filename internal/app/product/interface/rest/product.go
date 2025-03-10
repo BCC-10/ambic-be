@@ -43,7 +43,7 @@ func (h ProductHandler) CreateProduct(ctx *fiber.Ctx) error {
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	if err := h.ProductUsecase.CreateProduct(partnerId, *req); err != nil {
@@ -65,7 +65,7 @@ func (h ProductHandler) UpdateProduct(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
@@ -113,7 +113,7 @@ func (h ProductHandler) FilterProduct(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	products, _err := h.ProductUsecase.FilterProducts(*req)

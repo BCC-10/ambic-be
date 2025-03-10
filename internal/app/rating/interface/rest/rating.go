@@ -44,7 +44,7 @@ func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	ratings, err := h.RatingUsecase.Get(*req, *pagination)
@@ -64,7 +64,7 @@ func (h *RatingHandler) Show(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	rating, _err := h.RatingUsecase.Show(*req)
@@ -84,7 +84,7 @@ func (h *RatingHandler) Create(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
@@ -102,7 +102,7 @@ func (h *RatingHandler) Update(ctx *fiber.Ctx) error {
 	}
 
 	if err := h.validator.Struct(req); err != nil {
-		return res.ValidationError(ctx, nil, err)
+		return res.ValidationError(ctx, err)
 	}
 
 	param := new(dto.UpdateRatingParam)
