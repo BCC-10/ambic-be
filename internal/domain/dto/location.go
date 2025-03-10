@@ -13,8 +13,8 @@ type LocationResponse struct {
 }
 
 type PlaceDetails struct {
-	Name    string
-	PlaceId string
-	Lat     float64
-	Long    float64
+	Name    string  `json:"name"`
+	PlaceId string  `json:"place_id"`
+	Lat     float64 `json:"lat"`
+	Long    float64 `json:"long"`
 }
