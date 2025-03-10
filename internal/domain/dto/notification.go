@@ -8,7 +8,6 @@ type GetNotificationResponse struct {
 	Content  string `json:"content"`
 	Link     string `json:"link"`
 	Button   string `json:"button"`
-	Photo    string `json:"photo"`
 	Datetime string `json:"datetime"`
 }
 

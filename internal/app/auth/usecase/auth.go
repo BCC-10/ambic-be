@@ -194,12 +194,11 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	}
 
 	notification := &entity.Notification{
-		UserID:   user.ID,
-		Title:    fmt.Sprintf(res.WelcomeTitle, user.Name),
-		Content:  res.WelcomeContent,
-		Link:     res.WelcomeLink,
-		Button:   res.WelcomeButton,
-		PhotoURL: res.WelcomeImageURL,
+		UserID:  user.ID,
+		Title:   fmt.Sprintf(res.WelcomeTitle, user.Name),
+		Content: res.WelcomeContent,
+		Link:    res.WelcomeLink,
+		Button:  res.WelcomeButton,
 	}
 
 	if err := u.NotificationRepository.Create(tx, notification); err != nil {

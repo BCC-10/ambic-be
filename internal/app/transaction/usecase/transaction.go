@@ -212,12 +212,11 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	}
 
 	notification := &entity.Notification{
-		UserID:   user.ID,
-		Title:    fmt.Sprintf(res.WaitingPaymentTitle),
-		Content:  res.WaitingPaymentContent,
-		Link:     res.WaitingPaymentLink,
-		Button:   res.WaitingPaymentButton,
-		PhotoURL: res.WaitingPaymentImageURL,
+		UserID:  user.ID,
+		Title:   fmt.Sprintf(res.WaitingPaymentTitle),
+		Content: res.WaitingPaymentContent,
+		Link:    res.WaitingPaymentLink,
+		Button:  res.WaitingPaymentButton,
 	}
 
 	if err := u.NotificationRepository.Create(tx, notification); err != nil {
@@ -282,12 +281,11 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 
 	if req.Status == string(entity.Process) {
 		notification := &entity.Notification{
-			UserID:   transaction.UserID,
-			Title:    res.TransactionProcessTitle,
-			Content:  res.TransactionProcessContent,
-			Link:     res.TransactionProcessLink,
-			Button:   res.TransactionProcessButton,
-			PhotoURL: res.TransactionProcessImageURL,
+			UserID:  transaction.UserID,
+			Title:   res.TransactionProcessTitle,
+			Content: res.TransactionProcessContent,
+			Link:    res.TransactionProcessLink,
+			Button:  res.TransactionProcessButton,
 		}
 
 		if err := u.NotificationRepository.Create(tx, notification); err != nil {
@@ -296,12 +294,11 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.CancelledBySystem) {
 		notification := &entity.Notification{
-			UserID:   transaction.UserID,
-			Title:    res.TransactionFailedTitle,
-			Content:  res.TransactionFailedContent,
-			Link:     res.TransactionFailedLink,
-			Button:   res.TransactionFailedButton,
-			PhotoURL: res.TransactionFailedImageURL,
+			UserID:  transaction.UserID,
+			Title:   res.TransactionFailedTitle,
+			Content: res.TransactionFailedContent,
+			Link:    res.TransactionFailedLink,
+			Button:  res.TransactionFailedButton,
 		}
 
 		if err := u.NotificationRepository.Create(tx, notification); err != nil {
@@ -310,12 +307,11 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.Finish) {
 		notification := &entity.Notification{
-			UserID:   transaction.UserID,
-			Title:    res.TransactionFinishTitle,
-			Content:  fmt.Sprintf(res.TransactionFinishContent, transaction.Invoice),
-			Link:     res.TransactionFinishLink,
-			Button:   res.TransactionFinishButton,
-			PhotoURL: res.TransactionFinishImageURL,
+			UserID:  transaction.UserID,
+			Title:   res.TransactionFinishTitle,
+			Content: fmt.Sprintf(res.TransactionFinishContent, transaction.Invoice),
+			Link:    res.TransactionFinishLink,
+			Button:  res.TransactionFinishButton,
 		}
 
 		if err := u.NotificationRepository.Create(tx, notification); err != nil {

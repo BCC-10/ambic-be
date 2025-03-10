@@ -120,12 +120,11 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		}
 
 		notification := &entity.Notification{
-			UserID:   transactionDB.UserID,
-			Title:    res.PaymentSuccessTitle,
-			Content:  res.PaymentSuccessContent,
-			Link:     res.PaymentSuccessLink,
-			Button:   res.PaymentSuccessButton,
-			PhotoURL: res.PaymentSuccessImageURL,
+			UserID:  transactionDB.UserID,
+			Title:   res.PaymentSuccessTitle,
+			Content: res.PaymentSuccessContent,
+			Link:    res.PaymentSuccessLink,
+			Button:  res.PaymentSuccessButton,
 		}
 
 		if err := u.NotificationRepository.Create(tx, notification); err != nil {
