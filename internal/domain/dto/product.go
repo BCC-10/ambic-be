@@ -5,6 +5,16 @@ import (
 	"mime/multipart"
 )
 
+type FilterProductRequest struct {
+	Name   string  `query:"name"`
+	Lat    float64 `query:"lat" validate:"required"`
+	Long   float64 `query:"long" validate:"required"`
+	Radius float64 `query:"radius" validate:"required"`
+	Limit  int     `query:"limit"`
+	Page   int     `query:"page"`
+	Offset int
+}
+
 type GetProductResponse struct {
 	ID            string  `json:"id"`
 	PartnerID     string  `json:"partner_id,omitempty"`
@@ -16,6 +26,7 @@ type GetProductResponse struct {
 	PickupTime    string  `json:"pickup_time"`
 	EndPickupTime string  `json:"end_pickup_time"`
 	PhotoURL      string  `json:"photo"`
+	Star          float32 `json:"star,omitempty"`
 }
 
 type CreateProductRequest struct {

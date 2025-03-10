@@ -32,6 +32,15 @@ func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (p *Product) ParseDTOGet() dto.GetProductResponse {
+	var star float32
+	if len(p.Ratings) > 0 {
+		var totalRating float32
+		for _, r := range p.Ratings {
+			totalRating += float32(r.Star)
+		}
+		star = totalRating / float32(len(p.Ratings))
+	}
+
 	return dto.GetProductResponse{
 		ID:            p.ID.String(),
 		PartnerID:     p.PartnerID.String(),
@@ -43,5 +52,6 @@ func (p *Product) ParseDTOGet() dto.GetProductResponse {
 		PickupTime:    p.PickupTime.String(),
 		EndPickupTime: p.EndPickupTime.String(),
 		PhotoURL:      p.PhotoURL,
+		Star:          star,
 	}
 }

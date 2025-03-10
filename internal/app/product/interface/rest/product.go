@@ -27,6 +27,7 @@ func NewProductHandler(routerGroup fiber.Router, productUsecase usecase.ProductU
 	routerGroup = routerGroup.Group("/products", m.Authentication)
 
 	routerGroup.Use(m.EnsurePartner)
+	routerGroup.Get("/", ProductHandler.FilterProduct)
 	routerGroup.Post("/", m.EnsureVerifiedPartner, ProductHandler.CreateProduct)
 	routerGroup.Get("/:id", ProductHandler.ShowProduct)
 	routerGroup.Delete("/:id", m.EnsureVerifiedPartner, ProductHandler.DeleteProduct)
@@ -102,5 +103,25 @@ func (h ProductHandler) ShowProduct(ctx *fiber.Ctx) error {
 
 	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
 		"product": product,
+	})
+}
+
+func (h ProductHandler) FilterProduct(ctx *fiber.Ctx) error {
+	req := new(dto.FilterProductRequest)
+	if err := ctx.QueryParser(req); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.validator.Struct(req); err != nil {
+		return res.ValidationError(ctx, nil, err)
+	}
+
+	products, _err := h.ProductUsecase.FilterProducts(*req)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
+		"products": products,
 	})
 }

@@ -46,8 +46,8 @@ type GetPartnerResponse struct {
 
 type LocationRequest struct {
 	Query  string  `json:"query" validate:"required"`
-	Lat    float64 `json:"lat" validate:"required"`
-	Long   float64 `json:"long" validate:"required"`
+	Lat    float64 `json:"lat"`
+	Long   float64 `json:"long"`
 	Radius float64 `json:"radius"`
 }
 
@@ -57,6 +57,7 @@ type LocationResponse struct {
 }
 
 type PartnerParam struct {
-	ID    uuid.UUID
-	Email string
+	ID         uuid.UUID
+	IsVerified bool
+	Email      string
 }
