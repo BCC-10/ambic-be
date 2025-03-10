@@ -32,7 +32,7 @@ type Transaction struct {
 func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	products := make([]dto.GetProductResponse, len(t.TransactionDetails))
 	for i, detail := range t.TransactionDetails {
-		products[i] = detail.Product.ParseDTOGet()
+		products[i] = detail.Product.ParseDTOGet(nil)
 	}
 
 	res := dto.GetTransactionResponse{

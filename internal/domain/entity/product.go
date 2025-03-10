@@ -31,7 +31,7 @@ func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
 	return
 }
 
-func (p *Product) ParseDTOGet() dto.GetProductResponse {
+func (p *Product) ParseDTOGet(distance *float64) dto.GetProductResponse {
 	var star float32
 	if len(p.Ratings) > 0 {
 		var totalRating float32
@@ -41,7 +41,7 @@ func (p *Product) ParseDTOGet() dto.GetProductResponse {
 		star = totalRating / float32(len(p.Ratings))
 	}
 
-	return dto.GetProductResponse{
+	res := dto.GetProductResponse{
 		ID:            p.ID.String(),
 		PartnerID:     p.PartnerID.String(),
 		Name:          p.Name,
@@ -54,4 +54,10 @@ func (p *Product) ParseDTOGet() dto.GetProductResponse {
 		PhotoURL:      p.PhotoURL,
 		Star:          star,
 	}
+
+	if distance != nil {
+		res.Distance = *distance
+	}
+
+	return res
 }

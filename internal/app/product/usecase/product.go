@@ -231,7 +231,7 @@ func (u ProductUsecase) ShowProduct(productId uuid.UUID) (dto.GetProductResponse
 		return dto.GetProductResponse{}, res.ErrInternalServer()
 	}
 
-	return product.ParseDTOGet(), nil
+	return product.ParseDTOGet(nil), nil
 }
 
 func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.GetProductResponse, *res.Err) {
@@ -252,25 +252,21 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 		return resp, res.ErrInternalServer()
 	}
 
+	partnerDistanceMap := make(map[uuid.UUID]float64)
+
 	var withinRadiusPartnerIds []uuid.UUID
 	for _, partner := range *partners {
-		origin := dto.Location{
-			Lat:  req.Lat,
-			Long: req.Long,
-		}
-
-		destination := dto.Location{
-			Lat:  partner.Latitude,
-			Long: partner.Longitude,
-		}
+		origin := dto.Location{Lat: req.Lat, Long: req.Long}
+		destination := dto.Location{Lat: partner.Latitude, Long: partner.Longitude}
 
 		distance, err := u.Maps.GetDistance(origin, destination)
 		if err != nil {
-			return nil, res.ErrInternalServer(err.Error())
+			return nil, res.ErrInternalServer()
 		}
 
 		if float64(*distance) <= req.Radius {
 			withinRadiusPartnerIds = append(withinRadiusPartnerIds, partner.ID)
+			partnerDistanceMap[partner.ID] = float64(*distance)
 		}
 	}
 
@@ -293,7 +289,9 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 
 	var response []dto.GetProductResponse
 	for _, product := range *products {
-		response = append(response, product.ParseDTOGet())
+		distance := partnerDistanceMap[product.PartnerID]
+
+		response = append(response, product.ParseDTOGet(&distance))
 	}
 
 	return &response, nil

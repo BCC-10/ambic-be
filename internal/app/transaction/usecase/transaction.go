@@ -174,7 +174,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		items = append(items, dto.TransactionDetail{
 			MerchantName: partner.Name,
 			ProductID:    item.ProductID,
-			Product:      product.ParseDTOGet(),
+			Product:      product.ParseDTOGet(nil),
 			Qty:          uint(item.Qty),
 		})
 

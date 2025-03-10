@@ -202,7 +202,7 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequ
 
 	productsResponse := make([]dto.GetProductResponse, 0)
 	for _, product := range *products {
-		productsResponse = append(productsResponse, product.ParseDTOGet())
+		productsResponse = append(productsResponse, product.ParseDTOGet(nil))
 	}
 
 	return productsResponse, nil
