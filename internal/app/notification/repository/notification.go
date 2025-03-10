@@ -20,7 +20,7 @@ func NewNotificationMySQL(db *gorm.DB) NotificationMySQLItf {
 }
 
 func (r *NotificationMySQL) GetByUserId(notif *[]entity.Notification, param dto.NotificationParam, pagination dto.PaginationRequest) error {
-	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Find(notif, param).Error
+	return r.db.Debug().Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(notif, param).Error
 }
 
 func (r *NotificationMySQL) Create(tx *gorm.DB, notif *entity.Notification) error {

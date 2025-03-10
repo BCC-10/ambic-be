@@ -128,7 +128,7 @@ func Start() error {
 	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, partnerRepository, h, snap)
 	TransactionHandler.NewTransactionHandler(v1, transactionUsecase, v, m)
 
-	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, db, paymentRepository, transactionRepository, productRepository)
+	paymentUsecase := PaymentUsecase.NewPaymentUsecase(config, db, paymentRepository, transactionRepository, productRepository, notificationRepository)
 	PaymentHandler.NewPaymentHandler(v1, paymentUsecase, v)
 
 	locationUsecase := LocationUsecase.NewLocationUsecase(ma)

@@ -211,6 +211,20 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		return "", res.ErrInternalServer()
 	}
 
+	notification := &entity.Notification{
+		UserID:   user.ID,
+		Title:    fmt.Sprintf(res.WaitingPaymentTitle),
+		Content:  res.WaitingPaymentContent,
+		Link:     res.WaitingPaymentLink,
+		Button:   res.WaitingPaymentButton,
+		PhotoURL: res.WaitingPaymentImageURL,
+	}
+
+	if err := u.NotificationRepository.Create(tx, notification); err != nil {
+		tx.Rollback()
+		return "", res.ErrInternalServer()
+	}
+
 	tx.Commit()
 
 	return url, nil
@@ -229,8 +243,17 @@ func (u *TransactionUsecase) Show(id uuid.UUID) (dto.GetTransactionResponse, *re
 }
 
 func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	transaction := new(entity.Transaction)
 	if err := u.TransactionRepository.Show(transaction, dto.TransactionParam{ID: id}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.TransactionNotFound)
 		}
@@ -239,6 +262,7 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 	}
 
 	if transaction.Status == entity.WaitingForPayment || transaction.Status == entity.CancelledBySystem {
+		tx.Rollback()
 		return res.ErrForbidden(res.NotAllowedToChangeStatus)
 	}
 
@@ -251,9 +275,56 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		Status: *status,
 	}
 
-	if err := u.TransactionRepository.Update(u.db, transaction); err != nil {
+	if err := u.TransactionRepository.Update(tx, transaction); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
+
+	if req.Status == string(entity.Process) {
+		notification := &entity.Notification{
+			UserID:   transaction.UserID,
+			Title:    res.TransactionProcessTitle,
+			Content:  res.TransactionProcessContent,
+			Link:     res.TransactionProcessLink,
+			Button:   res.TransactionProcessButton,
+			PhotoURL: res.TransactionProcessImageURL,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+	} else if req.Status == string(entity.CancelledBySystem) {
+		notification := &entity.Notification{
+			UserID:   transaction.UserID,
+			Title:    res.TransactionFailedTitle,
+			Content:  res.TransactionFailedContent,
+			Link:     res.TransactionFailedLink,
+			Button:   res.TransactionFailedButton,
+			PhotoURL: res.TransactionFailedImageURL,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+	} else if req.Status == string(entity.Finish) {
+		notification := &entity.Notification{
+			UserID:   transaction.UserID,
+			Title:    res.TransactionFinishTitle,
+			Content:  fmt.Sprintf(res.TransactionFinishContent, transaction.Invoice),
+			Link:     res.TransactionFinishLink,
+			Button:   res.TransactionFinishButton,
+			PhotoURL: res.TransactionFinishImageURL,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+	}
+
+	tx.Commit()
 
 	return nil
 }

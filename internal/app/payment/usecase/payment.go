@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	notificationRepo "ambic/internal/app/notification/repository"
 	"ambic/internal/app/payment/repository"
 	ProductRepo "ambic/internal/app/product/repository"
 	transactionRepo "ambic/internal/app/transaction/repository"
@@ -21,20 +22,22 @@ type PaymentUsecaseItf interface {
 }
 
 type PaymentUsecase struct {
-	env                   *env.Env
-	db                    *gorm.DB
-	PaymentRepository     repository.PaymentMySQLItf
-	TransactionRepository transactionRepo.TransactionMySQLItf
-	ProductRepository     ProductRepo.ProductMySQLItf
+	env                    *env.Env
+	db                     *gorm.DB
+	PaymentRepository      repository.PaymentMySQLItf
+	TransactionRepository  transactionRepo.TransactionMySQLItf
+	ProductRepository      ProductRepo.ProductMySQLItf
+	NotificationRepository notificationRepo.NotificationMySQLItf
 }
 
-func NewPaymentUsecase(env *env.Env, db *gorm.DB, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, productRepository ProductRepo.ProductMySQLItf) PaymentUsecaseItf {
+func NewPaymentUsecase(env *env.Env, db *gorm.DB, paymentRepository repository.PaymentMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, productRepository ProductRepo.ProductMySQLItf, notificationRepository notificationRepo.NotificationMySQLItf) PaymentUsecaseItf {
 	return &PaymentUsecase{
-		env:                   env,
-		db:                    db,
-		PaymentRepository:     paymentRepository,
-		TransactionRepository: transactionRepository,
-		ProductRepository:     productRepository,
+		env:                    env,
+		db:                     db,
+		PaymentRepository:      paymentRepository,
+		TransactionRepository:  transactionRepository,
+		ProductRepository:      productRepository,
+		NotificationRepository: notificationRepository,
 	}
 }
 
@@ -106,6 +109,26 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		transaction.Payment = *payment
 
 		if err := u.TransactionRepository.Update(tx, transaction); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+
+		transactionDB := new(entity.Transaction)
+		if err := u.TransactionRepository.Show(transactionDB, dto.TransactionParam{ID: transactionId}); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
+
+		notification := &entity.Notification{
+			UserID:   transactionDB.UserID,
+			Title:    res.PaymentSuccessTitle,
+			Content:  res.PaymentSuccessContent,
+			Link:     res.PaymentSuccessLink,
+			Button:   res.PaymentSuccessButton,
+			PhotoURL: res.PaymentSuccessImageURL,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
 			tx.Rollback()
 			return res.ErrInternalServer()
 		}
