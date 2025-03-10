@@ -27,6 +27,7 @@ type GetProductResponse struct {
 	EndPickupTime string  `json:"end_pickup_time"`
 	PhotoURL      string  `json:"photo"`
 	Star          float32 `json:"star,omitempty"`
+	CountRating   int     `json:"count_rating,omitempty"`
 	Distance      float64 `json:"distance,omitempty"`
 }
 

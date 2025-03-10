@@ -33,10 +33,12 @@ func (p *Product) BeforeCreate(tx *gorm.DB) (err error) {
 
 func (p *Product) ParseDTOGet(distance *float64) dto.GetProductResponse {
 	var star float32
+	var countRating int
 	if len(p.Ratings) > 0 {
 		var totalRating float32
 		for _, r := range p.Ratings {
 			totalRating += float32(r.Star)
+			countRating++
 		}
 		star = totalRating / float32(len(p.Ratings))
 	}
@@ -57,6 +59,10 @@ func (p *Product) ParseDTOGet(distance *float64) dto.GetProductResponse {
 
 	if distance != nil {
 		res.Distance = *distance
+	}
+
+	if countRating > 0 {
+		res.CountRating = countRating
 	}
 
 	return res
