@@ -279,9 +279,15 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		return res.ErrInternalServer()
 	}
 
+	transactionDB := new(entity.Transaction)
+	if err := u.TransactionRepository.Show(transactionDB, dto.TransactionParam{ID: id}); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
 	if req.Status == string(entity.Process) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionProcessTitle,
 			Content: res.TransactionProcessContent,
 			Link:    res.TransactionProcessLink,
@@ -294,7 +300,7 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.CancelledBySystem) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionFailedTitle,
 			Content: res.TransactionFailedContent,
 			Link:    res.TransactionFailedLink,
@@ -307,7 +313,7 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.Finish) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionFinishTitle,
 			Content: fmt.Sprintf(res.TransactionFinishContent, transaction.Invoice),
 			Link:    res.TransactionFinishLink,
