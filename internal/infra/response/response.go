@@ -53,7 +53,6 @@ const (
 // User Domain
 const (
 	ShowUserSuccess    = "User retrieved successfully"
-	InvalidDateFormat  = "Date format is invalid"
 	UpdateSuccess      = "User profile updated successfully"
 	PhoneAlreadyExists = "Phone number already exists"
 )
@@ -121,8 +120,10 @@ const (
 	NotAllowedToChangeStatus  = "Status cannot be changed"
 )
 
-// Transaction Detail Domain
-const ()
+// Location Domain
+const (
+	GetLocationSuccess = "Location retrieved successfully"
+)
 
 // Notification Domain
 const (
@@ -133,41 +134,36 @@ const (
 const (
 	WelcomeTitle   = "Yuk Lengkapi Datamu, Kak %s"
 	WelcomeContent = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran menarik dari AMBIC"
-	WelcomeLink    = "/profiles"
+	WelcomeLink    = "/"
 	WelcomeButton  = "Lengkapi Sekarang"
 
 	FeedbackTitle   = "Saran dari %s Sangat Berharga"
 	FeedbackContent = "Hi, %s! Kami ingin mendengar pendapatmu. Bantu kami meningkatkan layanan dengan mengisi survei singkat."
-	FeedbackLink    = "/feedbacks"
+	FeedbackLink    = "/"
 	FeedbackButton  = "Isi Survei"
 
 	TransactionProcessTitle   = "Pesanan Kamu Sedang Diproses"
-	TransactionProcessContent = "Pesananmu sedang diproses oleh mitra kami. Kami akan segera menginformasikan saat pesanan siap diambil"
-	TransactionProcessLink    = "/transactions"
+	TransactionProcessContent = "Pesanan %s sedang diproses oleh mitra kami. Kami akan segera menginformasikan saat pesanan siap diambil"
+	TransactionProcessLink    = "/"
 	TransactionProcessButton  = "Lihat Pesanan"
 
 	PaymentSuccessTitle   = "Pembayaran Berhasil"
 	PaymentSuccessContent = "Yeay! pembayaran untuk pesanan %s telah berhasil. Pesananmu akan segera diproses!"
-	PaymentSuccessLink    = "/transactions"
+	PaymentSuccessLink    = "/"
 	PaymentSuccessButton  = "Lihat Pesanan"
 
 	WaitingPaymentTitle   = "Menunggu Pembayaran"
-	WaitingPaymentContent = "Pesananmu %s sedang menunggu pembayaran. Segera lakukan pembayaran agar pesananmu segera diproses."
-	WaitingPaymentLink    = "/transactions"
+	WaitingPaymentContent = "Pesanan %s sedang menunggu pembayaran. Segera lakukan pembayaran agar pesananmu segera diproses."
+	WaitingPaymentLink    = "/"
 	WaitingPaymentButton  = "Bayar Sekarang"
 
 	TransactionFailedTitle   = "Pembayaran Gagal"
 	TransactionFailedContent = "Maaf, pembayaran untuk pesanan %s gagal. Waktu pembayaran telah habis. Silahkan lakukan pemesanan ulang."
-	TransactionFailedLink    = "/transactions"
+	TransactionFailedLink    = "/"
 	TransactionFailedButton  = "Pesan Ulang"
 
 	TransactionFinishTitle   = "Pesanan Selesai"
 	TransactionFinishContent = "Pesanan %s telah berhasil diselesaikan! Terima kasih telah berbelanja di AMBIC dan membantu mengurangi food waste. Jangan lupa untuk mengisi ulasan produk membagikan pengalamanmu!"
-	TransactionFinishLink    = "/transactions"
+	TransactionFinishLink    = "/"
 	TransactionFinishButton  = "Beri Ulasan"
-)
-
-// Location Domain
-const (
-	GetLocationSuccess = "Location retrieved successfully"
 )

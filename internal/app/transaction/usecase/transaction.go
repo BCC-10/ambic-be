@@ -114,6 +114,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	}
 
 	if len(req.TransactionDetails) < 1 {
+		tx.Rollback()
 		return "", res.ErrBadRequest(res.MissingTransactionItems)
 	}
 
@@ -121,10 +122,12 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 
 	for _, item := range req.TransactionDetails {
 		if item.Qty < 1 {
+			tx.Rollback()
 			return "", res.ErrBadRequest(res.InvalidQty)
 		}
 
 		if item.ProductID == "" {
+			tx.Rollback()
 			return "", res.ErrBadRequest(res.MissingProductID)
 		}
 
@@ -137,12 +140,11 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		}
 
 		if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
+			tx.Rollback()
 			if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-				tx.Rollback()
 				return "", res.ErrNotFound(fmt.Sprintf(res.ProductNotFound, item.ProductID))
 			}
 
-			tx.Rollback()
 			return "", res.ErrInternalServer()
 		}
 
@@ -214,7 +216,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 	notification := &entity.Notification{
 		UserID:  user.ID,
 		Title:   fmt.Sprintf(res.WaitingPaymentTitle),
-		Content: res.WaitingPaymentContent,
+		Content: fmt.Sprintf(res.WaitingPaymentContent, transaction.Invoice),
 		Link:    res.WaitingPaymentLink,
 		Button:  res.WaitingPaymentButton,
 	}
@@ -279,11 +281,17 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		return res.ErrInternalServer()
 	}
 
+	transactionDB := new(entity.Transaction)
+	if err := u.TransactionRepository.Show(transactionDB, dto.TransactionParam{ID: id}); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
 	if req.Status == string(entity.Process) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionProcessTitle,
-			Content: res.TransactionProcessContent,
+			Content: fmt.Sprintf(res.TransactionProcessContent, transaction.Invoice),
 			Link:    res.TransactionProcessLink,
 			Button:  res.TransactionProcessButton,
 		}
@@ -294,9 +302,9 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.CancelledBySystem) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionFailedTitle,
-			Content: res.TransactionFailedContent,
+			Content: fmt.Sprintf(res.TransactionFailedContent, transaction.Invoice),
 			Link:    res.TransactionFailedLink,
 			Button:  res.TransactionFailedButton,
 		}
@@ -307,7 +315,7 @@ func (u *TransactionUsecase) UpdateStatus(id uuid.UUID, req dto.UpdateTransactio
 		}
 	} else if req.Status == string(entity.Finish) {
 		notification := &entity.Notification{
-			UserID:  transaction.UserID,
+			UserID:  transactionDB.UserID,
 			Title:   res.TransactionFinishTitle,
 			Content: fmt.Sprintf(res.TransactionFinishContent, transaction.Invoice),
 			Link:    res.TransactionFinishLink,
