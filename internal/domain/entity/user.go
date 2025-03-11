@@ -25,7 +25,6 @@ type User struct {
 	Email         string         `gorm:"type:varchar(255);unique;not null"`
 	Phone         string         `gorm:"type:varchar(15);uniqueIndex;default:null"`
 	Address       string         `gorm:"type:text;default:null"`
-	BornDate      time.Time      `gorm:"type:date;default:null"`
 	Gender        *Gender        `gorm:"type:ENUM('male','female');default:null"`
 	Password      string         `gorm:"type:varchar(255)"`
 	IsVerified    bool           `gorm:"type:boolean;default:false"`
@@ -57,10 +56,6 @@ func (t *User) ParseDTOGet() dto.GetUserResponse {
 
 	if t.Partner.ID != uuid.Nil {
 		getUserResponse.Partner = t.Partner.ParseDTOGet()
-	}
-
-	if t.BornDate != (time.Time{}) {
-		getUserResponse.BornDate = t.BornDate.String()
 	}
 
 	if t.Gender != nil {

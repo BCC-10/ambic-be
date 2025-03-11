@@ -22,7 +22,7 @@ import (
 type AuthUsecaseItf interface {
 	Register(dto.RegisterRequest) *res.Err
 	Login(login dto.LoginRequest) (string, *res.Err)
-	ResendVerification(requestToken dto.EmailVerificationRequest) *res.Err
+	SendVerification(requestToken dto.EmailVerificationRequest) *res.Err
 	VerifyUser(verifyUser dto.VerifyUserRequest) *res.Err
 	ForgotPassword(resetPassword dto.ForgotPasswordRequest) *res.Err
 	ResetPassword(data dto.ResetPasswordRequest) *res.Err
@@ -57,8 +57,17 @@ func NewAuthUsecase(env *env.Env, db *gorm.DB, userRepository repository.UserMyS
 }
 
 func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 
@@ -81,12 +90,21 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	if len(errors) > 0 {
+		tx.Rollback()
 		return res.ErrValidationError(errors)
 	}
 
-	if err := u.UserRepository.Create(u.db, &user); err != nil {
+	if err := u.UserRepository.Create(tx, &user); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
+
+	if err := u.SendVerification(dto.EmailVerificationRequest{Email: user.Email}); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
+	tx.Commit()
 
 	return nil
 }
@@ -118,7 +136,7 @@ func (u *AuthUsecase) Login(data dto.LoginRequest) (string, *res.Err) {
 	return token, nil
 }
 
-func (u *AuthUsecase) ResendVerification(data dto.EmailVerificationRequest) *res.Err {
+func (u *AuthUsecase) SendVerification(data dto.EmailVerificationRequest) *res.Err {
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -194,12 +212,11 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 	}
 
 	notification := &entity.Notification{
-		UserID:   user.ID,
-		Title:    fmt.Sprintf(res.WelcomeTitle, user.Name),
-		Content:  res.WelcomeContent,
-		Link:     res.WelcomeLink,
-		Button:   res.WelcomeButton,
-		PhotoURL: res.WelcomeImageURL,
+		UserID:  user.ID,
+		Title:   fmt.Sprintf(res.WelcomeTitle, user.Name),
+		Content: res.WelcomeContent,
+		Link:    res.WelcomeLink,
+		Button:  res.WelcomeButton,
 	}
 
 	if err := u.NotificationRepository.Create(tx, notification); err != nil {

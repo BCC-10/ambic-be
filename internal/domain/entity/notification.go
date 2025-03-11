@@ -14,7 +14,6 @@ type Notification struct {
 	Content   string    `gorm:"type:varchar(255);not null"`
 	Link      string    `gorm:"type:varchar(255)"`
 	Button    string    `gorm:"type:varchar(255)"`
-	PhotoURL  string    `gorm:"type:varchar(255)"`
 	CreatedAt time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
@@ -31,7 +30,6 @@ func (n *Notification) ParseDTOGet() dto.GetNotificationResponse {
 		Content:  n.Content,
 		Link:     n.Link,
 		Button:   n.Button,
-		Photo:    n.PhotoURL,
 		Datetime: n.CreatedAt.String(),
 	}
 }

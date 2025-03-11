@@ -29,7 +29,7 @@ type PartnerUsecaseItf interface {
 	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
-	GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err)
+	GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *res.Err)
 }
 
 type PartnerUsecase struct {
@@ -68,7 +68,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		return "", res.ErrInternalServer()
 	}
 
-	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil || user.BornDate.IsZero() {
+	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil {
 		return "", res.ErrForbidden(res.ProfileNotFilledCompletely)
 	}
 
@@ -311,19 +311,30 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 	return *resp, nil
 }
 
-func (u *PartnerUsecase) GetTransactions(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetTransactionResponse, *res.Err) {
-	if pagination.Limit < 1 {
-		pagination.Limit = u.env.DefaultPaginationLimit
+func (u *PartnerUsecase) GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *res.Err) {
+	if data.Limit < 1 {
+		data.Limit = u.env.DefaultPaginationLimit
 	}
 
-	if pagination.Page < 1 {
-		pagination.Page = u.env.DefaultPaginationPage
+	if data.Page < 1 {
+		data.Page = u.env.DefaultPaginationPage
 	}
 
-	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+	data.Offset = (data.Page - 1) * data.Limit
+
+	pagination := dto.PaginationRequest{
+		Limit:  data.Limit,
+		Offset: data.Offset,
+	}
+
+	param := dto.TransactionParam{PartnerID: id}
+
+	if data.Status != "" {
+		param.Status = data.Status
+	}
 
 	transactions := new([]entity.Transaction)
-	if err := u.TransactionRepository.Get(transactions, dto.TransactionParam{PartnerID: id}, pagination); err != nil {
+	if err := u.TransactionRepository.Get(transactions, param, pagination); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return nil, res.ErrNotFound(res.PartnerNotExists)
 		}

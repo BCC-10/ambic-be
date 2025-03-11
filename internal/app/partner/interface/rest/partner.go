@@ -151,8 +151,8 @@ func (h *PartnerHandler) GetStatistics(ctx *fiber.Ctx) error {
 }
 
 func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
-	pagination := new(dto.PaginationRequest)
-	if err := ctx.QueryParser(pagination); err != nil {
+	data := new(dto.GetPartnerTransactionRequest)
+	if err := ctx.QueryParser(data); err != nil {
 		return res.BadRequest(ctx)
 	}
 
@@ -161,7 +161,7 @@ func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *pagination)
+	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}

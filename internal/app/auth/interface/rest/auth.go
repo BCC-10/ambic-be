@@ -45,10 +45,6 @@ func (h AuthHandler) Register(ctx *fiber.Ctx) error {
 		return res.Error(ctx, err)
 	}
 
-	if err := h.AuthUsecase.ResendVerification(dto.EmailVerificationRequest{Email: user.Email}); err != nil {
-		return res.Error(ctx, err)
-	}
-
 	return res.SuccessResponse(ctx, res.RegisterSuccess, nil)
 }
 
@@ -62,7 +58,7 @@ func (h AuthHandler) ResendVerification(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, err)
 	}
 
-	if err := h.AuthUsecase.ResendVerification(*requestToken); err != nil {
+	if err := h.AuthUsecase.SendVerification(*requestToken); err != nil {
 		return res.Error(ctx, err)
 	}
 
