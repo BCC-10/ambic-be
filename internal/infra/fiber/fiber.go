@@ -21,7 +21,11 @@ func New(env *env.Env) *fiber.App {
 
 	app.Use(logger.New())
 
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders: "Content-Type,Authorization",
+	}))
 
 	//app.Use(cache.New())
 
