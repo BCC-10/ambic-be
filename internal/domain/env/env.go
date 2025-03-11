@@ -72,9 +72,9 @@ func New() (*Env, error) {
 		return nil, err
 	}
 
-	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
+	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
 
-	_env.DefaultPartnerProfilePhotoURL = fmt.Sprintf("%s/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultPartnerProfilePhotoPath)
+	_env.DefaultPartnerProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultPartnerProfilePhotoPath)
 
 	return _env, nil
 }
