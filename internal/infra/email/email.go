@@ -8,8 +8,10 @@ import (
 )
 
 type EmailIf interface {
-	SendEmailVerification(to string, code string) error
+	SendVerificationEmail(to string, code string) error
 	SendResetPasswordLink(to string, token string) error
+	SendPartnerRegistrationEmail(to string, name string) error
+	SendPartnerVerifiedEmail(to string, name string) error
 }
 
 type Email struct {
@@ -45,7 +47,7 @@ func (e *Email) sendEmail(dialer *gomail.Dialer, message *gomail.Message) error 
 	return dialer.DialAndSend(message)
 }
 
-func (e *Email) SendEmailVerification(to string, token string) error {
+func (e *Email) SendVerificationEmail(to string, token string) error {
 	message := gomail.NewMessage()
 	body, err := file.ReadHTML(e.template, "verification")
 	if err != nil {
@@ -54,7 +56,7 @@ func (e *Email) SendEmailVerification(to string, token string) error {
 
 	message.SetHeader("From", e.user)
 	message.SetHeader("To", to)
-	message.SetHeader("Subject", "Email Verification")
+	message.SetHeader("Subject", "Verifikasi Email")
 
 	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, to, token))
 
@@ -70,9 +72,41 @@ func (e *Email) SendResetPasswordLink(to string, token string) error {
 
 	message.SetHeader("From", e.user)
 	message.SetHeader("To", to)
-	message.SetHeader("Subject", "Email Verification Code")
+	message.SetHeader("Subject", "Reset Password")
 
 	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, token))
+
+	return e.sendEmail(e.connect(), message)
+}
+
+func (e *Email) SendPartnerRegistrationEmail(to string, name string) error {
+	message := gomail.NewMessage()
+	body, err := file.ReadHTML(e.template, "partner_registration")
+	if err != nil {
+		return err
+	}
+
+	message.SetHeader("From", e.user)
+	message.SetHeader("To", to)
+	message.SetHeader("Subject", "Pendaftaran Partner Berhasil")
+
+	message.SetBody("text/html", fmt.Sprintf(body, name))
+
+	return e.sendEmail(e.connect(), message)
+}
+
+func (e *Email) SendPartnerVerifiedEmail(to string, name string) error {
+	message := gomail.NewMessage()
+	body, err := file.ReadHTML(e.template, "partner_verified")
+	if err != nil {
+		return err
+	}
+
+	message.SetHeader("From", e.user)
+	message.SetHeader("To", to)
+	message.SetHeader("Subject", "Verifikasi Partner Berhasil")
+
+	message.SetBody("text/html", fmt.Sprintf(body, name))
 
 	return e.sendEmail(e.connect(), message)
 }

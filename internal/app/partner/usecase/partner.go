@@ -10,6 +10,7 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/email"
 	"ambic/internal/infra/helper"
 	"ambic/internal/infra/jwt"
 	"ambic/internal/infra/maps"
@@ -44,9 +45,10 @@ type PartnerUsecase struct {
 	Supabase               supabase.SupabaseIf
 	helper                 helper.HelperIf
 	jwt                    jwt.JWTIf
+	email                  email.EmailIf
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf, email email.EmailIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
@@ -59,6 +61,7 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 		Supabase:               supabase,
 		helper:                 helper,
 		jwt:                    jwt,
+		email:                  email,
 	}
 }
 
@@ -140,6 +143,10 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		return "", res.ErrInternalServer()
 	}
 
+	if err := u.email.SendPartnerRegistrationEmail(user.Email, partner.Name); err != nil {
+		return "", res.ErrInternalServer()
+	}
+
 	return token, nil
 }
 
@@ -173,6 +180,10 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
+		return "", res.ErrInternalServer()
+	}
+
+	if err := u.email.SendPartnerVerifiedEmail(user.Email, user.Partner.Name); err != nil {
 		return "", res.ErrInternalServer()
 	}
 
