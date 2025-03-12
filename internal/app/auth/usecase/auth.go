@@ -159,7 +159,7 @@ func (u *AuthUsecase) SendVerification(data dto.EmailVerificationRequest) *res.E
 		return res.ErrInternalServer()
 	}
 
-	if err := u.email.SendEmailVerification(data.Email, token); err != nil {
+	if err := u.email.SendVerificationEmail(data.Email, token); err != nil {
 		return res.ErrInternalServer()
 	}
 

@@ -1,7 +1,31 @@
-<html>
-    <body>
-        <h1>This is an Email from Ambic</h1>
-        Click this link to verify your account:
-        <a href="%s/verify?email=%s&token=%s">Verify account</a>
-    </body>
+<!doctype html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Email Verification - Ambic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+<div class="flex justify-center items-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md text-center">
+        <div class="mb-4">
+            <img src="https://uqrnpvnydqwyreivieki.supabase.co/storage/v1/object/public/uploads/assets/ambic.png" alt="Ambic Logo" class="mx-auto rounded-md">
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Halo,</h2>
+        <p class="mt-2 text-gray-600">Terima kasih telah mendaftar di <span class="font-semibold">Ambic</span>! Untuk mulai menggunakan layanan kami, silakan verifikasi email Anda dengan mengklik tombol di bawah ini.</p>
+        <div class="mt-6">
+            <a href="%s/verify?email=%s&token=%s" target="_blank" class="bg-blue-600 text-white px-5 py-3 rounded-md text-lg font-medium hover:bg-blue-700 transition">Verifikasi Email</a>
+        </div>
+        <p class="mt-4 text-gray-500 text-sm">Jika Anda tidak mendaftar di Ambic, abaikan email ini.</p>
+        <div class="border-t mt-6 pt-4 text-gray-500 text-sm">
+            <p>Salam,</p>
+            <p><strong>Tim Ambic</strong></p>
+        </div>
+        <div class="mt-6 text-xs text-gray-400">
+            <p>Ambic, Indonesia</p>
+        </div>
+    </div>
+</div>
+</body>
 </html>

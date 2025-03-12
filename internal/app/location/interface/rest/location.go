@@ -20,7 +20,7 @@ func NewLocationHandler(routerGroup fiber.Router, locationUsecase usecase.Locati
 		Validator:       validator,
 	}
 
-	routerGroup = routerGroup.Group("/locations", m.Authentication)
+	routerGroup = routerGroup.Group("/locations")
 	routerGroup.Get("/", LocationHandler.AutocompleteLocation)
 	routerGroup.Get("/:id", LocationHandler.ShowLocation)
 }

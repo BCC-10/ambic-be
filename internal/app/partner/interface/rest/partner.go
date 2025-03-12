@@ -72,7 +72,7 @@ func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.PartnerVerificationSuccess, fiber.Map{
-		"new_token": token,
+		"token": token,
 	})
 }
 
