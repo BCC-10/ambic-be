@@ -9,7 +9,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"log"
 )
 
 type PartnerHandler struct {
@@ -29,6 +28,8 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	routerGroup.Get("/", m.EnsurePartner, PartnerHandler.ShowLoggedInPartner)
 	routerGroup.Get("/statistics", m.EnsurePartner, PartnerHandler.GetLoggedInPartnerStatistics)
 	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
+	routerGroup.Get("/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerProducts)
+	routerGroup.Get("/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerTransactions)
 	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
 	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
 	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
@@ -84,12 +85,28 @@ func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx)
 	}
 
-	log.Println(pagination)
-
 	partnerId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
+
+	products, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
+		"products": products,
+	})
+}
+
+func (h *PartnerHandler) GetLoggedInPartnerProducts(ctx *fiber.Ctx) error {
+	pagination := new(dto.PaginationRequest)
+	if err := ctx.QueryParser(pagination); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
 	products, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
 	if _err != nil {
@@ -189,6 +206,23 @@ func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
+	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
+		"transactions": transactions,
+	})
+}
+
+func (h *PartnerHandler) GetLoggedInPartnerTransactions(ctx *fiber.Ctx) error {
+	data := new(dto.GetPartnerTransactionRequest)
+	if err := ctx.QueryParser(data); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
 	if _err != nil {
 		return res.Error(ctx, _err)
