@@ -19,7 +19,11 @@ type Midtrans struct {
 
 func New(env *env.Env) *Midtrans {
 	var s = snap.Client{}
-	s.New(env.MidtransServerKey, midtrans.Sandbox)
+	if env.MidtransEnvironment == "production" {
+		s.New(env.MidtransServerKey, midtrans.Production)
+	} else {
+		s.New(env.MidtransServerKey, midtrans.Sandbox)
+	}
 
 	return &Midtrans{
 		Snap: s,
