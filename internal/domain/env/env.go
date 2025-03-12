@@ -60,6 +60,7 @@ type Env struct {
 
 	MidtransServerKey          string `env:"MIDTRANS_SERVER_KEY"`
 	MidtransMaxPaymentDuration int64  `env:"MIDTRANS_MAX_PAYMENT_DURATION"`
+	MidtransEnvironment        string `env:"MIDTRANS_ENVIRONMENT"`
 }
 
 func New() (*Env, error) {
