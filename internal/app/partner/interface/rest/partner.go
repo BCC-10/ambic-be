@@ -27,12 +27,13 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 
 	routerGroup = routerGroup.Group("/partners", m.Authentication)
 	routerGroup.Get("/", m.EnsurePartner, PartnerHandler.ShowLoggedInPartner)
+	routerGroup.Get("/statistics", m.EnsurePartner, PartnerHandler.GetLoggedInPartnerStatistics)
+	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
 	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
 	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
 	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
 	routerGroup.Get("/:id", m.EnsurePartner, PartnerHandler.ShowPartner)
 	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
-	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
 	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 }
 
@@ -146,6 +147,19 @@ func (h *PartnerHandler) UpdatePhoto(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.UpdatePartnerPhotoSuccess, nil)
+}
+
+func (h *PartnerHandler) GetLoggedInPartnerStatistics(ctx *fiber.Ctx) error {
+	partnerId := ctx.Locals("partnerId").(uuid.UUID)
+
+	statistic, _err := h.PartnerUsecase.GetStatistics(partnerId)
+	if _err != nil {
+		return res.Error(ctx, _err)
+	}
+
+	return res.SuccessResponse(ctx, res.GetPartnerStatisticsSuccess, fiber.Map{
+		"statistic": statistic,
+	})
 }
 
 func (h *PartnerHandler) GetStatistics(ctx *fiber.Ctx) error {
