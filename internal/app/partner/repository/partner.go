@@ -35,7 +35,7 @@ func (r *PartnerMySQL) Update(partner *entity.Partner) error {
 }
 
 func (r *PartnerMySQL) Show(partner *entity.Partner, param dto.PartnerParam) error {
-	return r.db.Debug().First(partner, param).Error
+	return r.db.Debug().Preload("BusinessType").First(partner, param).Error
 }
 
 func (r *PartnerMySQL) ShowWithTransactions(partner *entity.Partner, param dto.PartnerParam) error {
