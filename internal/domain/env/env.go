@@ -25,8 +25,9 @@ type Env struct {
 
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
-	TokenLength      int           `env:"TOKEN_LENGTH"`
-	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
+	TokenLength                     int           `env:"TOKEN_LENGTH"`
+	TokenExpiresTime                time.Duration `env:"TOKEN_EXPIRES_TIME"`
+	PartnerVerificationTokenExpires time.Duration `env:"PARTNER_VERIFICATION_TOKEN_EXPIRES"`
 
 	StateExpiresTime time.Duration `env:"STATE_EXPIRES_TIME"`
 

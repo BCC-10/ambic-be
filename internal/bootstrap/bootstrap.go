@@ -119,8 +119,8 @@ func Start() error {
 	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, partnerRepository, s, h, ma)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j, e)
-	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j, e, c, r)
+	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h, l)
 
 	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)

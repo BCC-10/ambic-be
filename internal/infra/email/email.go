@@ -8,10 +8,10 @@ import (
 )
 
 type EmailIf interface {
-	SendVerificationEmail(to string, code string) error
+	SendVerificationEmail(to string, name string, code string) error
 	SendResetPasswordLink(to string, token string) error
 	SendPartnerRegistrationEmail(to string, name string) error
-	SendPartnerVerifiedEmail(to string, name string) error
+	SendPartnerVerificationEmail(to string, name string, code string) error
 }
 
 type Email struct {
@@ -47,7 +47,7 @@ func (e *Email) sendEmail(dialer *gomail.Dialer, message *gomail.Message) error 
 	return dialer.DialAndSend(message)
 }
 
-func (e *Email) SendVerificationEmail(to string, token string) error {
+func (e *Email) SendVerificationEmail(to string, name string, token string) error {
 	message := gomail.NewMessage()
 	body, err := file.ReadHTML(e.template, "verification")
 	if err != nil {
@@ -58,7 +58,7 @@ func (e *Email) SendVerificationEmail(to string, token string) error {
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", "Verifikasi Email")
 
-	message.SetBody("text/html", fmt.Sprintf(body, e.appURL, to, token))
+	message.SetBody("text/html", fmt.Sprintf(body, name, e.appURL, to, token))
 
 	return e.sendEmail(e.connect(), message)
 }
@@ -95,18 +95,18 @@ func (e *Email) SendPartnerRegistrationEmail(to string, name string) error {
 	return e.sendEmail(e.connect(), message)
 }
 
-func (e *Email) SendPartnerVerifiedEmail(to string, name string) error {
+func (e *Email) SendPartnerVerificationEmail(to string, name string, code string) error {
 	message := gomail.NewMessage()
-	body, err := file.ReadHTML(e.template, "partner_verified")
+	body, err := file.ReadHTML(e.template, "partner_verification")
 	if err != nil {
 		return err
 	}
 
 	message.SetHeader("From", e.user)
 	message.SetHeader("To", to)
-	message.SetHeader("Subject", "Verifikasi Partner Berhasil")
+	message.SetHeader("Subject", "Verifikasi Partner")
 
-	message.SetBody("text/html", fmt.Sprintf(body, name))
+	message.SetBody("text/html", fmt.Sprintf(body, name, e.appURL, to, code))
 
 	return e.sendEmail(e.connect(), message)
 }

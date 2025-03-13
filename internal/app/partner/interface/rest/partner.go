@@ -4,6 +4,7 @@ import (
 	"ambic/internal/app/partner/usecase"
 	"ambic/internal/domain/dto"
 	"ambic/internal/infra/helper"
+	"ambic/internal/infra/limiter"
 	res "ambic/internal/infra/response"
 	"ambic/internal/middleware"
 	"github.com/go-playground/validator/v10"
@@ -15,18 +16,23 @@ type PartnerHandler struct {
 	Validator      *validator.Validate
 	PartnerUsecase usecase.PartnerUsecaseItf
 	helper         helper.HelperIf
+	limiter        limiter.LimiterIf
 }
 
-func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf, helper helper.HelperIf) {
+func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerUsecaseItf, validator *validator.Validate, m middleware.MiddlewareIf, helper helper.HelperIf, limiter limiter.LimiterIf) {
 	PartnerHandler := PartnerHandler{
 		PartnerUsecase: partnerUsecase,
 		Validator:      validator,
 		helper:         helper,
+		limiter:        limiter,
 	}
 
 	routerGroup = routerGroup.Group("/partners", m.Authentication)
 	routerGroup.Get("/", m.EnsurePartner, PartnerHandler.ShowLoggedInPartner)
+	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
+	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 	routerGroup.Get("/statistics", m.EnsurePartner, PartnerHandler.GetLoggedInPartnerStatistics)
+	routerGroup.Get("/verification", limiter.Set(3, "15m"), PartnerHandler.RequestPartnerVerification)
 	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
 	routerGroup.Get("/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerProducts)
 	routerGroup.Get("/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerTransactions)
@@ -34,8 +40,6 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	routerGroup.Get("/:id/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetTransactions)
 	routerGroup.Get("/:id/statistics", m.EnsurePartner, PartnerHandler.GetStatistics)
 	routerGroup.Get("/:id", m.EnsurePartner, PartnerHandler.ShowPartner)
-	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
-	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 }
 
 func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
@@ -57,6 +61,23 @@ func (h *PartnerHandler) RegisterPartner(ctx *fiber.Ctx) error {
 	return res.SuccessResponse(ctx, res.PartnerRegisterSuccess, fiber.Map{
 		"new_token": token,
 	})
+}
+
+func (h *PartnerHandler) RequestPartnerVerification(ctx *fiber.Ctx) error {
+	data := new(dto.RequestPartnerVerificationRequest)
+	if err := ctx.QueryParser(data); err != nil {
+		return res.BadRequest(ctx)
+	}
+
+	if err := h.Validator.Struct(data); err != nil {
+		return res.ValidationError(ctx, err)
+	}
+
+	if err := h.PartnerUsecase.RequestPartnerVerification(*data); err != nil {
+		return res.Error(ctx, err)
+	}
+
+	return res.SuccessResponse(ctx, res.PartnerVerificationRequestSuccess, nil)
 }
 
 func (h *PartnerHandler) VerifyPartner(ctx *fiber.Ctx) error {

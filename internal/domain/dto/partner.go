@@ -15,6 +15,11 @@ type RegisterPartnerRequest struct {
 	Photo          *multipart.FileHeader `form:"photo"`
 }
 
+type RequestPartnerVerificationRequest struct {
+	Email string `query:"email" validate:"required,email"`
+	Token string `query:"token" validate:"required"`
+}
+
 type VerifyPartnerRequest struct {
 	Email string `json:"email" validate:"required,email"`
 	Token string `json:"token" validate:"required"`
