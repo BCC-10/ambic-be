@@ -108,7 +108,7 @@ func (e *Email) SendPartnerVerificationEmail(to string, name string, code string
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", "Verifikasi Partner")
 
-	message.SetBody("text/html", fmt.Sprintf(body, name, e.appURL, to, code))
+	message.SetBody("text/html", fmt.Sprintf(body, e.logo, name, e.appURL, to, code))
 
 	return e.sendEmail(e.connect(), message)
 }
