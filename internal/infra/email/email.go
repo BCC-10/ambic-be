@@ -76,7 +76,7 @@ func (e *Email) SendResetPasswordLink(to string, token string) error {
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", "Reset Password")
 
-	message.SetBody("text/html", fmt.Sprintf(body, e.logo, e.appURL, token))
+	message.SetBody("text/html", fmt.Sprintf(body, e.logo, e.appURL, to, token))
 
 	return e.sendEmail(e.connect(), message)
 }
