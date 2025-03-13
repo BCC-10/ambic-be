@@ -289,6 +289,8 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 		return "", res.ErrInternalServer()
 	}
 
+	tx.Commit()
+
 	return newJWTToken, nil
 }
 

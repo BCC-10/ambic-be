@@ -191,6 +191,14 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 }
 
 func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -217,6 +225,8 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 			return res.ErrInternalServer()
 		}
 	}
+
+	tx.Rollback()
 
 	return nil
 }
