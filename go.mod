@@ -18,7 +18,7 @@ require (
 	github.com/midtrans/midtrans-go v1.3.8
 	github.com/nedpals/supabase-go v0.5.0
 	github.com/wI2L/jettison v0.7.4
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.223.0
 	google.golang.org/genproto v0.0.0-20250227231956-55c901821b1e
@@ -65,7 +65,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.35.0 // indirect
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	golang.org/x/image v0.25.0 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250219182151-9fdb1cabc7b2 // indirect
