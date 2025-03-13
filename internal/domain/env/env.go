@@ -8,9 +8,10 @@ import (
 )
 
 type Env struct {
-	AppName                string  `env:"APP_NAME"`
-	AppPort                int     `env:"APP_PORT"`
-	AppURL                 string  `env:"APP_URL"`
+	AppPort                int    `env:"APP_PORT"`
+	AppURL                 string `env:"APP_URL"`
+	AppLogoPath            string `env:"APP_LOGO_PATH"`
+	AppLogoURL             string
 	MaxUploadSize          int64   `env:"MAX_UPLOAD_SIZE"`
 	DefaultPaginationLimit int     `env:"DEFAULT_PAGINATION_LIMIT"`
 	DefaultPaginationPage  int     `env:"DEFAULT_PAGINATION_PAGE"`
@@ -25,8 +26,9 @@ type Env struct {
 
 	PartnerVerificationToken string `env:"PARTNER_VERIFICATION_TOKEN"`
 
-	TokenLength      int           `env:"TOKEN_LENGTH"`
-	TokenExpiresTime time.Duration `env:"TOKEN_EXPIRES_TIME"`
+	TokenLength                     int           `env:"TOKEN_LENGTH"`
+	TokenExpiresTime                time.Duration `env:"TOKEN_EXPIRES_TIME"`
+	PartnerVerificationTokenExpires time.Duration `env:"PARTNER_VERIFICATION_TOKEN_EXPIRES"`
 
 	StateExpiresTime time.Duration `env:"STATE_EXPIRES_TIME"`
 
@@ -76,6 +78,8 @@ func New() (*Env, error) {
 	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
 
 	_env.DefaultPartnerProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultPartnerProfilePhotoPath)
+
+	_env.AppLogoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.AppLogoPath)
 
 	return _env, nil
 }

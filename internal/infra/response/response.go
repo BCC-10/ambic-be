@@ -59,19 +59,21 @@ const (
 
 // Partner Domain
 const (
-	AlreadyRegisteredAsPartner  = "Partner is already registered"
-	NotPartner                  = "User is not a partner"
-	PartnerNotVerified          = "Partner is not verified"
-	PartnerRegisterSuccess      = "Partner registered successfully"
-	PartnerVerificationSuccess  = "Partner verified successfully"
-	PartnerVerified             = "Partner is already verified"
-	ProfileNotFilledCompletely  = "Profile is not filled completely"
-	PartnerNotExists            = "Partner does not exist"
-	GetPartnerSuccess           = "Partner retrieved successfully"
-	UpdatePartnerPhotoSuccess   = "Partner photo updated successfully"
-	InvalidBusinessType         = "Business type is invalid"
-	GetAutoCompleteSuccess      = "Auto complete suggestions retrieved successfully"
-	GetPartnerStatisticsSuccess = "Partner statistics retrieved successfully"
+	AlreadyRegisteredAsPartner        = "Partner is already registered"
+	NotPartner                        = "User is not a partner"
+	PartnerNotVerified                = "Partner is not verified"
+	PartnerRegisterSuccess            = "Partner registered successfully"
+	PartnerVerificationSuccess        = "Partner verified successfully"
+	PartnerVerified                   = "Partner is already verified"
+	ProfileNotFilledCompletely        = "Profile is not filled completely"
+	PartnerNotExists                  = "Partner does not exist"
+	GetPartnerSuccess                 = "Partner retrieved successfully"
+	UpdatePartnerPhotoSuccess         = "Partner photo updated successfully"
+	InvalidBusinessType               = "Business type is invalid"
+	GetAutoCompleteSuccess            = "Auto complete suggestions retrieved successfully"
+	GetPartnerStatisticsSuccess       = "Partner statistics retrieved successfully"
+	PartnerVerificationRequestSuccess = "Partner verification link sent successfully"
+	InvalidVerificationToken          = "Verification token is invalid or expired"
 )
 
 // Product Domain

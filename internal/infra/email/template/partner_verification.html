@@ -10,13 +10,21 @@
 <div class="flex justify-center items-center min-h-screen">
     <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg">
         <div class="mb-6 text-center">
-            <img src="https://uqrnpvnydqwyreivieki.supabase.co/storage/v1/object/public/uploads/assets/ambic.png" alt="Ambic Logo" class="mx-auto w-32">
+            <img src="%s" alt="Ambic Logo" class="mx-auto w-32">
             <h2 class="text-2xl font-bold text-gray-800 mt-4">Selamat! Anda Telah Diverifikasi</h2>
         </div>
         <p class="text-gray-600 leading-relaxed">
             Halo %s, <br><br>
             Selamat! Pendaftaran Anda sebagai <span class="font-semibold">Partner Ambic</span> telah berhasil diverifikasi oleh tim kami. Anda kini dapat mulai berkontribusi dan memanfaatkan layanan kami sepenuhnya.
         </p>
+        <p class="mt-4 text-gray-600 leading-relaxed">
+            Untuk menyelesaikan proses verifikasi, silakan klik tombol di bawah ini:
+        </p>
+        <div class="mt-6 text-center">
+            <a href="%s/mitra/verify?email=%s&token=%s" class="inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                Verifikasi Akun
+            </a>
+        </div>
         <p class="mt-4 text-gray-600 leading-relaxed">
             Jika Anda memiliki pertanyaan atau memerlukan bantuan lebih lanjut, jangan ragu untuk menghubungi tim kami.
         </p>
