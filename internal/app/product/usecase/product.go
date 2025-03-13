@@ -103,6 +103,7 @@ func (u ProductUsecase) CreateProduct(partnerId uuid.UUID, req dto.CreateProduct
 
 func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, req dto.UpdateProductRequest) *res.Err {
 	tx := u.db.Begin()
+
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
@@ -111,6 +112,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.ProductNotExists)
 		}
@@ -119,16 +121,19 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 	}
 
 	if productDB.PartnerID != partnerId {
+		tx.Rollback()
 		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
 	pickupTime, err := time.Parse("2006-01-02 15:04:05", req.PickupTime)
 	if err != nil {
+		tx.Rollback()
 		return res.ErrBadRequest(res.InvalidDateTime)
 	}
 
 	endPickupTime, err := time.Parse("2006-01-02 15:04:05", req.PickupTime)
 	if err != nil {
+		tx.Rollback()
 		return res.ErrBadRequest(res.InvalidDateTime)
 	}
 
@@ -145,11 +150,13 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 
 	if req.Photo != nil {
 		if err := u.helper.ValidateImage(req.Photo); err != nil {
+			tx.Rollback()
 			return err
 		}
 
 		src, err := req.Photo.Open()
 		if err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 
@@ -161,6 +168,7 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 
 		publicURL, err := u.Supabase.UploadFile(bucket, path, contentType, src)
 		if err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 
@@ -172,12 +180,14 @@ func (u ProductUsecase) UpdateProduct(productId uuid.UUID, partnerId uuid.UUID, 
 			oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
 			if err := u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+				tx.Rollback()
 				return res.ErrInternalServer()
 			}
 		}
 	}
 
 	if err := u.ProductRepository.Update(tx, product); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, mysql.ErrDuplicateEntry) {
 			return res.ErrBadRequest(res.ProductAlreadyExists)
 		}
@@ -201,6 +211,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 
 	productDB := new(entity.Product)
 	if err := u.ProductRepository.Show(productDB, dto.ProductParam{ID: productId}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.ProductNotExists)
 		}
@@ -209,10 +220,12 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 	}
 
 	if productDB.PartnerID != partnerId {
+		tx.Rollback()
 		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
 	if err := u.ProductRepository.Delete(tx, productDB); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 
@@ -222,6 +235,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 		path := productDB.PhotoURL[index+len(bucket+"/"):]
 
 		if err := u.Supabase.DeleteFile(bucket, path); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	}
@@ -274,10 +288,18 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 			return nil, res.ErrInternalServer()
 		}
 
+		if distance == nil {
+			continue
+		}
+
 		if float64(*distance) <= req.Radius {
 			withinRadiusPartnerIds = append(withinRadiusPartnerIds, partner.ID)
 			partnerDistanceMap[partner.ID] = float64(*distance)
 		}
+	}
+
+	if len(withinRadiusPartnerIds) == 0 {
+		return resp, nil
 	}
 
 	products := new([]entity.Product)
@@ -292,9 +314,17 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 			Offset: req.Offset,
 		}
 
-		if err := u.ProductRepository.Filter(products, param, pagination); err != nil {
+		productsInRadius := new([]entity.Product)
+
+		if err := u.ProductRepository.Filter(productsInRadius, param, pagination); err != nil {
 			return nil, res.ErrInternalServer()
 		}
+
+		*products = append(*products, *productsInRadius...)
+	}
+
+	if len(*products) == 0 {
+		return resp, nil
 	}
 
 	var response []dto.GetProductResponse

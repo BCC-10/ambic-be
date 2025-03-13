@@ -166,6 +166,10 @@ func (m *Maps) GetDistance(from dto.Location, to dto.Location) (*int32, error) {
 		return nil, err
 	}
 
+	if len(resp.Routes) == 0 {
+		return nil, nil
+	}
+
 	distance := resp.GetRoutes()[0].GetLegs()[0].GetDistanceMeters()
 
 	return &distance, nil

@@ -153,6 +153,7 @@ func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, re
 
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: param.ID}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.RatingNotFound)
 		}
@@ -161,6 +162,7 @@ func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, re
 	}
 
 	if ratingDB.UserID != userId {
+		tx.Rollback()
 		return res.ErrForbidden(res.RatingNotBelongToUser)
 	}
 
@@ -172,11 +174,13 @@ func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, re
 
 	if request.Photo != nil {
 		if err := u.helper.ValidateImage(request.Photo); err != nil {
+			tx.Rollback()
 			return err
 		}
 
 		src, err := request.Photo.Open()
 		if err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 
@@ -221,6 +225,7 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: ratingId}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return res.ErrNotFound(res.RatingNotExists)
 		}
@@ -229,10 +234,12 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 	}
 
 	if ratingDB.UserID != userId {
+		tx.Rollback()
 		return res.ErrForbidden(res.RatingNotBelongToUser)
 	}
 
 	if err := u.RatingRepository.Delete(tx, ratingDB); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
 
