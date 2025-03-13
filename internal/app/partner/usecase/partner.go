@@ -88,10 +88,12 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if user.Name == "" || user.Phone == "" || user.Address == "" || user.Gender == nil {
+		tx.Rollback()
 		return "", res.ErrForbidden(res.ProfileNotFilledCompletely)
 	}
 
@@ -101,11 +103,13 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	businessTypeId, err := uuid.Parse(data.BusinessTypeID)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrBadRequest(res.InvalidBusinessType)
 	}
 
 	businessType := new(entity.BusinessType)
 	if err := u.BusinessTypeRepository.Show(businessType, dto.BusinessTypeParam{ID: businessTypeId}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return "", res.ErrBadRequest(res.InvalidBusinessType)
 		}
@@ -115,6 +119,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	placeDetails, err := u.Maps.GetPlaceDetails(data.PlaceID)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer(err.Error())
 	}
 
@@ -132,11 +137,13 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 
 	if data.Photo != nil {
 		if err := u.helper.ValidateImage(data.Photo); err != nil {
+			tx.Rollback()
 			return "", err
 		}
 
 		src, err := data.Photo.Open()
 		if err != nil {
+			tx.Rollback()
 			return "", res.ErrInternalServer()
 		}
 
@@ -155,6 +162,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 	}
 
 	if err := u.PartnerRepository.Create(tx, &partner); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
@@ -248,6 +256,7 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
+		tx.Rollback()
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return "", res.ErrNotFound(res.PartnerNotExists)
 		}
@@ -256,25 +265,30 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 	}
 
 	if user.Partner.ID == uuid.Nil {
+		tx.Rollback()
 		return "", res.ErrNotFound(res.PartnerNotExists)
 	}
 
 	if user.Partner.IsVerified {
+		tx.Rollback()
 		return "", res.ErrForbidden(res.PartnerVerified)
 	}
 
 	token, err := u.redis.Get("p" + data.Email)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if string(token) != data.Token {
+		tx.Rollback()
 		return "", res.ErrForbidden(res.InvalidVerificationToken)
 	}
 
 	user.Partner.IsVerified = true
 
 	if err := u.PartnerRepository.Update(tx, &user.Partner); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
