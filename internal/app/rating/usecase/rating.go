@@ -232,7 +232,7 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 		return res.ErrForbidden(res.RatingNotBelongToUser)
 	}
 
-	if err := u.RatingRepository.Delete(ratingDB); err != nil {
+	if err := u.RatingRepository.Delete(tx, ratingDB); err != nil {
 		return res.ErrInternalServer()
 	}
 
