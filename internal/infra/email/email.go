@@ -34,7 +34,7 @@ func NewEmail(env *env.Env) EmailIf {
 	pass := env.SMTPPass
 	appURL := env.AppURL
 	logo := env.AppLogoURL
-	template := "internal/infra/email/template"
+	template := "internal/infra/templates/email"
 
 	return &Email{
 		host, port, user, pass, appURL, template, logo,
