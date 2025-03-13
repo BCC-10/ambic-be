@@ -238,6 +238,14 @@ func (u *PartnerUsecase) RequestPartnerVerification(data dto.RequestPartnerVerif
 }
 
 func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *res.Err) {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -272,10 +280,12 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 	newJWTToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if err := u.redis.Delete("p" + data.Email); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
@@ -324,6 +334,14 @@ func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res
 }
 
 func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	partnerDB := new(entity.Partner)
 	if err := u.PartnerRepository.Show(partnerDB, dto.PartnerParam{ID: id}); err != nil {
 		return res.ErrInternalServer()
@@ -364,6 +382,7 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
 		if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	}
