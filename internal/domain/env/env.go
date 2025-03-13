@@ -8,9 +8,11 @@ import (
 )
 
 type Env struct {
-	AppName                string  `env:"APP_NAME"`
-	AppPort                int     `env:"APP_PORT"`
-	AppURL                 string  `env:"APP_URL"`
+	AppName                string `env:"APP_NAME"`
+	AppPort                int    `env:"APP_PORT"`
+	AppURL                 string `env:"APP_URL"`
+	AppLogoPath            string `env:"APP_LOGO_PATH"`
+	AppLogoURL             string
 	MaxUploadSize          int64   `env:"MAX_UPLOAD_SIZE"`
 	DefaultPaginationLimit int     `env:"DEFAULT_PAGINATION_LIMIT"`
 	DefaultPaginationPage  int     `env:"DEFAULT_PAGINATION_PAGE"`
@@ -77,6 +79,8 @@ func New() (*Env, error) {
 	_env.DefaultProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultProfilePhotoPath)
 
 	_env.DefaultPartnerProfilePhotoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.DefaultPartnerProfilePhotoPath)
+
+	_env.AppLogoURL = fmt.Sprintf("%s/storage/v1/object/public/%s/%s", _env.SupabaseURL, _env.SupabaseBucket, _env.AppLogoPath)
 
 	return _env, nil
 }
