@@ -274,7 +274,7 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 	user.Partner.IsVerified = true
 
-	if err := u.PartnerRepository.Update(&user.Partner); err != nil {
+	if err := u.PartnerRepository.Update(tx, &user.Partner); err != nil {
 		return "", res.ErrInternalServer()
 	}
 
@@ -374,7 +374,7 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		PhotoURL: photoURL,
 	}
 
-	if err := u.PartnerRepository.Update(partner); err != nil {
+	if err := u.PartnerRepository.Update(tx, partner); err != nil {
 		return res.ErrInternalServer()
 	}
 
