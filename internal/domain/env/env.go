@@ -8,7 +8,6 @@ import (
 )
 
 type Env struct {
-	AppName                string `env:"APP_NAME"`
 	AppPort                int    `env:"APP_PORT"`
 	AppURL                 string `env:"APP_URL"`
 	AppLogoPath            string `env:"APP_LOGO_PATH"`
