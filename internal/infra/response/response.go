@@ -73,7 +73,7 @@ const (
 	GetAutoCompleteSuccess            = "Auto complete suggestions retrieved successfully"
 	GetPartnerStatisticsSuccess       = "Partner statistics retrieved successfully"
 	PartnerVerificationRequestSuccess = "Partner verification link sent successfully"
-	InvalidVerificationToken          = "Verification token is invalid"
+	InvalidVerificationToken          = "Verification token is invalid or expired"
 )
 
 // Product Domain
