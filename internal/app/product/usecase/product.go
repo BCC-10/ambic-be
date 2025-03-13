@@ -288,10 +288,18 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 			return nil, res.ErrInternalServer()
 		}
 
+		if distance == nil {
+			continue
+		}
+
 		if float64(*distance) <= req.Radius {
 			withinRadiusPartnerIds = append(withinRadiusPartnerIds, partner.ID)
 			partnerDistanceMap[partner.ID] = float64(*distance)
 		}
+	}
+
+	if len(withinRadiusPartnerIds) == 0 {
+		return resp, nil
 	}
 
 	products := new([]entity.Product)
@@ -306,9 +314,17 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 			Offset: req.Offset,
 		}
 
-		if err := u.ProductRepository.Filter(products, param, pagination); err != nil {
+		productsInRadius := new([]entity.Product)
+
+		if err := u.ProductRepository.Filter(productsInRadius, param, pagination); err != nil {
 			return nil, res.ErrInternalServer()
 		}
+
+		*products = append(*products, *productsInRadius...)
+	}
+
+	if len(*products) == 0 {
+		return resp, nil
 	}
 
 	var response []dto.GetProductResponse
