@@ -347,6 +347,7 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 		Username:   profile.Username,
 		Email:      profile.Email,
 		IsVerified: profile.IsVerified,
+		PhotoURL:   u.env.DefaultProfilePhotoURL,
 	}
 
 	var dbUser entity.User
