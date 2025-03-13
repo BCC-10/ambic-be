@@ -10,7 +10,7 @@ type PartnerMySQLItf interface {
 	Get(partner *[]entity.Partner, param dto.PartnerParam) error
 	Show(partner *entity.Partner, param dto.PartnerParam) error
 	ShowWithTransactions(partner *entity.Partner, param dto.PartnerParam) error
-	Create(partner *entity.Partner) error
+	Create(tx *gorm.DB, partner *entity.Partner) error
 	Update(partner *entity.Partner) error
 }
 
@@ -26,8 +26,8 @@ func (r *PartnerMySQL) Get(partner *[]entity.Partner, param dto.PartnerParam) er
 	return r.db.Debug().Find(partner, param).Error
 }
 
-func (r *PartnerMySQL) Create(partner *entity.Partner) error {
-	return r.db.Debug().Create(partner).Error
+func (r *PartnerMySQL) Create(tx *gorm.DB, partner *entity.Partner) error {
+	return tx.Debug().Create(partner).Error
 }
 
 func (r *PartnerMySQL) Update(partner *entity.Partner) error {
