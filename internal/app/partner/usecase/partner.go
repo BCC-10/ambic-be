@@ -389,6 +389,8 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		}
 	}
 
+	tx.Commit()
+
 	return nil
 }
 

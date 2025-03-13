@@ -212,7 +212,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 		return res.ErrForbidden(res.RatingNotBelongToPartner)
 	}
 
-	if err := u.ProductRepository.Delete(productDB); err != nil {
+	if err := u.ProductRepository.Delete(tx, productDB); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -226,7 +226,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 		}
 	}
 
-	tx.Rollback()
+	tx.Commit()
 
 	return nil
 }
