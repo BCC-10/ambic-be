@@ -63,6 +63,9 @@ type Env struct {
 	MidtransServerKey          string `env:"MIDTRANS_SERVER_KEY"`
 	MidtransMaxPaymentDuration int64  `env:"MIDTRANS_MAX_PAYMENT_DURATION"`
 	MidtransEnvironment        string `env:"MIDTRANS_ENVIRONMENT"`
+
+	TelegramBotToken string `env:"TELEGRAM_BOT_TOKEN"`
+	TelegramChatID   int64  `env:"TELEGRAM_CHAT_ID"`
 }
 
 func New() (*Env, error) {
