@@ -172,5 +172,5 @@ func (m *Maps) GetDistance(from dto.Location, to dto.Location) (*int32, error) {
 }
 
 func (m *Maps) GenerateGoogleMapsURL(placeId string) string {
-	return "https://www.google.com/maps/place?q=" + placeId
+	return "https://www.google.com/maps/place?q=place_id:" + placeId
 }

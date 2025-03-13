@@ -31,9 +31,10 @@ type RatingUsecase struct {
 	TransactionRepository transactionRepo.TransactionMySQLItf
 	Supabase              supabase.SupabaseIf
 	helper                helper.HelperIf
+	db                    *gorm.DB
 }
 
-func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, productRepository productRepo.ProductMySQLItf, transactionRepo transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
+func NewRatingUsecase(env *env.Env, db *gorm.DB, ratingRepository repository.RatingMySQLItf, productRepository productRepo.ProductMySQLItf, transactionRepo transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf) RatingUsecaseItf {
 	return &RatingUsecase{
 		env:                   env,
 		RatingRepository:      ratingRepository,
@@ -41,6 +42,7 @@ func NewRatingUsecase(env *env.Env, ratingRepository repository.RatingMySQLItf, 
 		TransactionRepository: transactionRepo,
 		Supabase:              supabase,
 		helper:                helper,
+		db:                    db,
 	}
 }
 
@@ -141,6 +143,14 @@ func (u *RatingUsecase) Create(userId uuid.UUID, request dto.CreateRatingRequest
 }
 
 func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, request dto.UpdateRatingRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: param.ID}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -180,7 +190,7 @@ func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, re
 		rating.PhotoURL = photoURL
 	}
 
-	if err := u.RatingRepository.Update(rating); err != nil {
+	if err := u.RatingRepository.Update(tx, rating); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -190,14 +200,25 @@ func (u *RatingUsecase) Update(userId uuid.UUID, param dto.UpdateRatingParam, re
 		oldPhotoPath := oldPhotoURL[index+len(u.env.SupabaseBucket+"/"):]
 
 		if err := u.Supabase.DeleteFile(u.env.SupabaseBucket, oldPhotoPath); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	}
+
+	tx.Commit()
 
 	return nil
 }
 
 func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	ratingDB := new(entity.Rating)
 	if err := u.RatingRepository.Show(ratingDB, dto.RatingParam{ID: ratingId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -211,7 +232,7 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 		return res.ErrForbidden(res.RatingNotBelongToUser)
 	}
 
-	if err := u.RatingRepository.Delete(ratingDB); err != nil {
+	if err := u.RatingRepository.Delete(tx, ratingDB); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -221,9 +242,12 @@ func (u *RatingUsecase) Delete(userId uuid.UUID, ratingId uuid.UUID) *res.Err {
 		path := ratingDB.PhotoURL[index+len(bucket+"/"):]
 
 		if err := u.Supabase.DeleteFile(bucket, path); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	}
+
+	tx.Commit()
 
 	return nil
 }

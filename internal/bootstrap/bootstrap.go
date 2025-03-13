@@ -42,6 +42,7 @@ import (
 	"ambic/internal/infra/oauth"
 	"ambic/internal/infra/redis"
 	"ambic/internal/infra/supabase"
+	"ambic/internal/infra/telegram"
 	"ambic/internal/middleware"
 	"fmt"
 	"github.com/go-playground/validator/v10"
@@ -91,6 +92,8 @@ func Start() error {
 
 	l := limiter.NewLimiter(r)
 
+	t := telegram.NewTelegram(config)
+
 	app := fiber.New(config)
 	app.Get("/metrics", monitor.New())
 	v1 := app.Group("/api/v1")
@@ -119,10 +122,10 @@ func Start() error {
 	productUsecase := ProductUsecase.NewProductUsecase(config, db, productRepository, partnerRepository, s, h, ma)
 	ProductHandler.NewProductHandler(v1, productUsecase, v, m, h)
 
-	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j, e, c, r)
+	partnerUsecase := PartnerUsecase.NewPartnerUsecase(config, db, partnerRepository, userRepository, businessTypeRepository, productRepository, ratingRepository, transactionRepository, s, h, ma, j, e, c, r, t)
 	PartnerHandler.NewPartnerHandler(v1, partnerUsecase, v, m, h, l)
 
-	ratingUsecase := RatingUsecase.NewRatingUsecase(config, ratingRepository, productRepository, transactionRepository, s, h)
+	ratingUsecase := RatingUsecase.NewRatingUsecase(config, db, ratingRepository, productRepository, transactionRepository, s, h)
 	RatingHandler.NewRatingHandler(v1, ratingUsecase, v, m, h)
 
 	transactionUsecase := TransactionUsecase.NewTransactionUsecase(config, db, transactionRepository, productRepository, userRepository, notificationRepository, partnerRepository, h, snap)

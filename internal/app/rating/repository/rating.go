@@ -11,8 +11,8 @@ type RatingMySQLItf interface {
 	Get(rating *[]entity.Rating, param dto.RatingParam, pagination dto.PaginationRequest) error
 	Show(rating *entity.Rating, param dto.RatingParam) error
 	Create(rating *entity.Rating) error
-	Update(rating *entity.Rating) error
-	Delete(rating *entity.Rating) error
+	Update(tx *gorm.DB, rating *entity.Rating) error
+	Delete(tx *gorm.DB, rating *entity.Rating) error
 	GetTotalRatingsByPartnerId(partnerId uuid.UUID) (int64, error)
 }
 
@@ -36,11 +36,11 @@ func (r *RatingMySQL) Create(rating *entity.Rating) error {
 	return r.db.Debug().Create(rating).Error
 }
 
-func (r *RatingMySQL) Update(rating *entity.Rating) error {
-	return r.db.Debug().Updates(rating).Error
+func (r *RatingMySQL) Update(tx *gorm.DB, rating *entity.Rating) error {
+	return tx.Debug().Updates(rating).Error
 }
 
-func (r *RatingMySQL) Delete(rating *entity.Rating) error {
+func (r *RatingMySQL) Delete(tx *gorm.DB, rating *entity.Rating) error {
 	return r.db.Debug().Delete(rating).Error
 }
 

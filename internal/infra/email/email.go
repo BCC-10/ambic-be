@@ -34,7 +34,7 @@ func NewEmail(env *env.Env) EmailIf {
 	pass := env.SMTPPass
 	appURL := env.AppURL
 	logo := env.AppLogoURL
-	template := "internal/infra/email/template"
+	template := "internal/infra/templates/email"
 
 	return &Email{
 		host, port, user, pass, appURL, template, logo,
@@ -108,7 +108,7 @@ func (e *Email) SendPartnerVerificationEmail(to string, name string, code string
 	message.SetHeader("To", to)
 	message.SetHeader("Subject", "Verifikasi Partner")
 
-	message.SetBody("text/html", fmt.Sprintf(body, name, e.appURL, to, code))
+	message.SetBody("text/html", fmt.Sprintf(body, e.logo, name, e.appURL, to, code))
 
 	return e.sendEmail(e.connect(), message)
 }

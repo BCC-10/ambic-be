@@ -19,6 +19,7 @@ import (
 	"ambic/internal/infra/redis"
 	res "ambic/internal/infra/response"
 	"ambic/internal/infra/supabase"
+	"ambic/internal/infra/telegram"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"path/filepath"
@@ -51,9 +52,11 @@ type PartnerUsecase struct {
 	jwt                    jwt.JWTIf
 	redis                  redis.RedisIf
 	email                  email.EmailIf
+	telegram               telegram.TelegramIf
+	db                     *gorm.DB
 }
 
-func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf, email email.EmailIf, code code.CodeIf, redis redis.RedisIf) PartnerUsecaseItf {
+func NewPartnerUsecase(env *env.Env, db *gorm.DB, partnerRepository repository.PartnerMySQLItf, userRepository userRepo.UserMySQLItf, businessTypeRepository businessTypeRepo.BusinessTypeMySQLItf, productRepository productRepo.ProductMySQLItf, ratingRepository ratingRepo.RatingMySQLItf, transactionRepository transactionRepo.TransactionMySQLItf, supabase supabase.SupabaseIf, helper helper.HelperIf, maps maps.MapsIf, jwt jwt.JWTIf, email email.EmailIf, code code.CodeIf, redis redis.RedisIf, telegram telegram.TelegramIf) PartnerUsecaseItf {
 	return &PartnerUsecase{
 		env:                    env,
 		PartnerRepository:      partnerRepository,
@@ -69,10 +72,20 @@ func NewPartnerUsecase(env *env.Env, partnerRepository repository.PartnerMySQLIt
 		code:                   code,
 		redis:                  redis,
 		email:                  email,
+		telegram:               telegram,
+		db:                     db,
 	}
 }
 
 func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err) {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Id: id}); err != nil {
 		return "", res.ErrInternalServer()
@@ -141,18 +154,47 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		partner.PhotoURL = photoURL
 	}
 
-	if err := u.PartnerRepository.Create(&partner); err != nil {
+	if err := u.PartnerRepository.Create(tx, &partner); err != nil {
 		return "", res.ErrInternalServer()
 	}
 
 	token, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if err := u.email.SendPartnerRegistrationEmail(user.Email, partner.Name); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
+
+	msg := dto.PartnerRegistrationTelegramMessage{
+		UserID:               user.ID.String(),
+		UserName:             user.Name,
+		UserUsername:         user.Username,
+		UserEmail:            user.Email,
+		UserPhone:            user.Phone,
+		UserAddress:          user.Address,
+		UserGender:           user.Gender.String(),
+		UserRegisteredAt:     user.CreatedAt.String(),
+		PartnerID:            partner.ID.String(),
+		BusinessType:         businessType.Name,
+		BusinessName:         partner.Name,
+		BusinessAddress:      partner.Address,
+		BusinessCity:         partner.City,
+		BusinessGmaps:        u.Maps.GenerateGoogleMapsURL(partner.PlaceID),
+		BusinessInstagram:    partner.Instagram,
+		BusinessPhoto:        partner.PhotoURL,
+		BusinessRegisteredAt: partner.CreatedAt.String(),
+	}
+
+	if err := u.telegram.SendPartnerRegistrationMessage(msg); err != nil {
+		tx.Rollback()
+		return "", res.ErrInternalServer(err.Error())
+	}
+
+	tx.Commit()
 
 	return token, nil
 }
@@ -196,6 +238,14 @@ func (u *PartnerUsecase) RequestPartnerVerification(data dto.RequestPartnerVerif
 }
 
 func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *res.Err) {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	user := new(entity.User)
 	if err := u.UserRepository.Show(user, dto.UserParam{Email: data.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
@@ -224,18 +274,22 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 
 	user.Partner.IsVerified = true
 
-	if err := u.PartnerRepository.Update(&user.Partner); err != nil {
+	if err := u.PartnerRepository.Update(tx, &user.Partner); err != nil {
 		return "", res.ErrInternalServer()
 	}
 
 	newJWTToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if err := u.redis.Delete("p" + data.Email); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
+
+	tx.Commit()
 
 	return newJWTToken, nil
 }
@@ -282,6 +336,14 @@ func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res
 }
 
 func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	partnerDB := new(entity.Partner)
 	if err := u.PartnerRepository.Show(partnerDB, dto.PartnerParam{ID: id}); err != nil {
 		return res.ErrInternalServer()
@@ -312,7 +374,7 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		PhotoURL: photoURL,
 	}
 
-	if err := u.PartnerRepository.Update(partner); err != nil {
+	if err := u.PartnerRepository.Update(tx, partner); err != nil {
 		return res.ErrInternalServer()
 	}
 
@@ -322,9 +384,12 @@ func (u *PartnerUsecase) UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) 
 		oldPhotoPath := oldPhotoURL[index+len(bucket+"/"):]
 
 		if err = u.Supabase.DeleteFile(bucket, oldPhotoPath); err != nil {
+			tx.Rollback()
 			return res.ErrInternalServer()
 		}
 	}
+
+	tx.Commit()
 
 	return nil
 }
