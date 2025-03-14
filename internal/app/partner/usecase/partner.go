@@ -30,10 +30,10 @@ type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
 	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
-	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err)
+	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *dto.PaginationResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
-	GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *res.Err)
+	GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *dto.PaginationResponse, *res.Err)
 	RequestPartnerVerification(data dto.RequestPartnerVerificationRequest) *res.Err
 }
 
@@ -133,6 +133,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		Latitude:       placeDetails.Lat,
 		Longitude:      placeDetails.Long,
 		BusinessTypeID: businessTypeId,
+		PhotoURL:       u.env.DefaultPartnerProfilePhotoURL,
 	}
 
 	if data.Photo != nil {
@@ -308,24 +309,16 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 	return newJWTToken, nil
 }
 
-func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err) {
-	if pagination.Limit < 1 {
-		pagination.Limit = u.env.DefaultPaginationLimit
-	}
-
-	if pagination.Page < 1 {
-		pagination.Page = u.env.DefaultPaginationPage
-	}
-
-	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *dto.PaginationResponse, *res.Err) {
+	pagination = u.helper.CreatePagination(pagination)
 
 	products := new([]entity.Product)
 	if err := u.ProductRepository.GetByPartnerId(products, dto.ProductParam{PartnerId: id}, pagination); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return nil, res.ErrNotFound(res.PartnerNotExists)
+			return nil, nil, res.ErrNotFound(res.PartnerNotExists)
 		}
 
-		return nil, res.ErrInternalServer()
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	productsResponse := make([]dto.GetProductResponse, 0)
@@ -333,7 +326,14 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequ
 		productsResponse = append(productsResponse, product.ParseDTOGet(nil))
 	}
 
-	return productsResponse, nil
+	totalProducts, err := u.ProductRepository.GetTotalProductsByPartnerId(id)
+	if err != nil {
+		return nil, nil, res.ErrInternalServer()
+	}
+
+	pg := u.helper.CalculatePagination(pagination, totalProducts)
+
+	return productsResponse, &pg, nil
 }
 
 func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err) {
@@ -451,21 +451,11 @@ func (u *PartnerUsecase) GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticRes
 	return *resp, nil
 }
 
-func (u *PartnerUsecase) GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *res.Err) {
-	if data.Limit < 1 {
-		data.Limit = u.env.DefaultPaginationLimit
-	}
-
-	if data.Page < 1 {
-		data.Page = u.env.DefaultPaginationPage
-	}
-
-	data.Offset = (data.Page - 1) * data.Limit
-
-	pagination := dto.PaginationRequest{
-		Limit:  data.Limit,
-		Offset: data.Offset,
-	}
+func (u *PartnerUsecase) GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *dto.PaginationResponse, *res.Err) {
+	pagination := u.helper.CreatePagination(dto.PaginationRequest{
+		Limit: data.Limit,
+		Page:  data.Page,
+	})
 
 	param := dto.TransactionParam{PartnerID: id}
 
@@ -474,18 +464,25 @@ func (u *PartnerUsecase) GetTransactions(id uuid.UUID, data dto.GetPartnerTransa
 	}
 
 	transactions := new([]entity.Transaction)
-	if err := u.TransactionRepository.Get(transactions, param, pagination); err != nil {
+	totalTransactions, err := u.TransactionRepository.Get(transactions, param, pagination)
+	if err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return nil, res.ErrNotFound(res.PartnerNotExists)
+			return nil, nil, res.ErrNotFound(res.PartnerNotExists)
 		}
 
-		return nil, res.ErrInternalServer()
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	transactionsResponse := make([]dto.GetTransactionResponse, 0)
 	for _, transaction := range *transactions {
+		if transaction.Status == entity.CancelledBySystem {
+			continue
+		}
+
 		transactionsResponse = append(transactionsResponse, transaction.ParseDTOGet())
 	}
 
-	return transactionsResponse, nil
+	pg := u.helper.CalculatePagination(pagination, totalTransactions)
+
+	return transactionsResponse, &pg, nil
 }

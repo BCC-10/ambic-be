@@ -54,7 +54,8 @@ type UpdateProductRequest struct {
 }
 
 type ProductParam struct {
-	ID        uuid.UUID
-	PartnerId uuid.UUID
-	Name      string
+	ID         uuid.UUID
+	PartnerId  uuid.UUID
+	PartnerIds []uuid.UUID
+	Name       string
 }

@@ -39,13 +39,14 @@ func (h *TransactionHandler) GetByLoggedInUser(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	transactions, err := h.TransactionUsecase.GetByUserID(userId, *req)
+	transactions, pg, err := h.TransactionUsecase.GetByUserID(userId, *req)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
 		"transactions": transactions,
+		"pagination":   pg,
 	})
 }
 

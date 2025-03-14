@@ -29,12 +29,13 @@ func (h *NotificationHandler) GetByUserId(ctx *fiber.Ctx) error {
 	}
 
 	userId := ctx.Locals("userId").(uuid.UUID)
-	notifications, err := h.NotificationUsecase.GetByUserId(userId, *pagination)
+	notifications, pg, err := h.NotificationUsecase.GetByUserId(userId, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetNotificationSuccess, fiber.Map{
 		"notifications": notifications,
+		"pagination":    pg,
 	})
 }

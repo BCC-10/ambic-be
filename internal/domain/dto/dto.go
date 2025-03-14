@@ -6,6 +6,13 @@ type PaginationRequest struct {
 	Offset int
 }
 
+type PaginationResponse struct {
+	TotalData int `json:"total_items,omitempty"`
+	TotalPage int `json:"total_pages,omitempty"`
+	Page      int `json:"page,omitempty"`
+	Limit     int `json:"limit,omitempty"`
+}
+
 type Location struct {
 	Lat  float64
 	Long float64

@@ -137,7 +137,7 @@ const (
 const (
 	WelcomeTitle   = "Yuk Lengkapi Datamu, Kak %s"
 	WelcomeContent = "Kamu perlu melengkapi data agar tetap mendapatkan penawaran menarik dari AMBIC"
-	WelcomeLink    = "/"
+	WelcomeLink    = "/user/profile"
 	WelcomeButton  = "Lengkapi Sekarang"
 
 	FeedbackTitle   = "Saran dari %s Sangat Berharga"
@@ -145,28 +145,23 @@ const (
 	FeedbackLink    = "/"
 	FeedbackButton  = "Isi Survei"
 
-	TransactionProcessTitle   = "Pesanan Kamu Sedang Diproses"
-	TransactionProcessContent = "Pesanan %s sedang diproses oleh mitra kami. Kami akan segera menginformasikan saat pesanan siap diambil"
-	TransactionProcessLink    = "/"
-	TransactionProcessButton  = "Lihat Pesanan"
-
 	PaymentSuccessTitle   = "Pembayaran Berhasil"
 	PaymentSuccessContent = "Yeay! pembayaran untuk pesanan %s telah berhasil. Pesananmu akan segera diproses!"
-	PaymentSuccessLink    = "/"
+	PaymentSuccessLink    = "/order/active"
 	PaymentSuccessButton  = "Lihat Pesanan"
 
 	WaitingPaymentTitle   = "Menunggu Pembayaran"
 	WaitingPaymentContent = "Menunggu pembayaran untuk Pesanan %s. Segera lakukan pembayaran agar pesananmu segera diproses."
-	WaitingPaymentLink    = "/"
+	WaitingPaymentLink    = "/order/active"
 	WaitingPaymentButton  = "Bayar Sekarang"
 
 	TransactionFailedTitle   = "Pembayaran Gagal"
 	TransactionFailedContent = "Maaf, pembayaran untuk pesanan %s gagal. Waktu pembayaran telah habis. Silahkan lakukan pemesanan ulang."
-	TransactionFailedLink    = "/"
+	TransactionFailedLink    = "/order"
 	TransactionFailedButton  = "Pesan Ulang"
 
 	TransactionFinishTitle   = "Pesanan Selesai"
 	TransactionFinishContent = "Pesanan %s telah berhasil diselesaikan! Terima kasih telah berbelanja di AMBIC dan membantu mengurangi food waste. Jangan lupa mengisi ulasan produk untuk membagikan pengalamanmu!"
-	TransactionFinishLink    = "/"
+	TransactionFinishLink    = "/order/done"
 	TransactionFinishButton  = "Beri Ulasan"
 )

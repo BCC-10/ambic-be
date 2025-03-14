@@ -20,7 +20,7 @@ import (
 )
 
 type TransactionUsecaseItf interface {
-	GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err)
+	GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *dto.PaginationResponse, *res.Err)
 	Create(id uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err)
 	Show(id uuid.UUID) (dto.GetTransactionResponse, *res.Err)
 	UpdateStatus(id uuid.UUID, req dto.UpdateTransactionStatusRequest) *res.Err
@@ -52,7 +52,7 @@ func NewTransactionUsecase(env *env.Env, db *gorm.DB, transactionRepository repo
 	}
 }
 
-func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *res.Err) {
+func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactionByUserIdAndByStatusRequest) (*[]dto.GetTransactionResponse, *dto.PaginationResponse, *res.Err) {
 	param := dto.TransactionParam{
 		UserID: userId,
 	}
@@ -61,23 +61,15 @@ func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactio
 		param.Status = req.Status
 	}
 
-	if req.Limit < 1 {
-		req.Limit = u.env.DefaultPaginationLimit
-	}
-
-	if req.Page < 1 {
-		req.Page = u.env.DefaultPaginationPage
-	}
-
-	pagination := dto.PaginationRequest{
-		Limit:  req.Limit,
-		Page:   req.Page,
-		Offset: (req.Page - 1) * req.Limit,
-	}
+	pagination := u.helper.CreatePagination(dto.PaginationRequest{
+		Limit: req.Limit,
+		Page:  req.Page,
+	})
 
 	transactions := new([]entity.Transaction)
-	if err := u.TransactionRepository.Get(transactions, param, pagination); err != nil {
-		return nil, res.ErrInternalServer()
+	totalTransactions, err := u.TransactionRepository.Get(transactions, param, pagination)
+	if err != nil {
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	resp := make([]dto.GetTransactionResponse, len(*transactions))
@@ -85,7 +77,9 @@ func (u *TransactionUsecase) GetByUserID(userId uuid.UUID, req dto.GetTransactio
 		resp[i] = transaction.ParseDTOGet()
 	}
 
-	return &resp, nil
+	pg := u.helper.CalculatePagination(pagination, totalTransactions)
+
+	return &resp, &pg, nil
 }
 
 func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransactionRequest) (string, *res.Err) {
@@ -213,6 +207,8 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		tx.Rollback()
 		return "", res.ErrInternalServer(err.Error())
 	}
+
+	transaction.PaymentURL = url
 
 	if err := u.TransactionRepository.Create(tx, transaction); err != nil {
 		tx.Rollback()
