@@ -30,7 +30,7 @@ type PartnerUsecaseItf interface {
 	ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err)
 	RegisterPartner(id uuid.UUID, data dto.RegisterPartnerRequest) (string, *res.Err)
 	VerifyPartner(request dto.VerifyPartnerRequest) (string, *res.Err)
-	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err)
+	GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *dto.PaginationResponse, *res.Err)
 	UpdatePhoto(id uuid.UUID, data dto.UpdatePhotoRequest) *res.Err
 	GetStatistics(id uuid.UUID) (dto.GetPartnerStatisticResponse, *res.Err)
 	GetTransactions(id uuid.UUID, data dto.GetPartnerTransactionRequest) ([]dto.GetTransactionResponse, *res.Err)
@@ -308,7 +308,7 @@ func (u *PartnerUsecase) VerifyPartner(data dto.VerifyPartnerRequest) (string, *
 	return newJWTToken, nil
 }
 
-func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *res.Err) {
+func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetProductResponse, *dto.PaginationResponse, *res.Err) {
 	if pagination.Limit < 1 {
 		pagination.Limit = u.env.DefaultPaginationLimit
 	}
@@ -322,10 +322,10 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequ
 	products := new([]entity.Product)
 	if err := u.ProductRepository.GetByPartnerId(products, dto.ProductParam{PartnerId: id}, pagination); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			return nil, res.ErrNotFound(res.PartnerNotExists)
+			return nil, nil, res.ErrNotFound(res.PartnerNotExists)
 		}
 
-		return nil, res.ErrInternalServer()
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	productsResponse := make([]dto.GetProductResponse, 0)
@@ -333,7 +333,24 @@ func (u *PartnerUsecase) GetProducts(id uuid.UUID, pagination dto.PaginationRequ
 		productsResponse = append(productsResponse, product.ParseDTOGet(nil))
 	}
 
-	return productsResponse, nil
+	totalProducts, err := u.ProductRepository.GetTotalProductsByPartnerId(id)
+	if err != nil {
+		return nil, nil, res.ErrInternalServer()
+	}
+
+	totalPages := float64(totalProducts) / float64(pagination.Limit)
+	if totalPages > float64(int(totalPages)) {
+		totalPages++
+	}
+
+	pg := dto.PaginationResponse{
+		TotalData: int(totalProducts),
+		TotalPage: int(totalPages),
+		Page:      pagination.Page,
+		Limit:     pagination.Limit,
+	}
+
+	return productsResponse, &pg, nil
 }
 
 func (u *PartnerUsecase) ShowPartner(id uuid.UUID) (dto.GetPartnerResponse, *res.Err) {

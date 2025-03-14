@@ -112,13 +112,14 @@ func (h *PartnerHandler) GetProducts(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	products, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
+	products, pg, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
-		"products": products,
+		"products":   products,
+		"pagination": pg,
 	})
 }
 
@@ -130,13 +131,14 @@ func (h *PartnerHandler) GetLoggedInPartnerProducts(ctx *fiber.Ctx) error {
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
 
-	products, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
+	products, pg, _err := h.PartnerUsecase.GetProducts(partnerId, *pagination)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
-		"products": products,
+		"products":   products,
+		"pagination": pg,
 	})
 }
 
