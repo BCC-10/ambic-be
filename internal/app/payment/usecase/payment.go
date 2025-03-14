@@ -165,6 +165,19 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 				return res.ErrInternalServer()
 			}
 		}
+
+		notification := &entity.Notification{
+			UserID:  transactionDB.UserID,
+			Title:   res.TransactionFailedTitle,
+			Content: fmt.Sprintf(res.TransactionFailedContent, transactionDB.Invoice),
+			Link:    res.TransactionFailedLink,
+			Button:  res.TransactionFailedButton,
+		}
+
+		if err := u.NotificationRepository.Create(tx, notification); err != nil {
+			tx.Rollback()
+			return res.ErrInternalServer()
+		}
 	}
 
 	tx.Commit()
