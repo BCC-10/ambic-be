@@ -198,7 +198,7 @@ func (u *AuthUsecase) VerifyUser(data dto.VerifyUserRequest) *res.Err {
 
 	if string(savedToken) != data.Token {
 		tx.Rollback()
-		return res.ErrBadRequest(res.InvalidToken)
+		return res.ErrBadRequest(res.InvalidVerificationToken)
 	}
 
 	if err := u.UserRepository.Verify(user); err != nil {

@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 type TransactionUsecaseItf interface {
@@ -151,6 +152,11 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		if product.PartnerID != partnerId {
 			tx.Rollback()
 			return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotBelongToPartner, product.Name, product.Partner.Name))
+		}
+
+		if time.Now().Compare(product.PickupTime) < 0 {
+			tx.Rollback()
+			return "", res.ErrBadRequest(fmt.Sprintf(res.PickupTimePassed, product.Name))
 		}
 
 		if product.Stock < uint(item.Qty) {
