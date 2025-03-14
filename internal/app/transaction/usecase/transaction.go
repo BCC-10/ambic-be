@@ -214,6 +214,8 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 		return "", res.ErrInternalServer(err.Error())
 	}
 
+	transaction.PaymentURL = url
+
 	if err := u.TransactionRepository.Create(tx, transaction); err != nil {
 		tx.Rollback()
 		return "", res.ErrInternalServer()

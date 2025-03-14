@@ -25,6 +25,7 @@ type Transaction struct {
 	Total              float32   `gorm:"type:float(24);not null"`
 	Status             Status    `gorm:"type:ENUM('waiting for payment','finish','process','cancelled by system');default:null"`
 	Note               string    `gorm:"type:text"`
+	PaymentURL         string    `gorm:"type:varchar(255)"`
 	CreatedAt          time.Time `gorm:"type:timestamp;autoCreateTime"`
 	UpdatedAt          time.Time `gorm:"type:timestamp;autoUpdateTime"`
 }
@@ -36,14 +37,15 @@ func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 	}
 
 	res := dto.GetTransactionResponse{
-		ID:       t.ID.String(),
-		UserID:   t.UserID.String(),
-		Invoice:  t.Invoice,
-		Total:    t.Total,
-		Status:   string(t.Status),
-		Note:     t.Note,
-		Datetime: t.UpdatedAt,
-		Items:    products,
+		ID:         t.ID.String(),
+		UserID:     t.UserID.String(),
+		Invoice:    t.Invoice,
+		Total:      t.Total,
+		Status:     string(t.Status),
+		Note:       t.Note,
+		Datetime:   t.UpdatedAt,
+		Items:      products,
+		PaymentURL: t.PaymentURL,
 	}
 
 	if t.Payment.ID != uuid.Nil {
