@@ -28,13 +28,13 @@ func NewPartnerHandler(routerGroup fiber.Router, partnerUsecase usecase.PartnerU
 	}
 
 	routerGroup.Get("/partners/verification", limiter.Set(3, "15m"), PartnerHandler.RequestPartnerVerification)
+	routerGroup.Post("/partners/verification", PartnerHandler.VerifyPartner)
 
 	routerGroup = routerGroup.Group("/partners", m.Authentication)
 	routerGroup.Get("/", m.EnsurePartner, PartnerHandler.ShowLoggedInPartner)
 	routerGroup.Post("/", m.EnsureNotPartner, PartnerHandler.RegisterPartner)
 	routerGroup.Patch("/", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.UpdatePhoto)
 	routerGroup.Get("/statistics", m.EnsurePartner, PartnerHandler.GetLoggedInPartnerStatistics)
-	routerGroup.Post("/verification", PartnerHandler.VerifyPartner)
 	routerGroup.Get("/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerProducts)
 	routerGroup.Get("/transactions", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetLoggedInPartnerTransactions)
 	routerGroup.Get("/:id/products", m.EnsurePartner, m.EnsureVerifiedPartner, PartnerHandler.GetProducts)
