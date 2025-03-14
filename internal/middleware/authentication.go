@@ -10,7 +10,7 @@ func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	authToken := ctx.GetReqHeaders()["Authorization"]
 
 	if len(authToken) < 1 {
-		return res.BadRequest(ctx, res.MissingToken)
+		return res.Unauthorized(ctx, res.MissingToken)
 	}
 
 	bearerToken := authToken[0]
@@ -18,7 +18,7 @@ func (m *Middleware) Authentication(ctx *fiber.Ctx) error {
 	token := strings.Split(bearerToken, " ")
 
 	if len(token) < 2 {
-		return res.BadRequest(ctx, res.InvalidTokenFormat)
+		return res.Unauthorized(ctx, res.InvalidTokenFormat)
 	}
 
 	userId, isVerified, partnerId, isVerifiedPartner, err := m.jwt.ValidateToken(token[1])
