@@ -34,7 +34,7 @@ func (r *RatingMySQL) Get(rating *[]entity.Rating, param dto.RatingParam, pagina
 }
 
 func (r *RatingMySQL) Show(rating *entity.Rating, param dto.RatingParam) error {
-	return r.db.Debug().First(rating, param).Error
+	return r.db.Debug().Preload("User").First(rating, param).Error
 }
 
 func (r *RatingMySQL) Create(rating *entity.Rating) error {
