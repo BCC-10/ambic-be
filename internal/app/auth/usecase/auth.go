@@ -111,9 +111,9 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	}
 
 	if err := u.email.SendVerificationEmail(data.Email, user.Name, token); err != nil {
+		tx.Rollback()
 		return res.ErrInternalServer()
 	}
-	tx.Rollback()
 
 	tx.Commit()
 
