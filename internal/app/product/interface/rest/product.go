@@ -115,12 +115,13 @@ func (h ProductHandler) FilterProduct(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, err)
 	}
 
-	products, _err := h.ProductUsecase.FilterProducts(*req)
+	products, pg, _err := h.ProductUsecase.FilterProducts(*req)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetProductSuccess, fiber.Map{
-		"products": products,
+		"products":   products,
+		"pagination": pg,
 	})
 }

@@ -15,7 +15,7 @@ type ProductMySQLItf interface {
 	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) error
 	Update(tx *gorm.DB, product *entity.Product) error
 	GetTotalProductsByPartnerId(id uuid.UUID) (int64, error)
-	Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) error
+	Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) (int64, error)
 }
 
 type ProductMySQL struct {
@@ -52,16 +52,23 @@ func (r *ProductMySQL) GetTotalProductsByPartnerId(id uuid.UUID) (int64, error) 
 	return total, err
 }
 
-func (r *ProductMySQL) Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) error {
+func (r *ProductMySQL) Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) (int64, error) {
 	now := time.Now()
 
-	query := r.db.Debug().Preload("Ratings").Where("partner_id = ? AND stock > 0 AND pickup_time >= ?", param.PartnerId, now)
+	query := r.db.Debug().
+		Preload("Ratings").
+		Where("partner_id IN (?) AND stock > 0 AND pickup_time >= ?", param.PartnerIds, now)
 
 	if param.Name != "" {
 		query = query.Where("name LIKE ?", "%"+param.Name+"%")
 	}
 
-	query.Limit(pagination.Limit).Offset(pagination.Offset).Find(&products)
+	var count int64
+	if err := query.Model(&products).Count(&count).Error; err != nil {
+		return 0, err
+	}
 
-	return query.Error
+	query.Limit(pagination.Limit).Offset(pagination.Offset).Find(products)
+
+	return count, query.Error
 }
