@@ -68,7 +68,7 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		tx.Rollback()
-		return res.ErrInternalServer()
+		return res.ErrInternalServer(err.Error())
 	}
 
 	user := entity.User{
@@ -96,13 +96,24 @@ func (u *AuthUsecase) Register(data dto.RegisterRequest) *res.Err {
 
 	if err := u.UserRepository.Create(tx, &user); err != nil {
 		tx.Rollback()
-		return res.ErrInternalServer()
+		return res.ErrInternalServer(err.Error())
 	}
 
-	if err := u.SendVerification(dto.EmailVerificationRequest{Email: user.Email}); err != nil {
+	token, err := u.code.GenerateToken()
+	if err != nil {
 		tx.Rollback()
 		return res.ErrInternalServer()
 	}
+
+	if err := u.redis.Set(data.Email, []byte(token), u.env.TokenExpiresTime); err != nil {
+		tx.Rollback()
+		return res.ErrInternalServer()
+	}
+
+	if err := u.email.SendVerificationEmail(data.Email, user.Name, token); err != nil {
+		return res.ErrInternalServer()
+	}
+	tx.Rollback()
 
 	tx.Commit()
 
