@@ -15,7 +15,7 @@ type ProductMySQLItf interface {
 	GetByPartnerId(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) error
 	Update(tx *gorm.DB, product *entity.Product) error
 	GetTotalProductsByPartnerId(id uuid.UUID) (int64, error)
-	Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) (int64, error)
+	Filter(products *[]entity.Product, param dto.FilterParam, pagination dto.PaginationRequest) (int64, error)
 }
 
 type ProductMySQL struct {
@@ -52,7 +52,7 @@ func (r *ProductMySQL) GetTotalProductsByPartnerId(id uuid.UUID) (int64, error) 
 	return total, err
 }
 
-func (r *ProductMySQL) Filter(products *[]entity.Product, param dto.ProductParam, pagination dto.PaginationRequest) (int64, error) {
+func (r *ProductMySQL) Filter(products *[]entity.Product, param dto.FilterParam, pagination dto.PaginationRequest) (int64, error) {
 	now := time.Now()
 
 	query := r.db.Debug().
