@@ -27,7 +27,7 @@ func NewProductMySQL(db *gorm.DB) ProductMySQLItf {
 }
 
 func (r *ProductMySQL) Show(product *entity.Product, param dto.ProductParam) error {
-	return r.db.Debug().Preload("Ratings").Preload("Partner").First(&product, param).Error
+	return r.db.Debug().Preload("Ratings").Preload("Partner").First(product, param).Error
 }
 
 func (r *ProductMySQL) Create(product *entity.Product) error {
