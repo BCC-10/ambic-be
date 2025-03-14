@@ -133,6 +133,7 @@ func (u *PartnerUsecase) RegisterPartner(id uuid.UUID, data dto.RegisterPartnerR
 		Latitude:       placeDetails.Lat,
 		Longitude:      placeDetails.Long,
 		BusinessTypeID: businessTypeId,
+		PhotoURL:       u.env.DefaultPartnerProfilePhotoURL,
 	}
 
 	if data.Photo != nil {
