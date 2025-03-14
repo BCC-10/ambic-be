@@ -156,7 +156,7 @@ const (
 	PaymentSuccessButton  = "Lihat Pesanan"
 
 	WaitingPaymentTitle   = "Menunggu Pembayaran"
-	WaitingPaymentContent = "Pesanan %s sedang menunggu pembayaran. Segera lakukan pembayaran agar pesananmu segera diproses."
+	WaitingPaymentContent = "Menunggu pembayaran untuk Pesanan %s. Segera lakukan pembayaran agar pesananmu segera diproses."
 	WaitingPaymentLink    = "/"
 	WaitingPaymentButton  = "Bayar Sekarang"
 
@@ -166,7 +166,7 @@ const (
 	TransactionFailedButton  = "Pesan Ulang"
 
 	TransactionFinishTitle   = "Pesanan Selesai"
-	TransactionFinishContent = "Pesanan %s telah berhasil diselesaikan! Terima kasih telah berbelanja di AMBIC dan membantu mengurangi food waste. Jangan lupa untuk mengisi ulasan produk membagikan pengalamanmu!"
+	TransactionFinishContent = "Pesanan %s telah berhasil diselesaikan! Terima kasih telah berbelanja di AMBIC dan membantu mengurangi food waste. Jangan lupa mengisi ulasan produk untuk membagikan pengalamanmu!"
 	TransactionFinishLink    = "/"
 	TransactionFinishButton  = "Beri Ulasan"
 )
