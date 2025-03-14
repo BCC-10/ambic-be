@@ -154,7 +154,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 			return "", res.ErrBadRequest(fmt.Sprintf(res.ProductNotBelongToPartner, product.Name, product.Partner.Name))
 		}
 
-		if time.Now().Compare(product.PickupTime) < 0 {
+		if product.PickupTime.Compare(time.Now()) < 0 {
 			tx.Rollback()
 			return "", res.ErrBadRequest(fmt.Sprintf(res.PickupTimePassed, product.Name))
 		}
