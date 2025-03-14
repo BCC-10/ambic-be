@@ -13,6 +13,7 @@ import (
 	"ambic/internal/infra/supabase"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -247,6 +248,7 @@ func (u ProductUsecase) DeleteProduct(productId uuid.UUID, partnerId uuid.UUID) 
 
 func (u ProductUsecase) ShowProduct(productId uuid.UUID) (dto.GetProductResponse, *res.Err) {
 	product := new(entity.Product)
+	log.Println(productId)
 	if err := u.ProductRepository.Show(product, dto.ProductParam{ID: productId}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
 			return dto.GetProductResponse{}, res.ErrNotFound(res.ProductNotExists)
@@ -293,7 +295,7 @@ func (u ProductUsecase) FilterProducts(req dto.FilterProductRequest) (*[]dto.Get
 	}
 
 	products := new([]entity.Product)
-	param := dto.ProductParam{
+	param := dto.FilterParam{
 		PartnerIds: withinRadiusPartnerIds,
 		Name:       req.Name,
 	}
