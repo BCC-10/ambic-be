@@ -327,26 +327,39 @@ func (u *AuthUsecase) GoogleLogin() (string, *res.Err) {
 }
 
 func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *res.Err) {
+	tx := u.db.Begin()
+
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	if data.Error != "" {
+		tx.Rollback()
 		return "", res.ErrForbidden(data.Error)
 	}
 
 	savedState, err := u.redis.Get(data.State)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if string(savedState) != data.State {
+		tx.Rollback()
 		return "", res.ErrBadRequest(res.InvalidState)
 	}
 
 	token, err := u.OAuth.ExchangeToken(data.Code)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrBadRequest(err.Error())
 	}
 
 	profile, err := u.OAuth.GetUserProfile(token)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
@@ -364,10 +377,13 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 	var dbUser entity.User
 	if err := u.UserRepository.Show(&dbUser, dto.UserParam{Email: user.Email}); err != nil {
 		if mysql.CheckError(err, gorm.ErrRecordNotFound) {
-			if err := u.UserRepository.Create(u.db, user); err != nil {
+			if err := u.UserRepository.Create(tx, user); err != nil {
+				tx.Rollback()
 				return "", res.ErrInternalServer()
 			}
+			tx.Rollback()
 		} else {
+			tx.Rollback()
 			return "", res.ErrInternalServer()
 		}
 	} else {
@@ -376,12 +392,16 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 
 	jwtToken, err := u.jwt.GenerateToken(user.ID, user.IsVerified, user.Partner.ID, user.Partner.IsVerified)
 	if err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
 
 	if err := u.redis.Delete(data.State); err != nil {
+		tx.Rollback()
 		return "", res.ErrInternalServer()
 	}
+
+	tx.Commit()
 
 	return jwtToken, nil
 }
