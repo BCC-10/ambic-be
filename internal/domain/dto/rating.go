@@ -17,13 +17,13 @@ type ShowRatingRequest struct {
 }
 
 type GetRatingResponse struct {
-	ID        string    `json:"id"`
-	ProductID string    `json:"product_id"`
-	UserID    string    `json:"user_id"`
-	Star      int       `json:"star"`
-	Feedback  string    `json:"feedback"`
-	Photo     string    `json:"photo"`
-	Datetime  time.Time `json:"datetime"`
+	ID        string          `json:"id"`
+	ProductID string          `json:"product_id"`
+	User      GetUserResponse `json:"user"`
+	Star      int             `json:"star"`
+	Feedback  string          `json:"feedback"`
+	Photo     string          `json:"photo"`
+	Datetime  time.Time       `json:"datetime"`
 }
 
 type CreateRatingRequest struct {

@@ -11,6 +11,7 @@ type Rating struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	ProductID uuid.UUID `gorm:"type:char(36);uniqueIndex:idx_product_user"`
 	UserID    uuid.UUID `gorm:"type:char(36);uniqueIndex:idx_product_user"`
+	User      User
 	Star      int       `gorm:"type:int(8);not null"`
 	Feedback  string    `gorm:"type:varchar(1000)"`
 	PhotoURL  string    `gorm:"type:varchar(255);default:null"`
@@ -28,7 +29,7 @@ func (r *Rating) ParseDTOGet() dto.GetRatingResponse {
 	return dto.GetRatingResponse{
 		ID:        r.ID.String(),
 		ProductID: r.ProductID.String(),
-		UserID:    r.UserID.String(),
+		User:      r.User.ParseDTOGet(),
 		Star:      r.Star,
 		Feedback:  r.Feedback,
 		Photo:     r.PhotoURL,
