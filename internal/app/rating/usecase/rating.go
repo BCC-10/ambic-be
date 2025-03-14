@@ -84,7 +84,7 @@ func (u *RatingUsecase) Create(userId uuid.UUID, request dto.CreateRatingRequest
 		return res.ErrBadRequest(res.InvalidUUID)
 	}
 
-	if isUserHasPurchasedTheProduct := u.TransactionRepository.CheckHasUserPurchasedProduct(dto.TransactionParam{UserID: userId, ProductID: productId}); !isUserHasPurchasedTheProduct {
+	if isUserHasPurchasedTheProduct := u.TransactionRepository.CheckIsUserHasPurchasedProduct(dto.TransactionParam{UserID: userId, ProductID: productId}); !isUserHasPurchasedTheProduct {
 		return res.ErrForbidden(res.UserNotPurchasedProduct)
 	}
 

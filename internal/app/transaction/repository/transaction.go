@@ -12,7 +12,7 @@ type TransactionMySQLItf interface {
 	Show(transaction *entity.Transaction, param dto.TransactionParam) error
 	Create(tx *gorm.DB, transaction *entity.Transaction) error
 	Update(tx *gorm.DB, transaction *entity.Transaction) error
-	CheckHasUserPurchasedProduct(param dto.TransactionParam) bool
+	CheckIsUserHasPurchasedProduct(param dto.TransactionParam) bool
 }
 
 type TransactionMySQL struct {
@@ -24,15 +24,19 @@ func NewTransactionMySQL(db *gorm.DB) TransactionMySQLItf {
 }
 
 func (r *TransactionMySQL) Get(transaction *[]entity.Transaction, param dto.TransactionParam, pagination dto.PaginationRequest) (int64, error) {
-	result := r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product").Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(transaction, param)
+	query := r.db.Debug().Preload(clause.Associations).Preload("TransactionDetails.Product")
 
 	var count int64
-	result.Count(&count)
+	if err := query.Model(&transaction).Count(&count).Error; err != nil {
+		return 0, err
+	}
 
-	return count, result.Error
+	query.Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(transaction, param)
+
+	return count, query.Error
 }
 
-func (r *TransactionMySQL) CheckHasUserPurchasedProduct(param dto.TransactionParam) bool {
+func (r *TransactionMySQL) CheckIsUserHasPurchasedProduct(param dto.TransactionParam) bool {
 	var count int64
 	r.db.Table("transactions").
 		Select("COUNT(*)").

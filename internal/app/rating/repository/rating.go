@@ -25,12 +25,16 @@ func NewRatingMySQL(db *gorm.DB) RatingMySQLItf {
 }
 
 func (r *RatingMySQL) Get(rating *[]entity.Rating, param dto.RatingParam, pagination dto.PaginationRequest) (int64, error) {
-	result := r.db.Debug().Preload("User").Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(rating, param)
+	query := r.db.Debug().Preload("User")
 
 	var count int64
-	result.Count(&count)
+	if err := query.Model(&rating).Count(&count).Error; err != nil {
+		return 0, err
+	}
 
-	return count, result.Error
+	query.Limit(pagination.Limit).Offset(pagination.Offset).Order("created_at desc").Find(rating, param)
+
+	return count, query.Error
 }
 
 func (r *RatingMySQL) Show(rating *entity.Rating, param dto.RatingParam) error {
@@ -46,7 +50,7 @@ func (r *RatingMySQL) Update(tx *gorm.DB, rating *entity.Rating) error {
 }
 
 func (r *RatingMySQL) Delete(tx *gorm.DB, rating *entity.Rating) error {
-	return r.db.Debug().Delete(rating).Error
+	return tx.Debug().Delete(rating).Error
 }
 
 func (r *RatingMySQL) GetTotalRatingsByPartnerId(partnerId uuid.UUID) (int64, error) {
