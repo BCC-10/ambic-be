@@ -484,6 +484,10 @@ func (u *PartnerUsecase) GetTransactions(id uuid.UUID, data dto.GetPartnerTransa
 
 	transactionsResponse := make([]dto.GetTransactionResponse, 0)
 	for _, transaction := range *transactions {
+		if transaction.Status == entity.CancelledBySystem {
+			continue
+		}
+
 		transactionsResponse = append(transactionsResponse, transaction.ParseDTOGet())
 	}
 
