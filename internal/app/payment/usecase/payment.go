@@ -8,6 +8,7 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/infra/mysql"
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"strconv"
@@ -58,6 +59,7 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 
 	transactionId, err := uuid.Parse(req.TransactionID)
 	if err != nil {
+		tx.Rollback()
 		return res.ErrBadRequest()
 	}
 
@@ -122,7 +124,7 @@ func (u PaymentUsecase) ProcessPayment(req *dto.NotificationPayment) *res.Err {
 		notification := &entity.Notification{
 			UserID:  transactionDB.UserID,
 			Title:   res.PaymentSuccessTitle,
-			Content: res.PaymentSuccessContent,
+			Content: fmt.Sprintf(res.PaymentSuccessContent, transactionDB.Invoice),
 			Link:    res.PaymentSuccessLink,
 			Button:  res.PaymentSuccessButton,
 		}
