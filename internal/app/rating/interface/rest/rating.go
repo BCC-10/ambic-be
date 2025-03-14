@@ -53,8 +53,8 @@ func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
 	}
 
 	return res.SuccessResponse(ctx, res.GetRatingSuccess, fiber.Map{
-		"ratings": ratings,
-		"pg":      pg,
+		"ratings":    ratings,
+		"pagination": pg,
 	})
 }
 
