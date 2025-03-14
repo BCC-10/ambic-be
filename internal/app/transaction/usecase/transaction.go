@@ -156,7 +156,7 @@ func (u *TransactionUsecase) Create(userId uuid.UUID, req *dto.CreateTransaction
 
 		if time.Now().Compare(product.PickupTime) < 0 {
 			tx.Rollback()
-			return "", res.ErrBadRequest()
+			return "", res.ErrBadRequest(fmt.Sprintf(res.PickupTimePassed, product.Name))
 		}
 
 		if product.Stock < uint(item.Qty) {
