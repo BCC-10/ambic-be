@@ -230,13 +230,14 @@ func (h *PartnerHandler) GetTransactions(ctx *fiber.Ctx) error {
 		return res.BadRequest(ctx, res.InvalidUUID)
 	}
 
-	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
+	transactions, pg, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
 		"transactions": transactions,
+		"pagination":   pg,
 	})
 }
 
@@ -247,12 +248,13 @@ func (h *PartnerHandler) GetLoggedInPartnerTransactions(ctx *fiber.Ctx) error {
 	}
 
 	partnerId := ctx.Locals("partnerId").(uuid.UUID)
-	transactions, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
+	transactions, pg, _err := h.PartnerUsecase.GetTransactions(partnerId, *data)
 	if _err != nil {
 		return res.Error(ctx, _err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetTransactionSuccess, fiber.Map{
 		"transactions": transactions,
+		"pagination":   pg,
 	})
 }

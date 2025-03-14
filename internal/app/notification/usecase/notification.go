@@ -5,40 +5,36 @@ import (
 	"ambic/internal/domain/dto"
 	"ambic/internal/domain/entity"
 	"ambic/internal/domain/env"
+	"ambic/internal/infra/helper"
 	res "ambic/internal/infra/response"
 	"github.com/google/uuid"
 )
 
 type NotificationUsecaseItf interface {
-	GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *res.Err)
+	GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *dto.PaginationResponse, *res.Err)
 }
 
 type NotificationUsecase struct {
 	env                    *env.Env
+	helper                 helper.HelperIf
 	NotificationRepository repository.NotificationMySQLItf
 }
 
-func NewNotificationUsecase(env *env.Env, notificationRepository repository.NotificationMySQLItf) NotificationUsecaseItf {
+func NewNotificationUsecase(env *env.Env, notificationRepository repository.NotificationMySQLItf, helper helper.HelperIf) NotificationUsecaseItf {
 	return &NotificationUsecase{
 		env:                    env,
+		helper:                 helper,
 		NotificationRepository: notificationRepository,
 	}
 }
 
-func (u *NotificationUsecase) GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *res.Err) {
-	if pagination.Limit < 1 {
-		pagination.Limit = u.env.DefaultPaginationLimit
-	}
-
-	if pagination.Page < 1 {
-		pagination.Page = u.env.DefaultPaginationPage
-	}
-
-	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+func (u *NotificationUsecase) GetByUserId(userId uuid.UUID, pagination dto.PaginationRequest) ([]dto.GetNotificationResponse, *dto.PaginationResponse, *res.Err) {
+	pagination = u.helper.CreatePagination(pagination)
 
 	notifications := new([]entity.Notification)
-	if err := u.NotificationRepository.GetByUserId(notifications, dto.NotificationParam{UserID: userId}, pagination); err != nil {
-		return nil, res.ErrInternalServer()
+	totalNotifications, err := u.NotificationRepository.GetByUserId(notifications, dto.NotificationParam{UserID: userId}, pagination)
+	if err != nil {
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	var response []dto.GetNotificationResponse
@@ -46,5 +42,7 @@ func (u *NotificationUsecase) GetByUserId(userId uuid.UUID, pagination dto.Pagin
 		response = append(response, notification.ParseDTOGet())
 	}
 
-	return response, nil
+	pg := u.helper.CalculatePagination(pagination, totalNotifications)
+
+	return response, &pg, nil
 }

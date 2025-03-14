@@ -47,13 +47,14 @@ func (h *RatingHandler) Get(ctx *fiber.Ctx) error {
 		return res.ValidationError(ctx, err)
 	}
 
-	ratings, err := h.RatingUsecase.Get(*req, *pagination)
+	ratings, pg, err := h.RatingUsecase.Get(*req, *pagination)
 	if err != nil {
 		return res.Error(ctx, err)
 	}
 
 	return res.SuccessResponse(ctx, res.GetRatingSuccess, fiber.Map{
 		"ratings": ratings,
+		"pg":      pg,
 	})
 }
 

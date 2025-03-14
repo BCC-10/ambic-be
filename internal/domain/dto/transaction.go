@@ -13,7 +13,7 @@ type GetTransactionByUserIdAndByStatusRequest struct {
 
 type GetTransactionResponse struct {
 	ID         string               `json:"id"`
-	UserID     string               `json:"user_id"`
+	User       GetUserResponse      `json:"user"`
 	Payment    GetPaymentResponse   `json:"payment,omitempty"`
 	Invoice    string               `json:"invoice"`
 	Total      float32              `json:"total"`

@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"ambic/internal/domain/dto"
 	"ambic/internal/domain/env"
 	res "ambic/internal/infra/response"
 	"crypto/rand"
@@ -17,6 +18,8 @@ type HelperIf interface {
 	FormParser(ctx *fiber.Ctx, target interface{}) error
 	ValidateImage(file *multipart.FileHeader) *res.Err
 	GenerateInvoiceNumber() string
+	CreatePagination(pagination dto.PaginationRequest) dto.PaginationRequest
+	CalculatePagination(request dto.PaginationRequest, totalItems int64) dto.PaginationResponse
 }
 
 type Helper struct {
@@ -99,4 +102,32 @@ func (h Helper) GenerateInvoiceNumber() string {
 	num, _ := rand.Int(rand.Reader, big.NewInt(999999999999))
 
 	return fmt.Sprintf("%012d", num)
+}
+
+func (h Helper) CreatePagination(pagination dto.PaginationRequest) dto.PaginationRequest {
+	if pagination.Limit < 1 {
+		pagination.Limit = h.env.DefaultPaginationLimit
+	}
+
+	if pagination.Page < 1 {
+		pagination.Page = h.env.DefaultPaginationPage
+	}
+
+	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+
+	return pagination
+}
+
+func (h Helper) CalculatePagination(request dto.PaginationRequest, totalItems int64) dto.PaginationResponse {
+	totalPages := float64(totalItems) / float64(request.Limit)
+	if totalPages > float64(int(totalPages)) {
+		totalPages++
+	}
+
+	return dto.PaginationResponse{
+		Page:      request.Page,
+		Limit:     request.Limit,
+		TotalData: int(totalItems),
+		TotalPage: int(totalPages),
+	}
 }

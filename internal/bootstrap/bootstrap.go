@@ -107,7 +107,7 @@ func Start() error {
 	userRepository := UserRepo.NewUserMySQL(db)
 	notificationRepository := NotificationRepo.NewNotificationMySQL(db)
 
-	notificationUsecase := NotificationUsecase.NewNotificationUsecase(config, notificationRepository)
+	notificationUsecase := NotificationUsecase.NewNotificationUsecase(config, notificationRepository, h)
 	NotificationHandler.NewNotificationHandler(v1, notificationUsecase, m)
 
 	userUsecase := UserUsecase.NewUserUsecase(config, userRepository, s, h)

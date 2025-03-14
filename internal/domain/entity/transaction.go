@@ -20,6 +20,7 @@ type Transaction struct {
 	UserID             uuid.UUID `gorm:"type:char(36)"`
 	PartnerID          uuid.UUID `gorm:"type:char(36)"`
 	Payment            Payment
+	User               User
 	TransactionDetails []TransactionDetail
 	Invoice            string    `gorm:"type:varchar(255);not null;uniqueIndex"`
 	Total              float32   `gorm:"type:float(24);not null"`
@@ -38,7 +39,7 @@ func (t *Transaction) ParseDTOGet() dto.GetTransactionResponse {
 
 	res := dto.GetTransactionResponse{
 		ID:         t.ID.String(),
-		UserID:     t.UserID.String(),
+		User:       t.User.ParseDTOGet(),
 		Invoice:    t.Invoice,
 		Total:      t.Total,
 		Status:     string(t.Status),

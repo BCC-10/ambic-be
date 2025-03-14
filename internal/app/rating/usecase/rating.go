@@ -17,7 +17,7 @@ import (
 )
 
 type RatingUsecaseItf interface {
-	Get(req dto.GetRatingRequest, pagination dto.PaginationRequest) (*[]dto.GetRatingResponse, *res.Err)
+	Get(req dto.GetRatingRequest, pagination dto.PaginationRequest) (*[]dto.GetRatingResponse, *dto.PaginationResponse, *res.Err)
 	Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err)
 	Create(userId uuid.UUID, request dto.CreateRatingRequest) *res.Err
 	Update(userId uuid.UUID, param dto.UpdateRatingParam, request dto.UpdateRatingRequest) *res.Err
@@ -46,20 +46,13 @@ func NewRatingUsecase(env *env.Env, db *gorm.DB, ratingRepository repository.Rat
 	}
 }
 
-func (u *RatingUsecase) Get(req dto.GetRatingRequest, pagination dto.PaginationRequest) (*[]dto.GetRatingResponse, *res.Err) {
-	if pagination.Limit < 1 {
-		pagination.Limit = u.env.DefaultPaginationLimit
-	}
-
-	if pagination.Page < 1 {
-		pagination.Page = u.env.DefaultPaginationPage
-	}
-
-	pagination.Offset = (pagination.Page - 1) * pagination.Limit
+func (u *RatingUsecase) Get(req dto.GetRatingRequest, pagination dto.PaginationRequest) (*[]dto.GetRatingResponse, *dto.PaginationResponse, *res.Err) {
+	pagination = u.helper.CreatePagination(pagination)
 
 	ratings := new([]entity.Rating)
-	if err := u.RatingRepository.Get(ratings, req.ParseParam(), pagination); err != nil {
-		return nil, res.ErrInternalServer()
+	totalRatings, err := u.RatingRepository.Get(ratings, req.ParseParam(), pagination)
+	if err != nil {
+		return nil, nil, res.ErrInternalServer()
 	}
 
 	resp := make([]dto.GetRatingResponse, len(*ratings))
@@ -67,7 +60,9 @@ func (u *RatingUsecase) Get(req dto.GetRatingRequest, pagination dto.PaginationR
 		resp[i] = rating.ParseDTOGet()
 	}
 
-	return &resp, nil
+	pg := u.helper.CalculatePagination(pagination, totalRatings)
+
+	return &resp, &pg, nil
 }
 
 func (u *RatingUsecase) Show(req dto.ShowRatingRequest) (dto.GetRatingResponse, *res.Err) {
