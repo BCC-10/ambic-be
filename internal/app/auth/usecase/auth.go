@@ -381,7 +381,6 @@ func (u *AuthUsecase) GoogleCallback(data dto.GoogleCallbackRequest) (string, *r
 				tx.Rollback()
 				return "", res.ErrInternalServer()
 			}
-			tx.Rollback()
 		} else {
 			tx.Rollback()
 			return "", res.ErrInternalServer()
