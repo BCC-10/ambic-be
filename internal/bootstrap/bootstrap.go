@@ -137,5 +137,5 @@ func Start() error {
 	locationUsecase := LocationUsecase.NewLocationUsecase(ma)
 	LocationHandler.NewLocationHandler(v1, locationUsecase, m, v)
 
-	return app.Listen(fmt.Sprintf(":%d", config.AppPort))
+	return app.Listen(fmt.Sprintf("%s:%d", config.AppHost, config.AppPort))
 }
