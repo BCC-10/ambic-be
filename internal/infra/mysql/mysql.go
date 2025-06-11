@@ -6,10 +6,30 @@ import (
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"time"
 )
 
 func New(dsn string) (*gorm.DB, error) {
-	return gorm.Open(gormMysql.Open(dsn), &gorm.Config{})
+	var db *gorm.DB
+	var err error
+
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		db, err = gorm.Open(gormMysql.Open(dsn), &gorm.Config{})
+		if err == nil {
+			sqlDB, pingErr := db.DB()
+			if pingErr == nil && sqlDB.Ping() == nil {
+				log.Println("Successfully connected to DB via GORM.")
+				return db, nil
+			}
+		}
+
+		log.Printf("Retrying DB connection... (%d/%d)", i+1, maxRetries)
+		time.Sleep(3 * time.Second)
+	}
+
+	log.Printf("Failed to connect to DB after %d retries: %v", maxRetries, err)
+	return nil, err
 }
 
 const (
