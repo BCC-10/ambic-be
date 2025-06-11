@@ -10,8 +10,7 @@ import (
 )
 
 type Env struct {
-<<<<<<< HEAD
-        AppEnv		       string `env:"APP_ENV"`
+  AppEnv		       string `env:"APP_ENV"`
 	AppPort                int    `env:"APP_PORT"`
 	AppURL                 string `env:"APP_URL"`
 	AppLogoPath            string `env:"APP_LOGO_PATH"`
