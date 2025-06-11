@@ -35,3 +35,5 @@ dump.rdb
 qodana.yaml
 
 ambic
+
+*.backup.gz

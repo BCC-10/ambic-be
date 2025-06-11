@@ -5,10 +5,12 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 	"time"
+	"os"
+	"log"
 )
 
 type Env struct {
-	AppHost                string `env:"APP_HOST"`
+  AppEnv		       string `env:"APP_ENV"`
 	AppPort                int    `env:"APP_PORT"`
 	AppURL                 string `env:"APP_URL"`
 	AppLogoPath            string `env:"APP_LOGO_PATH"`
@@ -70,9 +72,11 @@ type Env struct {
 }
 
 func New() (*Env, error) {
-	if err := godotenv.Load(); err != nil {
-		panic(err)
-	}
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			log.Println("No .env file found, this is fine in Docker.")
+		}
+        }
 
 	_env := new(Env)
 	if err := env.Parse(_env); err != nil {
