@@ -31,12 +31,7 @@ jobs:
           cd /var/www/ambic
           git restore .
           git pull origin main
-          go mod tidy
-          cd /var/www/ambic/cmd/api
-          go build -o /var/www/ambic/ambic
-          cd /var/www/ambic
-          chmod +x ambic
-          systemctl restart ambic
+          docker compose up --build -d
           EOF
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
