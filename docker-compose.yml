@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "${APP_PORT}:8080"
+      - "127.0.0.1:${APP_PORT}:8080"
     env_file:
       - .env
     depends_on:
@@ -15,7 +15,7 @@ services:
     image: mysql:8.0
     restart: always
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3307:3306"
     env_file:
       - .env
     environment:
@@ -28,7 +28,7 @@ services:
     image: redis:7
     restart: always
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     env_file:
       - .env
 
