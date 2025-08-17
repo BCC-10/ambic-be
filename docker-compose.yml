@@ -1,44 +1,14 @@
 services:
-  app:
+  ambic-be:
+    container_name: ambic-be
     build: .
     restart: unless-stopped
     ports:
-      - "${APP_PORT}:3000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-      - redis
-    networks:
-      - ambic
-
-  db:
-    image: mysql:8.0.28
-    restart: unless-stopped
-    ports:
-      - "3307:3306"
-    env_file:
-      - .env
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - ambic
-
-  redis:
-    image: redis:7
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
+      - "${APP_PORT}:8080"
     env_file:
       - .env
     networks:
       - ambic
-
-volumes:
-  db_data:
 
 networks:
   ambic:
