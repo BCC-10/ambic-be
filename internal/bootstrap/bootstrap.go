@@ -55,6 +55,15 @@ func Start() error {
 		panic(err)
 	}
 
+	fmt.Printf(
+		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+		config.DBUsername,
+		config.DBPassword,
+		config.DBHost,
+		config.DBPort,
+		config.DBName,
+	)
+
 	db, err := mysql.New(fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		config.DBUsername,

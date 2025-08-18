@@ -19,7 +19,7 @@ WORKDIR /app
 
 COPY --from=builder /app/server /app/server
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata curl
 ENV TZ=Asia/Jakarta
 
 EXPOSE 8080
